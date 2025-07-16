@@ -21,7 +21,7 @@ defmodule PhonixKit.MixProject do
 
   defp deps do
     [
-      {:phoenix_live_view, "~> 0.18"}
+      {:phoenix_live_view, "~> 0.18 or ~> 1.0.0-rc"}
     ]
   end
 
