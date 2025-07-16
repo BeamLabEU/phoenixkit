@@ -1,0 +1,36 @@
+# Elixir
+/_build/
+/deps/
+/priv/static/
+/tmp/
+erl_crash.dump
+*.ez
+*.beam
+
+# Mix
+mix.lock
+
+# Documentation
+/doc/
+/docs/
+
+# Hex
+*.tar
+
+# IDE
+.elixir_ls/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+erl_crash.dump
+
+# Coverage
+/cover/
