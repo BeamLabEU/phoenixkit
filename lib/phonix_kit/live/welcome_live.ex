@@ -7,11 +7,16 @@ defmodule PhonixKit.Live.WelcomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      :timer.send_interval(1000, self(), :tick)
+    end
+    
     {:ok, assign(socket, 
       title: "Добро пожаловать!",
       subtitle: "PhonixKit LiveView успешно работает",
       counter: 0,
-      animated: false
+      animated: false,
+      current_time: DateTime.utc_now()
     )}
   end
 
@@ -45,6 +50,11 @@ defmodule PhonixKit.Live.WelcomeLive do
   end
 
   @impl true
+  def handle_info(:tick, socket) do
+    {:noreply, assign(socket, current_time: DateTime.utc_now())}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class={"min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center transition-all duration-500 #{if @animated, do: "animate-pulse"}"}>
@@ -56,6 +66,19 @@ defmodule PhonixKit.Live.WelcomeLive do
         <p class="text-xl opacity-90 mb-8">
           <%= @subtitle %>
         </p>
+
+        <!-- Большие часы -->
+        <div class="bg-white bg-opacity-20 rounded-lg p-6 mb-6 backdrop-blur-sm">
+          <h2 class="text-2xl font-semibold mb-4">🕐 Текущее время</h2>
+          
+          <div class="text-5xl font-mono font-bold mb-2 transition-all duration-300">
+            <%= Calendar.strftime(@current_time, "%H:%M:%S") %>
+          </div>
+          
+          <div class="text-lg opacity-80">
+            <%= Calendar.strftime(@current_time, "%d.%m.%Y") %>
+          </div>
+        </div>
 
         <!-- Интерактивный счетчик -->
         <div class="bg-white bg-opacity-20 rounded-lg p-6 mb-6 backdrop-blur-sm">
@@ -102,6 +125,7 @@ defmodule PhonixKit.Live.WelcomeLive do
         <!-- Информация -->
         <div class="text-sm opacity-75">
           <p>🚀 Это LiveView страница с реальным временем обновления</p>
+          <p>🕐 Часы обновляются каждую секунду автоматически</p>
           <p>✨ Все взаимодействия происходят без JavaScript</p>
         </div>
       </div>

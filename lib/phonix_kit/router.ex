@@ -28,11 +28,15 @@ defmodule PhonixKit.Router do
       live unquote(path), PhonixKit.Live.WelcomeLive, :index
       live unquote(path) <> "/:title", PhonixKit.Live.WelcomeLive, :index
       live unquote(path) <> "/:title/:subtitle", PhonixKit.Live.WelcomeLive, :index
+      
+      live unquote(path) <> "/dashboard", PhonixKit.Live.DashboardLive, :index
+      live unquote(path) <> "/dashboard/:title", PhonixKit.Live.DashboardLive, :index
+      live unquote(path) <> "/dashboard/:title/:subtitle", PhonixKit.Live.DashboardLive, :index
     end
   end
   
   @doc """
-  Альтернативный способ добавления только основного маршрута.
+  Альтернативный способ добавления только welcome маршрута.
   
   ## Пример:
   
@@ -46,6 +50,24 @@ defmodule PhonixKit.Router do
       import Phoenix.Router
       
       live unquote(path), PhonixKit.Live.WelcomeLive, :index
+    end
+  end
+  
+  @doc """
+  Альтернативный способ добавления только dashboard маршрута.
+  
+  ## Пример:
+  
+      scope "/" do
+        pipe_through :browser
+        phonix_kit_dashboard_route()
+      end
+  """
+  defmacro phonix_kit_dashboard_route(path \\ "/dashboard") do
+    quote do
+      import Phoenix.Router
+      
+      live unquote(path), PhonixKit.Live.DashboardLive, :index
     end
   end
 end
