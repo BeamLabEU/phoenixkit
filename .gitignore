@@ -34,3 +34,6 @@ erl_crash.dump
 
 # Coverage
 /cover/
+
+# Claude Code
+CLAUDE.md
