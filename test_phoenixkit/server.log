@@ -1,0 +1,2211 @@
+==> phoenix_kit
+    warning: this clause of defp maybe_add_routes/2 is never used
+    │
+ 68 │   defp maybe_add_routes(igniter, %{routes: true}) do
+    │        ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:68:8: Mix.Tasks.PhoenixKit.Install.maybe_add_routes/2
+
+    warning: Igniter.Code.Module.find_and_update_module!/3 is deprecated. Use `Igniter.Project.Module.find_and_update_module!/3` instead
+    │
+ 78 │     Igniter.Code.Module.find_and_update_module!(igniter, router_module(), fn zipper ->
+    │                         ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:78:25: Mix.Tasks.PhoenixKit.Install.add_phoenix_kit_import/1
+
+    warning: Igniter.Code.Module.find_and_update_module!/3 is deprecated. Use `Igniter.Project.Module.find_and_update_module!/3` instead
+    │
+ 93 │     Igniter.Code.Module.find_and_update_module!(igniter, router_module(), fn zipper ->
+    │                         ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:93:25: Mix.Tasks.PhoenixKit.Install.add_phoenix_kit_routes/1
+
+    warning: Igniter.Code.Function.move_to_defmodule/1 is undefined or private. Did you mean:
+
+          * move_to_def/1
+          * move_to_def/2
+          * move_to_def/3
+          * move_to_def/4
+          * move_to_defp/3
+
+    │
+ 79 │       with {:ok, zipper} <- Igniter.Code.Function.move_to_defmodule(zipper),
+    │                                                   ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:79:51: Mix.Tasks.PhoenixKit.Install.add_phoenix_kit_import/1
+
+    warning: Igniter.Code.Function.move_to_defmodule/1 is undefined or private. Did you mean:
+
+          * move_to_def/1
+          * move_to_def/2
+          * move_to_def/3
+          * move_to_def/4
+          * move_to_defp/3
+
+    │
+ 94 │       with {:ok, zipper} <- Igniter.Code.Function.move_to_defmodule(zipper),
+    │                                                   ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:94:51: Mix.Tasks.PhoenixKit.Install.add_phoenix_kit_routes/1
+
+     warning: Igniter.Code.Common.move_to_pattern/2 is undefined or private. However, there is a macro with the same name and arity. Be sure to require Igniter.Code.Common if you intend to invoke this macro
+     │
+ 110 │     Igniter.Code.Common.move_to_pattern(
+     │                         ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:110:25: Mix.Tasks.PhoenixKit.Install.find_browser_scope/1
+
+     warning: Igniter.Code.Common.capture_pattern/0 is undefined or private
+     │
+ 115 │           unquote(Igniter.Code.Common.capture_pattern())
+     │                                       ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:115:39: Mix.Tasks.PhoenixKit.Install.find_browser_scope/1
+
+     warning: this clause of defp maybe_install_assets/2 is never used
+     │
+ 135 │   defp maybe_install_assets(igniter, %{assets: true}) do
+     │        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:135:8: Mix.Tasks.PhoenixKit.Install.maybe_install_assets/2
+
+     warning: this clause of defp maybe_add_config/2 is never used
+     │
+ 154 │   defp maybe_add_config(igniter, %{config: true}) do
+     │        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:154:8: Mix.Tasks.PhoenixKit.Install.maybe_add_config/2
+
+     warning: Igniter.Project.Config.configure/4 is undefined or private. Did you mean:
+
+           * configure/5
+           * configure/6
+
+     │
+ 157 │     Igniter.Project.Config.configure(igniter, config_path, :phoenix_kit,
+     │                            ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:157:28: Mix.Tasks.PhoenixKit.Install.maybe_add_config/2
+
+     warning: this clause of defp maybe_create_examples/2 is never used
+     │
+ 167 │   defp maybe_create_examples(igniter, %{examples: true}) do
+     │        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:167:8: Mix.Tasks.PhoenixKit.Install.maybe_create_examples/2
+
+     warning: Igniter.Project.Application.app_name/0 is deprecated. Use `app_name/1` instead.
+     │
+ 213 │     app_name = Igniter.Project.Application.app_name()
+     │                                            ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.install.ex:213:44: Mix.Tasks.PhoenixKit.Install.router_module/0
+
+    warning: variable "options" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+ 81 │   defp maybe_remove_routes(igniter, options) do
+    │                                     ~~~~~~~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:81:37: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_routes/2
+
+    warning: Igniter.Code.Module.find_and_update_module!/3 is deprecated. Use `Igniter.Project.Module.find_and_update_module!/3` instead
+    │
+ 89 │     Igniter.Code.Module.find_and_update_module!(igniter, router_module(), fn zipper ->
+    │                         ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:89:25: Mix.Tasks.PhoenixKit.Uninstall.remove_phoenix_kit_routes/1
+
+     warning: Igniter.Code.Module.find_and_update_module!/3 is deprecated. Use `Igniter.Project.Module.find_and_update_module!/3` instead
+     │
+ 100 │     Igniter.Code.Module.find_and_update_module!(igniter, router_module(), fn zipper ->
+     │                         ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:100:25: Mix.Tasks.PhoenixKit.Uninstall.remove_phoenix_kit_import/1
+
+    warning: Igniter.Code.Common.remove_all_pattern/2 is undefined or private. Did you mean:
+
+          * remove/2
+          * remove_all_matches/2
+
+    │
+ 91 │       Igniter.Code.Common.remove_all_pattern(
+    │                           ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:91:27: Mix.Tasks.PhoenixKit.Uninstall.remove_phoenix_kit_routes/1
+
+     warning: Igniter.Code.Common.remove_all_pattern/2 is undefined or private. Did you mean:
+
+           * remove/2
+           * remove_all_matches/2
+
+     │
+ 102 │       Igniter.Code.Common.remove_all_pattern(
+     │                           ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:102:27: Mix.Tasks.PhoenixKit.Uninstall.remove_phoenix_kit_import/1
+
+     warning: this clause of defp maybe_remove_assets/2 is never used
+     │
+ 110 │   defp maybe_remove_assets(igniter, %{keep_assets: false}) do
+     │        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:110:8: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_assets/2
+
+     warning: Igniter.Project.remove_directory/2 is undefined (module Igniter.Project is not available or is yet to be defined)
+     │
+ 114 │     igniter = Igniter.Project.remove_directory(igniter, assets_dir)
+     │                               ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:114:31: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_assets/2
+
+     warning: this clause of defp maybe_remove_config/2 is never used
+     │
+ 122 │   defp maybe_remove_config(igniter, %{keep_config: false}) do
+     │        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:122:8: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_config/2
+
+     warning: Igniter.Project.Config.remove_config/3 is undefined or private
+     │
+ 126 │     igniter = Igniter.Project.Config.remove_config(igniter, config_path, :phoenix_kit)
+     │                                      ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:126:38: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_config/2
+
+     warning: this clause of defp maybe_remove_examples/2 is never used
+     │
+ 134 │   defp maybe_remove_examples(igniter, %{keep_examples: false}) do
+     │        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:134:8: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_examples/2
+
+     warning: Igniter.Project.remove_file/2 is undefined (module Igniter.Project is not available or is yet to be defined)
+     │
+ 142 │         Igniter.Project.remove_file(acc, file)
+     │                         ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:142:25: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_examples/2
+
+     warning: this clause of defp maybe_remove_dependency/2 is never used
+     │
+ 151 │   defp maybe_remove_dependency(igniter, %{remove_dependency: true}) do
+     │        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:151:8: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_dependency/2
+
+     warning: Igniter.Project.Deps.remove_dependency/2 is undefined or private. Did you mean:
+
+           * remove_dep/2
+
+     │
+ 153 │     igniter = Igniter.Project.Deps.remove_dependency(igniter, :phoenix_kit)
+     │                                    ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:153:36: Mix.Tasks.PhoenixKit.Uninstall.maybe_remove_dependency/2
+
+     warning: Igniter.Project.Application.app_name/0 is deprecated. Use `app_name/1` instead.
+     │
+ 193 │     app_name = Igniter.Project.Application.app_name()
+     │                                            ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.uninstall.ex:193:44: Mix.Tasks.PhoenixKit.Uninstall.router_module/0
+
+     warning: variable "module_name" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 177 │     Igniter.Project.Module.find_and_update_all_modules(igniter, fn module_name, zipper ->
+     │                                                                    ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:177:68: Mix.Tasks.PhoenixKit.Upgrade.migrate_deprecated_functions/1
+
+    warning: this clause of defp maybe_update_assets/2 is never used
+    │
+ 76 │   defp maybe_update_assets(igniter, %{assets: true, force: force}) do
+    │        ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:76:8: Mix.Tasks.PhoenixKit.Upgrade.maybe_update_assets/2
+
+    warning: Igniter.create_or_update_file/3 is undefined or private. Did you mean:
+
+          * create_or_update_file/4
+
+    │
+ 90 │         |> Igniter.create_or_update_file(css_path, css_content)
+    │                    ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:90:20: Mix.Tasks.PhoenixKit.Upgrade.maybe_update_assets/2
+
+    warning: Igniter.create_or_update_file/3 is undefined or private. Did you mean:
+
+          * create_or_update_file/4
+
+    │
+ 91 │         |> Igniter.create_or_update_file(js_path, js_content)
+    │                    ~
+    │
+    └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:91:20: Mix.Tasks.PhoenixKit.Upgrade.maybe_update_assets/2
+
+     warning: this clause of defp maybe_update_config/2 is never used
+     │
+ 104 │   defp maybe_update_config(igniter, %{config: true}) do
+     │        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:104:8: Mix.Tasks.PhoenixKit.Upgrade.maybe_update_config/2
+
+     warning: Igniter.Code.Common.update_all_pattern/3 is undefined or private. Did you mean:
+
+           * update_all_matches/3
+
+     │
+ 123 │           Igniter.Code.Common.update_all_pattern(
+     │                               ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:123:31: Mix.Tasks.PhoenixKit.Upgrade.maybe_update_config/2
+
+     warning: Igniter.Code.Common.update_all_pattern/3 is undefined or private. Did you mean:
+
+           * update_all_matches/3
+
+     │
+ 197 │       Igniter.Code.Common.update_all_pattern(
+     │                           ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:197:27: Mix.Tasks.PhoenixKit.Upgrade.migrate_deprecated_imports/1
+
+     warning: Igniter.Code.Common.update_all_pattern/3 is undefined or private. Did you mean:
+
+           * update_all_matches/3
+
+     │
+ 275 │     Igniter.Code.Common.update_all_pattern(
+     │                         ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:275:25: Mix.Tasks.PhoenixKit.Upgrade.replace_config_key/3
+
+     warning: Igniter.Code.Common.update_all_pattern/3 is undefined or private. Did you mean:
+
+           * update_all_matches/3
+
+     │
+ 289 │     Igniter.Code.Common.update_all_pattern(
+     │                         ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:289:25: Mix.Tasks.PhoenixKit.Upgrade.replace_function_call/5
+
+     warning: Igniter.Code.Common.capture_pattern/0 is undefined or private
+     │
+ 125 │             quote(do: config(:phoenix_kit, unquote(Igniter.Code.Common.capture_pattern()))),
+     │                                                                        ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:125:72: Mix.Tasks.PhoenixKit.Upgrade.maybe_update_config/2
+
+     warning: Igniter.Code.Common.capture_pattern/0 is undefined or private
+     │
+ 261 │              quote(do: {unquote(key), unquote(Igniter.Code.Common.capture_pattern())})
+     │                                                                   ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:261:67: Mix.Tasks.PhoenixKit.Upgrade.merge_config_options/2
+
+     warning: Igniter.Code.Common.capture_pattern/0 is undefined or private
+     │
+ 277 │       quote(do: {unquote(old_key), unquote(Igniter.Code.Common.capture_pattern())}),
+     │                                                                ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:277:64: Mix.Tasks.PhoenixKit.Upgrade.replace_config_key/3
+
+     warning: Igniter.Code.Common.capture_pattern/0 is undefined or private
+     │
+ 282 │           quote(do: {unquote(new_key), unquote(Igniter.Code.Common.capture_pattern())})
+     │                                                                    ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:282:68: Mix.Tasks.PhoenixKit.Upgrade.replace_config_key/3
+
+     warning: Igniter.Code.Common.capture_pattern/0 is undefined or private
+     │
+ 292 │         do: unquote(old_mod).unquote(old_fun)(unquote(Igniter.Code.Common.capture_pattern()))
+     │                                                                           ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:292:75: Mix.Tasks.PhoenixKit.Upgrade.replace_function_call/5
+
+     warning: Igniter.Code.Common.capture_pattern/0 is undefined or private
+     │
+ 299 │             do: unquote(new_mod).unquote(new_fun)(unquote(Igniter.Code.Common.capture_pattern()))
+     │                                                                               ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:299:79: Mix.Tasks.PhoenixKit.Upgrade.replace_function_call/5
+
+     warning: Igniter.Project.Config.configure/4 is undefined or private. Did you mean:
+
+           * configure/5
+           * configure/6
+
+     │
+ 165 │       Igniter.Project.Config.configure(acc, config_path, :phoenix_kit,
+     │                              ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:165:30: Mix.Tasks.PhoenixKit.Upgrade.migrate_deprecated_config/1
+
+     warning: Igniter.Project.Module.find_and_update_all_modules/2 is undefined or private. Did you mean:
+
+           * find_and_update_module/3
+           * find_and_update_module!/3
+           * find_and_update_or_create_module/4
+           * find_and_update_or_create_module/5
+
+     │
+ 177 │     Igniter.Project.Module.find_and_update_all_modules(igniter, fn module_name, zipper ->
+     │                            ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:177:28: Mix.Tasks.PhoenixKit.Upgrade.migrate_deprecated_functions/1
+
+     warning: Igniter.Code.Module.find_and_update_module/3 is deprecated. Use `Igniter.Project.Module.find_and_update_module/3` instead
+     │
+ 195 │     Igniter.Code.Module.find_and_update_module(igniter, router_module, fn zipper ->
+     │                         ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:195:25: Mix.Tasks.PhoenixKit.Upgrade.migrate_deprecated_imports/1
+
+     warning: Igniter.Project.Application.app_name/0 is deprecated. Use `app_name/1` instead.
+     │
+ 251 │     app_name = Igniter.Project.Application.app_name()
+     │                                            ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:251:44: Mix.Tasks.PhoenixKit.Upgrade.get_router_module/0
+
+     warning: Igniter.Code.Common.move_to_pattern/2 is undefined or private. However, there is a macro with the same name and arity. Be sure to require Igniter.Code.Common if you intend to invoke this macro
+     │
+ 259 │       case Igniter.Code.Common.move_to_pattern(
+     │                                ~
+     │
+     └─ (phoenix_kit 0.1.0) lib/mix/tasks/phoenix_kit.upgrade.ex:259:32: Mix.Tasks.PhoenixKit.Upgrade.merge_config_options/2
+
+    warning: unused import Phoenix.HTML
+    │
+  6 │   import Phoenix.HTML
+    │   ~
+    │
+    └─ lib/phoenix_kit/controllers/components_controller.ex:6:3
+
+    warning: unused import Phoenix.HTML
+    │
+  3 │   import Phoenix.HTML
+    │   ~
+    │
+    └─ lib/phoenix_kit/controllers/components_html.ex:3:3
+
+    warning: unused import Phoenix.HTML
+    │
+  6 │   import Phoenix.HTML
+    │   ~
+    │
+    └─ lib/phoenix_kit/controllers/dashboard_controller.ex:6:3
+
+    warning: unused import Phoenix.HTML
+    │
+  3 │   import Phoenix.HTML
+    │   ~
+    │
+    └─ lib/phoenix_kit/controllers/dashboard_html.ex:3:3
+
+    warning: unused import Phoenix.HTML
+    │
+  6 │   import Phoenix.HTML
+    │   ~
+    │
+    └─ lib/phoenix_kit/controllers/page_controller.ex:6:3
+
+    warning: outdented heredoc line. The contents inside the heredoc should be indented at the same level as the closing """. The following is forbidden:
+
+        def text do
+          """
+        contents
+          """
+        end
+
+    Instead make sure the contents are indented as much as the heredoc closing:
+
+        def text do
+          """
+          contents
+          """
+        end
+
+    The current heredoc line is indented too little
+    │
+ 84 │ PhoenixKit.routes()</code></pre>
+    │       ~
+    │
+    └─ lib/phoenix_kit/controllers/page_html.ex:84:7
+
+    warning: unused import Phoenix.HTML
+    │
+  3 │   import Phoenix.HTML
+    │   ~
+    │
+    └─ lib/phoenix_kit/controllers/page_html.ex:3:3
+
+    warning: unused import Phoenix.HTML
+    │
+  6 │   import Phoenix.HTML
+    │   ~
+    │
+    └─ lib/phoenix_kit/controllers/utilities_controller.ex:6:3
+
+    warning: unused import Phoenix.HTML
+    │
+  3 │   import Phoenix.HTML
+    │   ~
+    │
+    └─ lib/phoenix_kit/controllers/utilities_html.ex:3:3
+
+     warning: variable "resource_usage" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 584 │   defp check_alert_conditions(settings, system_health, performance_metrics, resource_usage) do
+     │                                                                             ~~~~~~~~~~~~~~
+     │
+     └─ (phoenix_kit 0.1.0) lib/phoenix_kit/live/monitor_live.ex:584:77: PhoenixKit.MonitorLive.check_alert_conditions/4
+
+     warning: variable "key" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 363 │   defp get_from_cache(key) do
+     │                       ~~~
+     │
+     └─ (phoenix_kit 0.1.0) lib/phoenix_kit/utils.ex:363:23: PhoenixKit.Utils.get_from_cache/1
+
+     warning: variable "key" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 369 │   defp set_in_cache(key, value, ttl) do
+     │                     ~~~
+     │
+     └─ (phoenix_kit 0.1.0) lib/phoenix_kit/utils.ex:369:21: PhoenixKit.Utils.set_in_cache/3
+
+     warning: variable "ttl" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 369 │   defp set_in_cache(key, value, ttl) do
+     │                                 ~~~
+     │
+     └─ (phoenix_kit 0.1.0) lib/phoenix_kit/utils.ex:369:33: PhoenixKit.Utils.set_in_cache/3
+
+     warning: variable "value" is unused (if the variable is not meant to be used, prefix it with an underscore)
+     │
+ 369 │   defp set_in_cache(key, value, ttl) do
+     │                          ~~~~~
+     │
+     └─ (phoenix_kit 0.1.0) lib/phoenix_kit/utils.ex:369:26: PhoenixKit.Utils.set_in_cache/3
+
+     warning: the following clause will never match:
+
+         {:ok, value}
+
+     because it attempts to match on the result of:
+
+         get_from_cache(key)
+
+     which has type:
+
+         dynamic({:error, :not_found})
+
+     typing violation found at:
+     │
+ 271 │       {:ok, value} ->
+     │       ~~~~~~~~~~~~~~~
+     │
+     └─ (phoenix_kit 0.1.0) lib/phoenix_kit/utils.ex:271: PhoenixKit.Utils.cache_get_or_set/3
+
+==> test_phoenixkit
+    warning: unused import PhoenixKit
+    │
+  4 │   import PhoenixKit
+    │   ~
+    │
+    └─ lib/test_phoenixkit_web/router.ex:4:3
+
+[info] Running TestPhoenixkitWeb.Endpoint with Bandit 1.7.0 at 0.0.0.0:4000 (http)
+[info] Access TestPhoenixkitWeb.Endpoint at http://localhost:4000
+[watch] build finished, watching for changes...
+/*! 🌼 daisyUI 5.0.8 */
+sh: 1: watchman: not found
+≈ tailwindcss v4.0.9
+
+Done in 191ms
+[info] CONNECTED TO Phoenix.LiveView.Socket in 34µs
+  Transport: :longpoll
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "QSMGMDwVHzB9HGkHIwYINUkCaRsAAFML5iOiYqfJEd-XpEQpprDpFZ0N", "_live_referer" => "undefined", "_mount_attempts" => "0", "_mounts" => "0", "_track_static" => %{"0" => "http://localhost:4000/assets/css/app.css", "1" => "http://localhost:4000/assets/js/app.js"}, "vsn" => "2.0.0"}
+[debug] MOUNT PhoenixKit.DashboardLive
+  Parameters: %{}
+  Session: %{"_csrf_token" => "tJIYedyz8xD_SCYE9p-kFZcE"}
+[debug] Replied in 123ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 39ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 29ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 14ms
+[info] GET /phoenix_kit
+[debug] Processing with PhoenixKit.PageController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 23ms
+[info] GET /phoenix_kit
+[debug] Processing with PhoenixKit.PageController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[debug] HANDLE EVENT "select_metric" in PhoenixKit.DashboardLive
+  Parameters: %{"metric" => "cpu_usage", "value" => ""}
+[debug] Replied in 4ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 15ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 14ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 10ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 5ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 5ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[debug] HANDLE EVENT "toggle_auto_refresh" in PhoenixKit.DashboardLive
+  Parameters: %{"value" => ""}
+[debug] Replied in 2ms
+[debug] HANDLE EVENT "clear_alerts" in PhoenixKit.DashboardLive
+  Parameters: %{"value" => ""}
+[debug] Replied in 4ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /
+[debug] Processing with TestPhoenixkitWeb.PageController.home/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 34ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 15ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 23ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 5ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 15ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 10ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 15ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 14ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 15ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 16ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /phoenix_kit/live
+[debug] Processing with PhoenixKit.DashboardLive.__live__/0
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 115ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 5ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] CONNECTED TO Phoenix.LiveView.Socket in 23µs
+  Transport: :websocket
+  Serializer: Phoenix.Socket.V2.JSONSerializer
+  Parameters: %{"_csrf_token" => "JCYiGCoAQQNKPnduIRodNnAeb1MgCiF0PlkAOd8yrF31rYDsInB8fPB1", "_live_referer" => "undefined", "_mount_attempts" => "0", "_mounts" => "0", "_track_static" => %{"0" => "http://localhost:4000/assets/css/app.css", "1" => "http://localhost:4000/assets/js/app.js"}, "vsn" => "2.0.0"}
+[debug] MOUNT PhoenixKit.DashboardLive
+  Parameters: %{}
+  Session: %{"_csrf_token" => "tJIYedyz8xD_SCYE9p-kFZcE"}
+[debug] Replied in 124ms
+[debug] HANDLE EVENT "toggle_auto_refresh" in PhoenixKit.DashboardLive
+  Parameters: %{"value" => ""}
+[debug] Replied in 7ms
+[debug] HANDLE EVENT "refresh_now" in PhoenixKit.DashboardLive
+  Parameters: %{"value" => ""}
+[debug] Replied in 5ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 15ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 17ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 15ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 15ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 14ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 5ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 8ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 6ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 12ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 5ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 9ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 11ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /phoenix_kit/api/stats
+[debug] Processing with PhoenixKit.DashboardController.stats/2
+  Parameters: %{}
+  Pipelines: [:browser, :api]
+[info] Sent 200 in 7ms
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 13ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[info] GET /phoenix_kit/dashboard
+[debug] Processing with PhoenixKit.DashboardController.index/2
+  Parameters: %{}
+  Pipelines: [:browser]
+[info] Sent 200 in 10ms
+[info] GET /.well-known/appspecific/com.chrome.devtools.json
+[debug] ** (Phoenix.Router.NoRouteError) no route found for GET /.well-known/appspecific/com.chrome.devtools.json (TestPhoenixkitWeb.Router)
+    (test_phoenixkit 0.1.0) deps/phoenix/lib/phoenix/router.ex:465: TestPhoenixkitWeb.Router.call/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.plug_builder_call/2
+    (test_phoenixkit 0.1.0) deps/plug/lib/plug/debugger.ex:155: TestPhoenixkitWeb.Endpoint."call (overridable 3)"/2
+    (test_phoenixkit 0.1.0) lib/test_phoenixkit_web/endpoint.ex:1: TestPhoenixkitWeb.Endpoint.call/2
+    (phoenix 1.8.0-rc.4) lib/phoenix/endpoint/sync_code_reload_plug.ex:22: Phoenix.Endpoint.SyncCodeReloadPlug.do_call/4
+    (bandit 1.7.0) lib/bandit/pipeline.ex:131: Bandit.Pipeline.call_plug!/2
+    (bandit 1.7.0) lib/bandit/pipeline.ex:42: Bandit.Pipeline.run/5
+    (bandit 1.7.0) lib/bandit/http1/handler.ex:13: Bandit.HTTP1.Handler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:18: Bandit.DelegatingHandler.handle_data/3
+    (bandit 1.7.0) lib/bandit/delegating_handler.ex:8: Bandit.DelegatingHandler.handle_info/2
+    (stdlib 6.2.2) gen_server.erl:2345: :gen_server.try_handle_info/3
+    (stdlib 6.2.2) gen_server.erl:2433: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+** (RuntimeError) could not compile application: test_phoenixkit.
+
+You must restart your server after changing configuration files or your dependencies.
+In particular, the following files changed and must be recomputed on a server restart:
+
+  * _build/dev/lib/test_phoenixkit/.mix/compile.lock
+
+
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:308: Phoenix.CodeReloader.Server.mix_compile_unless_stale_config/5
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:231: Phoenix.CodeReloader.Server.mix_compile/6
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:88: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:386: Phoenix.CodeReloader.Server.proxy_io/1
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:85: anonymous fn/5 in Phoenix.CodeReloader.Server.handle_call/3
+    (mix 1.18.4) lib/mix/sync/lock.ex:112: Mix.Sync.Lock.with_lock/3
+    (phoenix 1.8.0-rc.4) lib/phoenix/code_reloader/server.ex:70: Phoenix.CodeReloader.Server.handle_call/3
+    (stdlib 6.2.2) gen_server.erl:2381: :gen_server.try_handle_call/4
+    (stdlib 6.2.2) gen_server.erl:2410: :gen_server.handle_msg/6
+    (stdlib 6.2.2) proc_lib.erl:329: :proc_lib.init_p_do_apply/3
+
+[notice] SIGTERM received - shutting down
+
+[info] DRAINING 10 of 10 total connection(s) for socket Phoenix.LiveReloader.Socket every 2000ms - round 1 of 1
