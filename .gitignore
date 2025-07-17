@@ -1,0 +1,116 @@
+# The directory Mix will write compiled artifacts to.
+/_build/
+
+# If you run "mix test --cover", coverage assets end up here.
+/cover/
+
+# The directory Mix downloads your dependencies sources to.
+/deps/
+
+# Where third-party dependencies like ExDoc output generated docs.
+/doc/
+
+# Ignore .fetch files in case you like to edit your project deps locally.
+/.fetch
+
+# If the VM crashes, it generates a dump, let's ignore it too.
+erl_crash.dump
+
+# Also ignore archive artifacts (built via "mix archive.build").
+*.ez
+
+# Ignore package tarball (built via "mix hex.build").
+phoenix_kit-*.tar
+
+# Temporary files, for example, from tests.
+/tmp/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# Dialyzer PLTs
+*.plt
+*.plt.hash
+
+# Elixir Language Server
+.elixir_ls/
+
+# Sobelow security analysis
+.sobelow
+
+# Documentation for internal development (should not be committed)
+CLAUDE.md
+claude.md
+
+# Test artifacts
+/test_phoenixkit/
+
+# Mix lock file (uncomment if you want to ignore it)
+# mix.lock
+
+# Hex packages
+/packages/
+
+# Generated documentation
+/docs/
+
+# Build artifacts
+/_build/
+/priv/static/assets/
+
+# Local development files
+.local
+.dev
+.development
+
+# Phoenix temporary files
+/priv/static/cache/
+
+# LiveReload temporary files
+.#*
