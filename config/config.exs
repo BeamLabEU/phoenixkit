@@ -7,6 +7,19 @@
 # General application configuration
 import Config
 
+config :phoenix_kit, :scopes,
+  user: [
+    default: true,
+    module: BeamLab.PhoenixKit.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :id,
+    schema_table: :phoenix_kit_users,
+    test_data_fixture: BeamLab.PhoenixKit.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 config :phoenix_kit,
   namespace: BeamLab.PhoenixKit,
   ecto_repos: [BeamLab.PhoenixKit.Repo],

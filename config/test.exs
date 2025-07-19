@@ -1,5 +1,8 @@
 import Config
 
+# Only in tests, remove the complexity from the password hashing algorithm
+config :bcrypt_elixir, :log_rounds, 1
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
@@ -7,8 +10,8 @@ import Config
 # Run `mix help test` for more information.
 config :phoenix_kit, BeamLab.PhoenixKit.Repo,
   username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
+  password: "yourrandompassword",
+  hostname: "172.18.0.2",
   database: "phoenix_kit_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
