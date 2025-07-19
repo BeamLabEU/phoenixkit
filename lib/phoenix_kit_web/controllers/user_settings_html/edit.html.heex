@@ -6,7 +6,12 @@
     </.header>
   </div>
 
-  <.form :let={f} for={@email_changeset} action={~p"/phoenix_kit_users/settings"} id="update_email">
+  <.form
+    :let={f}
+    for={@email_changeset}
+    action={~p"/phoenix_kit_users/settings"}
+    id="update_email"
+  >
     <input type="hidden" name="action" value="update_email" />
 
     <.input field={f[:email]} type="email" label="Email" autocomplete="username" required />
@@ -16,7 +21,12 @@
 
   <div class="divider" />
 
-  <.form :let={f} for={@password_changeset} action={~p"/phoenix_kit_users/settings"} id="update_password">
+  <.form
+    :let={f}
+    for={@password_changeset}
+    action={~p"/phoenix_kit_users/settings"}
+    id="update_password"
+  >
     <input type="hidden" name="action" value="update_password" />
 
     <.input

@@ -146,7 +146,9 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
         })
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
-      assert BeamLab.PhoenixKit.Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "login"
+
+      assert BeamLab.PhoenixKit.Repo.get_by!(Accounts.UserToken, user_id: user.id).context ==
+               "login"
     end
 
     test "logs the user in", %{conn: conn, user: user} do

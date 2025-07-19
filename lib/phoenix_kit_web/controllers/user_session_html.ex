@@ -4,6 +4,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionHTML do
   embed_templates "user_session_html/*"
 
   defp local_mail_adapter? do
-    Application.get_env(:phoenix_kit, BeamLab.PhoenixKit.Mailer)[:adapter] == Swoosh.Adapters.Local
+    Application.get_env(:phoenix_kit, BeamLab.PhoenixKit.Mailer)[:adapter] ==
+      Swoosh.Adapters.Local
   end
 end

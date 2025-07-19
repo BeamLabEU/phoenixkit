@@ -186,7 +186,10 @@ defmodule BeamLab.PhoenixKitWeb.UserAuthTest do
   end
 
   describe "require_sudo_mode/2" do
-    test "allows phoenix_kit_users that have authenticated in the last 10 minutes", %{conn: conn, user: user} do
+    test "allows phoenix_kit_users that have authenticated in the last 10 minutes", %{
+      conn: conn,
+      user: user
+    } do
       conn =
         conn
         |> fetch_flash()

@@ -2,7 +2,9 @@ defmodule BeamLab.PhoenixKitWeb.ErrorJSONTest do
   use BeamLab.PhoenixKitWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert BeamLab.PhoenixKitWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert BeamLab.PhoenixKitWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do
