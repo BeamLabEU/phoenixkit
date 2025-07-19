@@ -35,3 +35,55 @@ phoenix_kit-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+secrets.exs
+
+# IDE and editor files
+/.vscode/
+/.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs and debugging
+*.log
+*.beam
+*.plt
+*.plt.*
+
+# Generated certificates
+/priv/cert/
+
+# Local configuration overrides
+/config/*.local.exs
+
+# Database dumps and backups  
+*.sql
+*.dump
+*.backup
+
+# Large binary files
+*.tar.gz
+*.zip
+*.7z
+*.dmg
+*.iso
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Uploads and user content
+/priv/static/uploads/
+/uploads/
+
