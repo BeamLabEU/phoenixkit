@@ -30,18 +30,16 @@ defmodule BeamLab.PhoenixKitWeb.Router do
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:phoenix_kit, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
+    # Only include dev routes if dependencies are available
+    if Code.ensure_loaded?(Phoenix.LiveDashboard.Router) and Code.ensure_loaded?(Plug.Swoosh.MailboxPreview) do
+      import Phoenix.LiveDashboard.Router
 
-    scope "/dev" do
-      pipe_through :browser
+      scope "/dev" do
+        pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: BeamLab.PhoenixKitWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+        live_dashboard "/dashboard", metrics: BeamLab.PhoenixKitWeb.Telemetry
+        forward "/mailbox", Plug.Swoosh.MailboxPreview
+      end
     end
   end
 

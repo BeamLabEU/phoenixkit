@@ -68,7 +68,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
   defp deps do
     [
       # CORE библиотеки (всегда нужны)
-      {:phoenix, "~> 1.7.0"},
+      {:phoenix, "~> 1.8.0-rc.4"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
       {:bcrypt_elixir, "~> 3.0"},
