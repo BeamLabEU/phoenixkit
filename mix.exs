@@ -1,16 +1,32 @@
 defmodule BeamLab.PhoenixKit.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+  @source_url "https://github.com/BeamLabEU/phoenixkit"
+
   def project do
     [
       app: :phoenix_kit,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      listeners: [Phoenix.CodeReloader]
+      
+      # Package metadata
+      description: description(),
+      package: package(),
+      
+      # Documentation
+      docs: docs(),
+      source_url: @source_url,
+      homepage_url: @source_url,
+      
+      # Testing
+      preferred_cli_env: [
+        "test.ci": :test
+      ]
     ]
   end
 
@@ -18,10 +34,28 @@ defmodule BeamLab.PhoenixKit.MixProject do
   #
   # Type `mix help compile.app` for more information.
   def application do
-    [
-      mod: {BeamLab.PhoenixKit.Application, []},
-      extra_applications: [:logger, :runtime_tools]
-    ]
+    case phoenix_kit_mode() do
+      :standalone ->
+        [
+          mod: {BeamLab.PhoenixKit.Application, []},
+          extra_applications: [:logger, :runtime_tools, :crypto]
+        ]
+      :library ->
+        [
+          extra_applications: [:logger, :crypto]
+        ]
+    end
+  end
+
+  # Determines if Phoenix Kit should run as standalone app or library
+  defp phoenix_kit_mode do
+    case {Mix.env(), Application.get_env(:phoenix_kit, :mode)} do
+      {:dev, _} -> :standalone  # Always standalone in dev for easier development
+      {_, :standalone} -> :standalone
+      {_, :library} -> :library
+      {_, nil} -> :library  # Default to library mode
+      {_, _} -> :library
+    end
   end
 
   # Specifies which paths to compile per environment.
@@ -33,18 +67,14 @@ defmodule BeamLab.PhoenixKit.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.8.0-rc.3", override: true},
+      # CORE библиотеки (всегда нужны)
+      {:phoenix, "~> 1.7.0"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
-      {:postgrex, ">= 0.0.0"},
+      {:bcrypt_elixir, "~> 3.0"},
       {:phoenix_html, "~> 4.1"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.0.9"},
-      {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:esbuild, "~> 0.9", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.3"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.1.1",
@@ -52,14 +82,25 @@ defmodule BeamLab.PhoenixKit.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:swoosh, "~> 1.16"},
-      {:req, "~> 0.5"},
-      {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
-      {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.5"}
+
+      # DATABASE (опциональная, пользователь может выбрать свою)
+      {:postgrex, ">= 0.0.0", optional: true},
+
+      # STANDALONE зависимости (только для демо/разработки)
+      {:bandit, "~> 1.5", optional: true},
+      {:swoosh, "~> 1.16", optional: true},
+      {:req, "~> 0.5", optional: true},
+      {:dns_cluster, "~> 0.1.1", optional: true},
+      {:phoenix_live_dashboard, "~> 0.8.3", optional: true},
+      {:telemetry_metrics, "~> 1.0", optional: true},
+      {:telemetry_poller, "~> 1.0", optional: true},
+
+      # DEVELOPMENT зависимости
+      {:phoenix_live_reload, "~> 1.2", only: :dev, optional: true},
+      {:esbuild, "~> 0.9", runtime: Mix.env() == :dev, optional: true},
+      {:floki, ">= 0.30.0", only: :test}
     ]
   end
 
@@ -81,6 +122,74 @@ defmodule BeamLab.PhoenixKit.MixProject do
         "tailwind phoenix_kit --minify",
         "esbuild phoenix_kit --minify",
         "phx.digest"
+      ]
+    ]
+  end
+
+  defp description do
+    """
+    BeamLab Phoenix Kit - A professional Phoenix authentication and UI component library.
+    
+    Provides complete user authentication system with registration, login, password reset,
+    email confirmation, and security best practices. Includes reusable UI components 
+    built with Tailwind CSS and designed for easy integration into Phoenix applications.
+    """
+  end
+
+  defp package do
+    [
+      name: "phoenix_kit",
+      maintainers: ["BeamLab Team"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => @source_url,
+        "Documentation" => "https://hexdocs.pm/phoenix_kit",
+        "BeamLab" => "https://beamlab.eu"
+      },
+      files: ~w(
+        lib
+        priv/repo/migrations
+        priv/gettext
+        mix.exs
+        README.md
+        LICENSE
+        CHANGELOG.md
+      )
+    ]
+  end
+
+  defp docs do
+    [
+      main: "BeamLab.PhoenixKit",
+      source_ref: "v#{@version}",
+      source_url: @source_url,
+      extras: [
+        "README.md": [title: "Overview"],
+        "CHANGELOG.md": [title: "Changelog"]
+      ],
+      groups_for_modules: [
+        "Core API": [
+          BeamLab.PhoenixKit
+        ],
+        "Accounts": [
+          BeamLab.PhoenixKit.Accounts,
+          BeamLab.PhoenixKit.Accounts.User,
+          BeamLab.PhoenixKit.Accounts.UserToken,
+          BeamLab.PhoenixKit.Accounts.UserNotifier,
+          BeamLab.PhoenixKit.Accounts.Scope
+        ],
+        "Web Layer": [
+          BeamLab.PhoenixKitWeb,
+          BeamLab.PhoenixKitWeb.UserAuth
+        ],
+        "Controllers": [
+          BeamLab.PhoenixKitWeb.UserRegistrationController,
+          BeamLab.PhoenixKitWeb.UserSessionController,
+          BeamLab.PhoenixKitWeb.UserSettingsController
+        ],
+        "Components": [
+          BeamLab.PhoenixKitWeb.CoreComponents
+        ]
       ]
     ]
   end
