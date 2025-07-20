@@ -53,7 +53,7 @@ defmodule TestApp.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v0.1.1"}
+      {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v0.2.0"}
     ]
   end
 
