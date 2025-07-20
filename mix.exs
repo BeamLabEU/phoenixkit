@@ -14,6 +14,9 @@ defmodule BeamLab.PhoenixKit.MixProject do
       aliases: aliases(),
       deps: deps(),
       
+      # Phoenix Code Reloader
+      listeners: listeners(Mix.env()),
+      
       # Package metadata
       description: description(),
       package: package(),
@@ -194,4 +197,8 @@ defmodule BeamLab.PhoenixKit.MixProject do
       ]
     ]
   end
+
+  # Phoenix Code Reloader listeners (only in dev mode)
+  defp listeners(:dev), do: [Phoenix.CodeReloader]
+  defp listeners(_), do: []
 end
