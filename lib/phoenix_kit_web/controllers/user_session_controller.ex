@@ -8,7 +8,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionController do
     email = get_in(conn.assigns, [:current_scope, Access.key(:user), Access.key(:email)])
     form = Phoenix.Component.to_form(%{"email" => email}, as: "user")
 
-    render(conn, :new, form: form)
+    render(conn, :new, form: form, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
   end
 
   # magic link login
@@ -28,7 +28,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionController do
       {:error, :not_found} ->
         conn
         |> put_flash(:error, "The link is invalid or it has expired.")
-        |> render(:new, form: Phoenix.Component.to_form(%{}, as: "user"))
+        |> render(:new, form: Phoenix.Component.to_form(%{}, as: "user"), layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
     end
   end
 
@@ -44,7 +44,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionController do
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
       conn
       |> put_flash(:error, "Invalid email or password")
-      |> render(:new, form: form)
+      |> render(:new, form: form, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
     end
   end
 
@@ -72,7 +72,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionController do
       conn
       |> assign(:user, user)
       |> assign(:form, form)
-      |> render(:confirm)
+      |> render(:confirm, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
     else
       conn
       |> put_flash(:error, "Magic link is invalid or it has expired.")

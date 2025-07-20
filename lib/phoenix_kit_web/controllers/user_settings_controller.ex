@@ -10,7 +10,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsController do
   plug :assign_email_and_password_changesets
 
   def edit(conn, _params) do
-    render(conn, :edit)
+    render(conn, :edit, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
   end
 
   def update(conn, %{"action" => "update_email"} = params) do
@@ -33,7 +33,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsController do
         |> redirect(to: ~p"/phoenix_kit_users/settings")
 
       changeset ->
-        render(conn, :edit, email_changeset: %{changeset | action: :insert})
+        render(conn, :edit, email_changeset: %{changeset | action: :insert}, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
     end
   end
 
@@ -49,7 +49,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsController do
         |> UserAuth.log_in_user(user)
 
       {:error, changeset} ->
-        render(conn, :edit, password_changeset: changeset)
+        render(conn, :edit, password_changeset: changeset, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
     end
   end
 

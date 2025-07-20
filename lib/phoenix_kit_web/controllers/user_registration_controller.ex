@@ -6,7 +6,7 @@ defmodule BeamLab.PhoenixKitWeb.UserRegistrationController do
 
   def new(conn, _params) do
     changeset = Accounts.change_user_email(%User{})
-    render(conn, :new, changeset: changeset)
+    render(conn, :new, changeset: changeset, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
   end
 
   def create(conn, %{"user" => user_params}) do
@@ -26,7 +26,7 @@ defmodule BeamLab.PhoenixKitWeb.UserRegistrationController do
         |> redirect(to: ~p"/phoenix_kit_users/log-in")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset)
+        render(conn, :new, changeset: changeset, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
     end
   end
 end
