@@ -29,18 +29,8 @@ defmodule BeamLab.PhoenixKitWeb.Router do
   # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
-  # Skip dev routes in library mode to avoid dependency issues
-  if Application.compile_env(:phoenix_kit, :dev_routes) and 
-     not Application.compile_env(:phoenix_kit, :library_mode, false) do
-    import Phoenix.LiveDashboard.Router
-
-    scope "/dev" do
-      pipe_through :browser
-
-      live_dashboard "/dashboard", metrics: BeamLab.PhoenixKitWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
-  end
+  import BeamLab.PhoenixKitWeb.DevRoutes
+  dev_routes()
 
   ## Authentication routes
 
