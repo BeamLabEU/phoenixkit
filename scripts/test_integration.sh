@@ -110,6 +110,11 @@ log_info "Шаг 3: Установка зависимостей"
 mix deps.get
 log_success "Зависимости установлены"
 
+# Шаг 3.5: Компиляция PhoenixKit
+log_info "Шаг 3.5: Компиляция PhoenixKit"
+mix deps.compile phoenix_kit
+log_success "PhoenixKit скомпилирован"
+
 # Шаг 4: Тестирование команд PhoenixKit
 log_info "Шаг 4: Тестирование команд PhoenixKit"
 

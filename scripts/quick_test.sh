@@ -35,6 +35,9 @@ sed -i.bak 's|def deps do|def deps do\
 echo "⬇️  Getting dependencies..."
 mix deps.get
 
+echo "🔨 Compiling PhoenixKit..."
+mix deps.compile phoenix_kit
+
 echo "🧪 Testing PhoenixKit commands..."
 
 # Тест команд
