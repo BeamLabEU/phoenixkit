@@ -31,19 +31,373 @@ Then run:
 mix deps.get
 ```
 
-### Library Usage
+## 🚀 Integration Guide
+
+### Step 1: Installation
+
+Add PhoenixKit to your `mix.exs` dependencies:
 
 ```elixir
-# In your application configuration
-config :phoenix_kit, mode: :library
+def deps do
+  [
+    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"},
+    # Add these if not already present
+    {:bcrypt_elixir, "~> 3.0"},
+    {:tailwind, "~> 0.3"},
+  ]
+end
+```
 
-# Access the main API
-BeamLab.PhoenixKit.version()
-BeamLab.PhoenixKit.mode()
+Install dependencies:
+```bash
+mix deps.get
+```
 
-# User management functions
-BeamLab.PhoenixKit.register_user(%{email: "user@example.com"})
-BeamLab.PhoenixKit.get_user_by_email("user@example.com")
+### Step 2: Configuration
+
+Configure PhoenixKit in `config/config.exs`:
+
+```elixir
+# Basic library mode configuration
+config :phoenix_kit, 
+  mode: :library,
+  library_mode: true
+
+# Database configuration for PhoenixKit tables
+config :phoenix_kit, BeamLab.PhoenixKit.Repo,
+  username: "postgres",
+  password: "postgres", 
+  database: "your_app_dev",
+  hostname: "localhost",
+  pool_size: 10
+
+# Configure mailer (optional - for email features)
+config :phoenix_kit, BeamLab.PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.Local
+
+# Add to your app's configuration
+config :your_app, :phoenix_kit_integration, true
+```
+
+### Step 3: Database Setup
+
+Create and run PhoenixKit migrations:
+
+```bash
+# Generate migration to add PhoenixKit tables
+mix ecto.gen.migration add_phoenix_kit_tables
+
+# Copy PhoenixKit migrations to your project
+cp deps/phoenix_kit/priv/repo/migrations/* priv/repo/migrations/
+
+# Run migrations
+mix ecto.migrate
+```
+
+Or manually add PhoenixKit tables to your existing schema:
+
+```elixir
+# In your migration file
+defmodule YourApp.Repo.Migrations.AddPhoenixKitTables do
+  use Ecto.Migration
+
+  def change do
+    # Phoenix Kit Users table
+    create table(:phoenix_kit_users) do
+      add :email, :string, null: false
+      add :hashed_password, :string
+      add :confirmed_at, :utc_datetime
+      add :authenticated_at, :utc_datetime
+
+      timestamps()
+    end
+
+    create unique_index(:phoenix_kit_users, [:email])
+
+    # Phoenix Kit User Tokens table
+    create table(:phoenix_kit_user_tokens) do
+      add :user_id, references(:phoenix_kit_users, on_delete: :delete_all), null: false
+      add :token, :binary, null: false
+      add :context, :string, null: false
+      add :sent_to, :string
+
+      timestamps(updated_at: false)
+    end
+
+    create index(:phoenix_kit_user_tokens, [:user_id])
+    create unique_index(:phoenix_kit_user_tokens, [:context, :token])
+  end
+end
+```
+
+### Step 4: Router Integration
+
+Add PhoenixKit routes to your `router.ex`:
+
+```elixir
+defmodule YourAppWeb.Router do
+  use YourAppWeb, :router
+  
+  # Import PhoenixKit authentication functions
+  import BeamLab.PhoenixKitWeb.UserAuth
+
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {YourAppWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    # Add PhoenixKit user fetching
+    plug :fetch_current_scope_for_user
+  end
+
+  # Your existing routes
+  scope "/", YourAppWeb do
+    pipe_through :browser
+    get "/", PageController, :home
+  end
+
+  # PhoenixKit Authentication routes
+  scope "/auth", BeamLab.PhoenixKitWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    get "/register", UserRegistrationController, :new
+    post "/register", UserRegistrationController, :create
+    get "/log-in", UserSessionController, :new
+    post "/log-in", UserSessionController, :create
+    get "/log-in/:token", UserSessionController, :confirm
+  end
+
+  scope "/auth", BeamLab.PhoenixKitWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/settings", UserSettingsController, :edit
+    put "/settings", UserSettingsController, :update
+    delete "/log-out", UserSessionController, :delete
+  end
+end
+```
+
+### Step 5: Layout Integration
+
+Update your application layout to support PhoenixKit styles and components:
+
+```heex
+<!-- In your app.html.heex or root.html.heex -->
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+  <head>
+    <!-- Your existing head content -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <!-- PhoenixKit styles (includes Tailwind + daisyUI) -->
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    
+    <!-- Theme support script -->
+    <script>
+      const setTheme = (theme) => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+      };
+      
+      const theme = localStorage.getItem('theme') || 
+                   (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      setTheme(theme);
+    </script>
+  </head>
+  
+  <body>
+    <!-- Navigation with authentication -->
+    <nav class="navbar bg-base-100">
+      <div class="navbar-start">
+        <.link navigate={~p"/"} class="btn btn-ghost text-xl">YourApp</.link>
+      </div>
+      <div class="navbar-end">
+        <%= if @current_scope do %>
+          <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost">
+              <%= @current_scope.user.email %>
+            </div>
+            <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+              <li><.link navigate={~p"/auth/settings"}>Settings</.link></li>
+              <li>
+                <.link href={~p"/auth/log-out"} method="delete">
+                  Log out
+                </.link>
+              </li>
+            </ul>
+          </div>
+        <% else %>
+          <.link navigate={~p"/auth/log-in"} class="btn btn-ghost">Log in</.link>
+          <.link navigate={~p"/auth/register"} class="btn btn-primary">Sign up</.link>
+        <% end %>
+      </div>
+    </nav>
+
+    <!-- Flash messages -->
+    <main>
+      <.flash_group flash={@flash} />
+      <%= @inner_content %>
+    </main>
+    
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
+  </body>
+</html>
+```
+
+### Step 6: Using PhoenixKit API
+
+```elixir
+# In your controllers or contexts
+defmodule YourAppWeb.SomeController do
+  use YourAppWeb, :controller
+  
+  # User management
+  def create_user(conn, params) do
+    case BeamLab.PhoenixKit.register_user(params["user"]) do
+      {:ok, user} -> 
+        # Handle success
+        redirect(conn, to: ~p"/dashboard")
+      {:error, changeset} ->
+        # Handle error
+        render(conn, :new, changeset: changeset)
+    end
+  end
+  
+  # Check authentication
+  def protected_action(conn, _params) do
+    if conn.assigns.current_scope do
+      # User is authenticated
+      user = conn.assigns.current_scope.user
+      render(conn, :show, user: user)
+    else
+      # Redirect to login
+      redirect(conn, to: ~p"/auth/log-in")
+    end
+  end
+end
+
+# In your contexts
+defmodule YourApp.SomeContext do
+  
+  def get_user_profile(email) do
+    BeamLab.PhoenixKit.get_user_by_email(email)
+  end
+  
+  def update_user_password(user, attrs) do
+    BeamLab.PhoenixKit.update_user_password(user, attrs)
+  end
+end
+```
+
+### Step 7: UI Components Usage
+
+Use PhoenixKit UI components in your templates:
+
+```heex
+<!-- Using PhoenixKit form components -->
+<.form :let={f} for={@changeset} action={~p"/some/action"}>
+  <.input 
+    field={f[:email]} 
+    type="email" 
+    label="Email" 
+    required 
+  />
+  <.input 
+    field={f[:password]} 
+    type="password" 
+    label="Password" 
+    required 
+  />
+  <.button class="btn btn-primary w-full">
+    Submit
+  </.button>
+</.form>
+
+<!-- Using theme toggle -->
+<div class="flex items-center gap-4">
+  <BeamLab.PhoenixKitWeb.Layouts.theme_toggle />
+</div>
+
+<!-- Using flash messages -->
+<BeamLab.PhoenixKitWeb.Layouts.flash_group flash={@flash} />
+```
+
+## 🔧 Advanced Configuration
+
+### Custom Email Templates
+
+Override email templates by creating your own notifier:
+
+```elixir
+defmodule YourApp.UserNotifier do
+  # Delegate to PhoenixKit or implement custom logic
+  defdelegate deliver_login_instructions(user, url), 
+    to: BeamLab.PhoenixKit.Accounts.UserNotifier
+    
+  # Custom implementation
+  def deliver_welcome_email(user) do
+    # Your custom email logic
+  end
+end
+```
+
+### Custom Authentication Pipelines
+
+Create custom authentication pipelines:
+
+```elixir
+defmodule YourAppWeb.CustomAuth do
+  import BeamLab.PhoenixKitWeb.UserAuth
+  
+  def require_admin(conn, _opts) do
+    if conn.assigns.current_scope && 
+       conn.assigns.current_scope.user.role == :admin do
+      conn
+    else
+      conn
+      |> put_flash(:error, "Access denied")
+      |> redirect(to: ~p"/")
+      |> halt()
+    end
+  end
+end
+```
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+1. **Migration conflicts**: Ensure PhoenixKit table names don't conflict with existing tables
+2. **CSS not loading**: Verify Tailwind configuration includes PhoenixKit paths
+3. **Authentication not working**: Check router pipeline order and scope configuration
+4. **Theme not switching**: Ensure theme toggle JavaScript is loaded
+
+### Environment Configuration
+
+For different environments:
+
+```elixir
+# config/dev.exs
+config :phoenix_kit, BeamLab.PhoenixKit.Repo,
+  username: "postgres",
+  password: "postgres",
+  database: "yourapp_dev",
+  hostname: "localhost"
+
+# config/test.exs  
+config :phoenix_kit, BeamLab.PhoenixKit.Repo,
+  username: "postgres", 
+  password: "postgres",
+  database: "yourapp_test#{System.get_env("MIX_TEST_PARTITION")}",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
+
+# config/prod.exs
+config :phoenix_kit, BeamLab.PhoenixKit.Repo,
+  url: System.get_env("DATABASE_URL"),
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 ```
 
 ## Development
@@ -97,40 +451,101 @@ PhoenixKit supports two modes:
 - Dark/light theme toggle
 - Responsive design patterns
 
-## API Documentation
+## 📚 API Reference
 
-### Main Module: `BeamLab.PhoenixKit`
+### Core Functions
 
 ```elixir
-# Version information
-BeamLab.PhoenixKit.version()  # Returns current version
+# Library information
+BeamLab.PhoenixKit.version()     # => "1.0.0"
+BeamLab.PhoenixKit.mode()        # => :library | :standalone
+BeamLab.PhoenixKit.library?()    # => true | false
 
-# Mode detection
-BeamLab.PhoenixKit.mode()        # :standalone or :library
-BeamLab.PhoenixKit.standalone?() # true/false
-BeamLab.PhoenixKit.library?()    # true/false
-
-# User management (delegates to Accounts context)
-BeamLab.PhoenixKit.register_user(attrs)
-BeamLab.PhoenixKit.get_user!(id)
-BeamLab.PhoenixKit.get_user_by_email(email)
-BeamLab.PhoenixKit.update_user_password(user, attrs)
+# User management (direct API)
+{:ok, user} = BeamLab.PhoenixKit.register_user(%{email: "user@example.com"})
+user = BeamLab.PhoenixKit.get_user_by_email("user@example.com")
+{:ok, {user, _tokens}} = BeamLab.PhoenixKit.update_user_password(user, %{
+  password: "new_password", 
+  password_confirmation: "new_password"
+})
 ```
 
-## Configuration
+### Authentication Context
 
-### Library Mode Configuration
+Access the full Accounts context for advanced usage:
 
 ```elixir
-# config/config.exs
-config :phoenix_kit, mode: :library
+alias BeamLab.PhoenixKit.Accounts
 
-# Database configuration (if using Ecto features)
-config :phoenix_kit, BeamLab.PhoenixKit.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "your_app_dev",
-  hostname: "localhost"
+# User queries
+Accounts.get_user!(123)
+Accounts.get_user_by_email_and_password("user@example.com", "password")
+
+# Magic link authentication  
+Accounts.deliver_login_instructions(user, &url(~p"/auth/log-in/#{&1}"))
+{:ok, user} = Accounts.login_user_by_magic_link(token)
+
+# Session management
+token = Accounts.generate_user_session_token(user)
+{user, inserted_at} = Accounts.get_user_by_session_token(token)
+Accounts.delete_user_session_token(token)
+
+# Email changes
+changeset = Accounts.change_user_email(user, %{email: "new@example.com"})
+{:ok, user} = Accounts.update_user_email(user, token)
+```
+
+## 🧪 Testing Integration
+
+PhoenixKit includes comprehensive tests. To test your integration:
+
+```bash
+# Run PhoenixKit tests
+mix test
+
+# Run with coverage
+mix test --cover
+
+# Test specific functionality
+mix test test/phoenix_kit/accounts_test.exs
+```
+
+### Testing in Your App
+
+```elixir
+# In your test helpers
+defmodule YourApp.PhoenixKitHelpers do
+  def create_user(attrs \\ %{}) do
+    attrs = 
+      %{email: "user#{System.unique_integer()}@example.com"}
+      |> Map.merge(attrs)
+    
+    {:ok, user} = BeamLab.PhoenixKit.register_user(attrs)
+    user
+  end
+  
+  def log_in_user(conn, user) do
+    token = BeamLab.PhoenixKit.Accounts.generate_user_session_token(user)
+    
+    conn
+    |> Plug.Test.init_test_session(%{})
+    |> Plug.Conn.put_session(:user_token, token)
+  end
+end
+
+# In your tests
+test "protected page requires authentication", %{conn: conn} do
+  conn = get(conn, ~p"/protected")
+  assert redirected_to(conn) == ~p"/auth/log-in"
+end
+
+test "authenticated user can access protected page", %{conn: conn} do
+  user = create_user()
+  conn = log_in_user(conn, user)
+  
+  conn = get(conn, ~p"/protected") 
+  assert html_response(conn, 200) =~ "Welcome"
+end
 ```
 
 ## Versioning

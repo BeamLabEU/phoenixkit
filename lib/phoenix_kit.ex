@@ -18,7 +18,7 @@ defmodule BeamLab.PhoenixKit do
 
   Add to your Phoenix application's dependencies:
 
-      {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v0.1.0"}
+      {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"}
 
   ### Installation
 
@@ -56,7 +56,7 @@ defmodule BeamLab.PhoenixKit do
   ## Examples
 
       iex> BeamLab.PhoenixKit.version()
-      "0.1.0"
+      "1.0.0"
 
   """
   def version, do: @version
