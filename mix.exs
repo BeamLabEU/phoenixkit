@@ -51,6 +51,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
   defp phoenix_kit_mode do
     case {Mix.env(), Application.get_env(:phoenix_kit, :mode)} do
       {:dev, _} -> :standalone  # Always standalone in dev for easier development
+      {:test, _} -> :standalone  # Always standalone in test for complete testing
       {_, :standalone} -> :standalone
       {_, :library} -> :library
       {_, nil} -> :library  # Default to library mode

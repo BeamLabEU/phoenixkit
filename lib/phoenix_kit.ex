@@ -73,6 +73,7 @@ defmodule BeamLab.PhoenixKit do
   def mode do
     case {Mix.env(), Application.get_env(:phoenix_kit, :mode)} do
       {:dev, _} -> :standalone
+      {:test, _} -> :standalone  # Always standalone in test for complete testing
       {_, :standalone} -> :standalone
       {_, :library} -> :library
       {_, nil} -> :library

@@ -1,6 +1,4 @@
 ExUnit.start()
 
-# Only configure Ecto sandbox in standalone mode
-if BeamLab.PhoenixKit.standalone?() do
-  Ecto.Adapters.SQL.Sandbox.mode(BeamLab.PhoenixKit.Repo, :manual)
-end
+# Configure Ecto sandbox for tests
+Ecto.Adapters.SQL.Sandbox.mode(BeamLab.PhoenixKit.Repo, :manual)
