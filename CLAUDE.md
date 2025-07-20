@@ -42,8 +42,9 @@ BeamLab PhoenixKit is a professional Phoenix Framework authentication library th
 - `mix phoenix_kit.gen.routes` - Generate router configuration code
 
 ### Integration Testing
-- `./scripts/test_integration.sh` - Automated integration test in clean Phoenix project
-- Creates test project, installs PhoenixKit, verifies functionality
+- Manual testing preferred due to Mix tasks loading complexity
+- See `TESTING.md` for comprehensive testing procedures
+- Quick test: create Phoenix project, add dependency, run installation commands
 
 ## Architecture
 
@@ -382,8 +383,10 @@ BeamLab.PhoenixKit.Accounts.deliver_login_instructions(
 - `assets/` - Tailwind CSS and JavaScript assets
 - `lib/mix/tasks/` - Mix tasks for automated installation
 - `priv/templates/` - Template files for code generation
-- `scripts/test_integration.sh` - Integration testing script
+- `scripts/test_integration.sh` - Integration testing script (experimental)
+- `scripts/quick_test.sh` - Quick testing script (experimental)
 - `UPGRADE.md` - Upgrade guide for existing projects
+- `TESTING.md` - Comprehensive testing guide for module integration
 - Conditional modules handle library vs standalone compilation differences
 
 ## Version Management

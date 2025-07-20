@@ -586,21 +586,7 @@ end
 
 For developers and contributors who want to test PhoenixKit integration:
 
-### Automated Integration Test
-
-```bash
-# Run comprehensive integration test
-./scripts/test_integration.sh
-```
-
-This script will:
-- Create a fresh Phoenix project
-- Add PhoenixKit as dependency
-- Test all installation commands
-- Verify compilation and database setup
-- Test server startup and routes
-
-### Manual Testing
+### Quick Manual Test
 
 ```bash
 # Create test Phoenix project
@@ -612,12 +598,18 @@ cd test_app
 
 # Install and test
 mix deps.get
+mix compile
 mix phoenix_kit.install
+mix ecto.create
 mix ecto.migrate
 mix phx.server
 ```
 
 Open http://localhost:4000/auth/register to test registration.
+
+### Comprehensive Testing
+
+See [TESTING.md](TESTING.md) for detailed testing instructions, troubleshooting, and step-by-step verification process.
 
 ## 📈 Upgrading
 
