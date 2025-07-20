@@ -145,8 +145,8 @@ This library is designed to be installed as a git dependency:
 # Complete installation
 BeamLab.PhoenixKit.install()
 
-# Or with custom options
-BeamLab.PhoenixKit.install(scope_prefix: "authentication")
+# Or with custom scope prefix (default is "phoenix_kit_users")
+BeamLab.PhoenixKit.install(scope_prefix: "auth")
 
 # Individual functions
 BeamLab.PhoenixKit.generate_migrations()

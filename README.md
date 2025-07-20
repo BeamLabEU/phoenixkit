@@ -48,11 +48,11 @@ mix deps.get
 Then in your IEx console or create a temporary script:
 
 ```elixir
-# Complete installation
+# Complete installation (uses actual PhoenixKit routes)
 BeamLab.PhoenixKit.install()
 
-# Or with custom options
-BeamLab.PhoenixKit.install(scope_prefix: "authentication")
+# Or with custom scope prefix (default is "phoenix_kit_users") 
+BeamLab.PhoenixKit.install(scope_prefix: "auth")
 
 # Individual functions
 BeamLab.PhoenixKit.generate_migrations()
@@ -216,23 +216,29 @@ defmodule YourAppWeb.Router do
     get "/", PageController, :home
   end
 
-  # PhoenixKit Authentication routes
-  scope "/auth", BeamLab.PhoenixKitWeb do
+  # PhoenixKit Authentication routes (actual routes)
+  scope "/", BeamLab.PhoenixKitWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-    get "/register", UserRegistrationController, :new
-    post "/register", UserRegistrationController, :create
-    get "/log-in", UserSessionController, :new
-    post "/log-in", UserSessionController, :create
-    get "/log-in/:token", UserSessionController, :confirm
+    get "/phoenix_kit_users/register", UserRegistrationController, :new
+    post "/phoenix_kit_users/register", UserRegistrationController, :create
   end
 
-  scope "/auth", BeamLab.PhoenixKitWeb do
+  scope "/", BeamLab.PhoenixKitWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    get "/settings", UserSettingsController, :edit
-    put "/settings", UserSettingsController, :update
-    delete "/log-out", UserSessionController, :delete
+    get "/phoenix_kit_users/settings", UserSettingsController, :edit
+    put "/phoenix_kit_users/settings", UserSettingsController, :update
+    get "/phoenix_kit_users/settings/confirm-email/:token", UserSettingsController, :confirm_email
+  end
+
+  scope "/", BeamLab.PhoenixKitWeb do
+    pipe_through [:browser]
+
+    get "/phoenix_kit_users/log-in", UserSessionController, :new
+    get "/phoenix_kit_users/log-in/:token", UserSessionController, :confirm
+    post "/phoenix_kit_users/log-in", UserSessionController, :create
+    delete "/phoenix_kit_users/log-out", UserSessionController, :delete
   end
 end
 ```
@@ -278,17 +284,17 @@ Update your application layout to support PhoenixKit styles and components:
               <%= @current_scope.user.email %>
             </div>
             <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-              <li><.link navigate={~p"/auth/settings"}>Settings</.link></li>
+              <li><.link navigate={~p"/phoenix_kit_users/settings"}>Settings</.link></li>
               <li>
-                <.link href={~p"/auth/log-out"} method="delete">
+                <.link href={~p"/phoenix_kit_users/log-out"} method="delete">
                   Log out
                 </.link>
               </li>
             </ul>
           </div>
         <% else %>
-          <.link navigate={~p"/auth/log-in"} class="btn btn-ghost">Log in</.link>
-          <.link navigate={~p"/auth/register"} class="btn btn-primary">Sign up</.link>
+          <.link navigate={~p"/phoenix_kit_users/log-in"} class="btn btn-ghost">Log in</.link>
+          <.link navigate={~p"/phoenix_kit_users/register"} class="btn btn-primary">Sign up</.link>
         <% end %>
       </div>
     </nav>
@@ -331,7 +337,7 @@ defmodule YourAppWeb.SomeController do
       render(conn, :show, user: user)
     else
       # Redirect to login
-      redirect(conn, to: ~p"/auth/log-in")
+      redirect(conn, to: ~p"/phoenix_kit_users/log-in")
     end
   end
 end
@@ -540,7 +546,7 @@ Accounts.get_user!(123)
 Accounts.get_user_by_email_and_password("user@example.com", "password")
 
 # Magic link authentication  
-Accounts.deliver_login_instructions(user, &url(~p"/auth/log-in/#{&1}"))
+Accounts.deliver_login_instructions(user, &url(~p"/phoenix_kit_users/log-in/#{&1}"))
 {:ok, user} = Accounts.login_user_by_magic_link(token)
 
 # Session management
@@ -594,7 +600,7 @@ end
 # In your tests
 test "protected page requires authentication", %{conn: conn} do
   conn = get(conn, ~p"/protected")
-  assert redirected_to(conn) == ~p"/auth/log-in"
+  assert redirected_to(conn) == ~p"/phoenix_kit_users/log-in"
 end
 
 test "authenticated user can access protected page", %{conn: conn} do

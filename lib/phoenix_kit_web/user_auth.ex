@@ -50,7 +50,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
     user_token && Accounts.delete_user_session_token(user_token)
 
     if live_socket_id = get_session(conn, :live_socket_id) do
-      BeamLab.PhoenixKitWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+      get_endpoint().broadcast(live_socket_id, "disconnect", %{})
     end
 
     conn
@@ -216,4 +216,13 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
   end
 
   defp maybe_store_return_to(conn), do: conn
+
+  @doc false
+  def get_endpoint do
+    if Application.get_env(:phoenix_kit, :library_mode, false) do
+      Application.get_env(:phoenix_kit, :parent_endpoint, BeamLab.PhoenixKitWeb.Endpoint)
+    else
+      BeamLab.PhoenixKitWeb.Endpoint
+    end
+  end
 end

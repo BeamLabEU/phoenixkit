@@ -98,8 +98,14 @@ defmodule BeamLab.PhoenixKitWeb do
 
   def verified_routes do
     quote do
+      endpoint = if Application.get_env(:phoenix_kit, :library_mode, false) do
+        Application.get_env(:phoenix_kit, :parent_endpoint, BeamLab.PhoenixKitWeb.Endpoint)
+      else
+        BeamLab.PhoenixKitWeb.Endpoint
+      end
+
       use Phoenix.VerifiedRoutes,
-        endpoint: BeamLab.PhoenixKitWeb.Endpoint,
+        endpoint: endpoint,
         router: BeamLab.PhoenixKitWeb.Router,
         statics: BeamLab.PhoenixKitWeb.static_paths()
     end

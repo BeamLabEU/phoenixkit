@@ -38,7 +38,7 @@ defmodule BeamLab.PhoenixKit.Installer do
       BeamLab.PhoenixKit.Installer.install(force: true)
   """
   def install(options \\ []) do
-    options = Keyword.merge([scope_prefix: "auth", no_migrations: false, no_config: false, force: false], options)
+    options = Keyword.merge([scope_prefix: "phoenix_kit_users", no_migrations: false, no_config: false, force: false], options)
     
     IO.puts("🚀 PhoenixKit Installation Starting...")
     
@@ -143,7 +143,7 @@ defmodule BeamLab.PhoenixKit.Installer do
       BeamLab.PhoenixKit.Installer.generate_routes(dry_run: true)
   """
   def generate_routes(options \\ []) do
-    options = Keyword.merge([scope_prefix: "auth", dry_run: false, force: false], options)
+    options = Keyword.merge([scope_prefix: "phoenix_kit_users", dry_run: false, force: false], options)
     
     IO.puts("🛣️  Generating PhoenixKit routes...")
     
@@ -175,7 +175,7 @@ defmodule BeamLab.PhoenixKit.Installer do
   
   Displays the router code that needs to be added manually.
   """
-  def show_router_example(scope_prefix \\ "auth") do
+  def show_router_example(scope_prefix \\ "phoenix_kit_users") do
     IO.puts("""
     
     🛣️  Router Configuration Example:
@@ -197,23 +197,29 @@ defmodule BeamLab.PhoenixKit.Installer do
       plug :fetch_current_scope_for_user  # Add this line
     end
 
-    # Add authentication routes:
-    scope "/#{scope_prefix}", BeamLab.PhoenixKitWeb do
+    # PhoenixKit Authentication routes (actual routes used by PhoenixKit):
+    scope "/", BeamLab.PhoenixKitWeb do
       pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-      get "/register", UserRegistrationController, :new
-      post "/register", UserRegistrationController, :create
-      get "/log-in", UserSessionController, :new
-      post "/log-in", UserSessionController, :create
-      get "/log-in/:token", UserSessionController, :confirm
+      get "/#{scope_prefix}/register", UserRegistrationController, :new
+      post "/#{scope_prefix}/register", UserRegistrationController, :create
     end
 
-    scope "/#{scope_prefix}", BeamLab.PhoenixKitWeb do
+    scope "/", BeamLab.PhoenixKitWeb do
       pipe_through [:browser, :require_authenticated_user]
 
-      get "/settings", UserSettingsController, :edit
-      put "/settings", UserSettingsController, :update
-      delete "/log-out", UserSessionController, :delete
+      get "/#{scope_prefix}/settings", UserSettingsController, :edit
+      put "/#{scope_prefix}/settings", UserSettingsController, :update
+      get "/#{scope_prefix}/settings/confirm-email/:token", UserSettingsController, :confirm_email
+    end
+
+    scope "/", BeamLab.PhoenixKitWeb do
+      pipe_through [:browser]
+
+      get "/#{scope_prefix}/log-in", UserSessionController, :new
+      get "/#{scope_prefix}/log-in/:token", UserSessionController, :confirm
+      post "/#{scope_prefix}/log-in", UserSessionController, :create
+      delete "/#{scope_prefix}/log-out", UserSessionController, :delete
     end
     """)
   end
@@ -292,7 +298,9 @@ defmodule BeamLab.PhoenixKit.Installer do
     
     # PhoenixKit Configuration
     config :phoenix_kit,
-      mode: :library
+      mode: :library,
+      library_mode: true,
+      parent_endpoint: #{Macro.camelize(app_name)}Web.Endpoint
 
     # Configure PhoenixKit Repo (adjust database settings as needed)
     config :phoenix_kit, BeamLab.PhoenixKit.Repo,
@@ -301,6 +309,17 @@ defmodule BeamLab.PhoenixKit.Installer do
       hostname: "localhost",
       database: System.get_env("DATABASE_NAME", "#{app_name}_dev"),
       pool_size: 10
+
+    # Configure PhoenixKit Endpoint (in library mode)
+    config :phoenix_kit, BeamLab.PhoenixKitWeb.Endpoint,
+      url: [host: "localhost"],
+      adapter: Bandit.PhoenixAdapter,
+      render_errors: [
+        formats: [html: #{Macro.camelize(app_name)}Web.ErrorHTML],
+        layout: false
+      ],
+      pubsub_server: BeamLab.PhoenixKit.PubSub,
+      live_view: [signing_salt: "your-secret-salt"]
 
     # Optional: Configure mailer for email features
     config :phoenix_kit, BeamLab.PhoenixKit.Mailer,
@@ -329,18 +348,38 @@ defmodule BeamLab.PhoenixKit.Installer do
   defp show_installation_instructions(options) do
     scope_prefix = options[:scope_prefix]
     
+    app_name = Mix.Project.config()[:app] |> to_string()
+    _app_module = Macro.camelize(app_name)
+    
     IO.puts("""
 
     📋 Manual Setup Required:
     
-    1. Add the following router configuration manually:
+    1. Add PhoenixKit endpoint to your application supervision tree.
+       In lib/#{app_name}/application.ex, add to children list:
+    
+       children = [
+         # ... your existing children ...
+         BeamLab.PhoenixKitWeb.Endpoint,  # ← Add this line
+         # ...
+       ]
+    
+    2. Configure PhoenixKit endpoint in config/dev.exs:
+    
+       config :phoenix_kit, BeamLab.PhoenixKitWeb.Endpoint,
+         http: [ip: {0, 0, 0, 0}, port: 4001],  # Different port!
+         debug_errors: true,
+         code_reloader: true,
+         check_origin: false
+
+    3. Add the following router configuration manually:
     """)
     
     show_router_example(scope_prefix)
     
     IO.puts("""
     
-    2. Update your layout template to show authentication state:
+    4. Update your layout template to show authentication state:
     
     <%= if assigns[:current_scope] do %>
       <div>Welcome, <%= @current_scope.user.email %>!</div>
