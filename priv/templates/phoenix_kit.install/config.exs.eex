@@ -1,0 +1,21 @@
+# PhoenixKit Configuration
+# Add this to your config/config.exs
+
+# Configure PhoenixKit to run in library mode
+config :phoenix_kit,
+  mode: :library
+
+# Configure PhoenixKit database repository
+config :phoenix_kit, BeamLab.PhoenixKit.Repo,
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  database: "<%= app_name %>_dev",
+  pool_size: 10
+
+# Configure PhoenixKit mailer (optional - for email features)
+config :phoenix_kit, BeamLab.PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.Local
+
+# Environment-specific configuration
+import_config "#{config_env()}.exs"

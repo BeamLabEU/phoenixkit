@@ -33,6 +33,40 @@ mix deps.get
 
 ## 🚀 Integration Guide
 
+### Automated Installation (Recommended)
+
+After adding PhoenixKit to your dependencies:
+
+```bash
+mix deps.get
+mix phoenix_kit.install
+```
+
+This single command will:
+- ✅ Copy database migrations with proper timestamps
+- ✅ Generate configuration in `config/config.exs`
+- ✅ Display router setup instructions
+- ✅ Show layout integration examples
+- ✅ Provide next steps guidance
+
+### Individual Commands
+
+```bash
+# Generate only database migrations
+mix phoenix_kit.gen.migration
+
+# Generate router configuration
+mix phoenix_kit.gen.routes --scope-prefix auth
+
+# Preview router changes without modifying files
+mix phoenix_kit.gen.routes --dry-run
+
+# Help for any command
+mix help phoenix_kit.install
+```
+
+### Manual Step-by-Step Installation
+
 ### Step 1: Installation
 
 Add PhoenixKit to your `mix.exs` dependencies:

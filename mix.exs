@@ -105,6 +105,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev, optional: true},
       {:esbuild, "~> 0.9", runtime: Mix.env() == :dev, optional: true},
       {:floki, ">= 0.30.0", only: :test}
+
     ]
   end
 

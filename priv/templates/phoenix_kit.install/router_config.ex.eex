@@ -1,0 +1,45 @@
+# PhoenixKit Authentication Router Configuration
+# Add this to your lib/<%= app_name %>_web/router.ex
+
+defmodule <%= app_module %>Web.Router do
+  use <%= app_module %>Web, :router
+
+  # Import PhoenixKit authentication functions
+  import BeamLab.PhoenixKitWeb.UserAuth
+
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {<%= app_module %>Web.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    # Add PhoenixKit user authentication
+    plug :fetch_current_scope_for_user
+  end
+
+  # Your existing routes
+  scope "/", <%= app_module %>Web do
+    pipe_through :browser
+    get "/", PageController, :home
+  end
+
+  # PhoenixKit Authentication routes
+  scope "/<%= scope_prefix %>", BeamLab.PhoenixKitWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    get "/register", UserRegistrationController, :new
+    post "/register", UserRegistrationController, :create
+    get "/log-in", UserSessionController, :new
+    post "/log-in", UserSessionController, :create
+    get "/log-in/:token", UserSessionController, :confirm
+  end
+
+  scope "/<%= scope_prefix %>", BeamLab.PhoenixKitWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/settings", UserSettingsController, :edit
+    put "/settings", UserSettingsController, :update
+    delete "/log-out", UserSessionController, :delete
+  end
+end
