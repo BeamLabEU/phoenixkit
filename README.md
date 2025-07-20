@@ -582,6 +582,47 @@ test "authenticated user can access protected page", %{conn: conn} do
 end
 ```
 
+## 🧪 Testing PhoenixKit as Module
+
+For developers and contributors who want to test PhoenixKit integration:
+
+### Automated Integration Test
+
+```bash
+# Run comprehensive integration test
+./scripts/test_integration.sh
+```
+
+This script will:
+- Create a fresh Phoenix project
+- Add PhoenixKit as dependency
+- Test all installation commands
+- Verify compilation and database setup
+- Test server startup and routes
+
+### Manual Testing
+
+```bash
+# Create test Phoenix project
+mix phx.new test_app --no-live --no-dashboard
+cd test_app
+
+# Add to mix.exs dependencies:
+{:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"}
+
+# Install and test
+mix deps.get
+mix phoenix_kit.install
+mix ecto.migrate
+mix phx.server
+```
+
+Open http://localhost:4000/auth/register to test registration.
+
+## 📈 Upgrading
+
+See [UPGRADE.md](UPGRADE.md) for detailed upgrade instructions from previous versions.
+
 ## Versioning
 
 This project uses semantic versioning with Git tags:
