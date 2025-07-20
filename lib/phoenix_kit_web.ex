@@ -30,6 +30,62 @@ defmodule BeamLab.PhoenixKitWeb do
     end
   end
 
+  @doc """
+  Macro for adding PhoenixKit authentication routes to your router.
+
+  ## Usage
+
+      defmodule YourAppWeb.Router do
+        use YourAppWeb, :router
+        import BeamLab.PhoenixKitWeb, only: [phoenix_kit_routes: 0]
+
+        pipeline :browser do
+          # ... your browser pipeline
+          plug :fetch_current_scope_for_user
+        end
+
+        # Add PhoenixKit routes
+        phoenix_kit_routes()
+      end
+
+  ## Options
+
+  You can also use it with a custom scope prefix:
+
+      phoenix_kit_routes("/custom_auth")
+
+  """
+  defmacro phoenix_kit_routes(scope_prefix \\ "/phoenix_kit_users") do
+    quote do
+      import BeamLab.PhoenixKitWeb.UserAuth,
+        only: [fetch_current_scope_for_user: 2, redirect_if_user_is_authenticated: 2, require_authenticated_user: 2]
+
+      scope unquote(scope_prefix), BeamLab.PhoenixKitWeb do
+        pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+        get "/register", UserRegistrationController, :new
+        post "/register", UserRegistrationController, :create
+      end
+
+      scope unquote(scope_prefix), BeamLab.PhoenixKitWeb do
+        pipe_through [:browser, :require_authenticated_user]
+
+        get "/settings", UserSettingsController, :edit
+        put "/settings", UserSettingsController, :update
+        get "/settings/confirm-email/:token", UserSettingsController, :confirm_email
+      end
+
+      scope unquote(scope_prefix), BeamLab.PhoenixKitWeb do
+        pipe_through [:browser]
+
+        get "/log-in", UserSessionController, :new
+        get "/log-in/:token", UserSessionController, :confirm
+        post "/log-in", UserSessionController, :create
+        delete "/log-out", UserSessionController, :delete
+      end
+    end
+  end
+
   def channel do
     quote do
       use Phoenix.Channel
@@ -98,16 +154,20 @@ defmodule BeamLab.PhoenixKitWeb do
 
   def verified_routes do
     quote do
-      endpoint = if Application.get_env(:phoenix_kit, :library_mode, false) do
-        Application.get_env(:phoenix_kit, :parent_endpoint, BeamLab.PhoenixKitWeb.Endpoint)
-      else
-        BeamLab.PhoenixKitWeb.Endpoint
-      end
-
+      # Use runtime endpoint detection for library mode
       use Phoenix.VerifiedRoutes,
-        endpoint: endpoint,
+        endpoint: BeamLab.PhoenixKitWeb.get_endpoint_module(),
         router: BeamLab.PhoenixKitWeb.Router,
         statics: BeamLab.PhoenixKitWeb.static_paths()
+    end
+  end
+
+  @doc false
+  def get_endpoint_module do
+    if Application.get_env(:phoenix_kit, :library_mode, false) do
+      Application.get_env(:phoenix_kit, :parent_endpoint, BeamLab.PhoenixKitWeb.Endpoint)
+    else
+      BeamLab.PhoenixKitWeb.Endpoint
     end
   end
 

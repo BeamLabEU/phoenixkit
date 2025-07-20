@@ -48,11 +48,11 @@ mix deps.get
 Then in your IEx console or create a temporary script:
 
 ```elixir
-# Complete installation (uses actual PhoenixKit routes)
+# Complete installation (uses router macro for automatic route setup)
 BeamLab.PhoenixKit.install()
 
-# Or with custom scope prefix (default is "phoenix_kit_users") 
-BeamLab.PhoenixKit.install(scope_prefix: "auth")
+# Or with custom scope prefix (default is "/phoenix_kit_users") 
+BeamLab.PhoenixKit.install(scope_prefix: "/auth")
 
 # Individual functions
 BeamLab.PhoenixKit.generate_migrations()
@@ -100,8 +100,7 @@ def deps do
   [
     {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"},
     # Add these if not already present
-    {:bcrypt_elixir, "~> 3.0"},
-    {:tailwind, "~> 0.3"},
+    {:bcrypt_elixir, "~> 3.0"}
   ]
 end
 ```
@@ -111,44 +110,53 @@ Install dependencies:
 mix deps.get
 ```
 
-### Step 2: Configuration
+### Step 2: Simple Setup
 
-Configure PhoenixKit in `config/config.exs`:
-
+Run automated installation:
 ```elixir
-# Basic library mode configuration
-config :phoenix_kit, 
-  mode: :library,
-  library_mode: true
-
-# Database configuration for PhoenixKit tables
-config :phoenix_kit, BeamLab.PhoenixKit.Repo,
-  username: "postgres",
-  password: "postgres", 
-  database: "your_app_dev",
-  hostname: "localhost",
-  pool_size: 10
-
-# Configure mailer (optional - for email features)
-config :phoenix_kit, BeamLab.PhoenixKit.Mailer,
-  adapter: Swoosh.Adapters.Local
-
-# Add to your app's configuration
-config :your_app, :phoenix_kit_integration, true
+# In IEx console or create a temporary script
+BeamLab.PhoenixKit.install()
 ```
 
-### Step 3: Database Setup
+This will:
+- Copy database migrations automatically
+- Generate correct configuration
+- Show simple router setup instructions
 
-Create and run PhoenixKit migrations:
+### Step 3: Router Setup (Only manual step needed)
 
-```bash
-# Generate migration to add PhoenixKit tables
-mix ecto.gen.migration add_phoenix_kit_tables
+Add one line to your router:
 
-# Copy PhoenixKit migrations to your project
-cp deps/phoenix_kit/priv/repo/migrations/* priv/repo/migrations/
+```elixir
+defmodule YourAppWeb.Router do
+  use YourAppWeb, :router
+  
+  # Import PhoenixKit routes macro  
+  import BeamLab.PhoenixKitWeb, only: [phoenix_kit_routes: 0]
+  import BeamLab.PhoenixKitWeb.UserAuth, only: [fetch_current_scope_for_user: 2]
 
-# Run migrations
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {YourAppWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user  # ← Add this
+  end
+
+  # Your existing routes
+  scope "/", YourAppWeb do
+    pipe_through :browser
+    get "/", PageController, :home
+  end
+
+  # PhoenixKit routes - automatic!
+  phoenix_kit_routes()  # ← Add this one line
+end
+```
+
+### Step 4: Run migrations
 mix ecto.migrate
 ```
 
@@ -216,30 +224,8 @@ defmodule YourAppWeb.Router do
     get "/", PageController, :home
   end
 
-  # PhoenixKit Authentication routes (actual routes)
-  scope "/", BeamLab.PhoenixKitWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-    get "/phoenix_kit_users/register", UserRegistrationController, :new
-    post "/phoenix_kit_users/register", UserRegistrationController, :create
-  end
-
-  scope "/", BeamLab.PhoenixKitWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    get "/phoenix_kit_users/settings", UserSettingsController, :edit
-    put "/phoenix_kit_users/settings", UserSettingsController, :update
-    get "/phoenix_kit_users/settings/confirm-email/:token", UserSettingsController, :confirm_email
-  end
-
-  scope "/", BeamLab.PhoenixKitWeb do
-    pipe_through [:browser]
-
-    get "/phoenix_kit_users/log-in", UserSessionController, :new
-    get "/phoenix_kit_users/log-in/:token", UserSessionController, :confirm
-    post "/phoenix_kit_users/log-in", UserSessionController, :create
-    delete "/phoenix_kit_users/log-out", UserSessionController, :delete
-  end
+  # PhoenixKit Authentication routes - automatic!
+  phoenix_kit_routes()  # One line replaces all the manual routes
 end
 ```
 

@@ -38,7 +38,7 @@ defmodule BeamLab.PhoenixKit.Installer do
       BeamLab.PhoenixKit.Installer.install(force: true)
   """
   def install(options \\ []) do
-    options = Keyword.merge([scope_prefix: "phoenix_kit_users", no_migrations: false, no_config: false, force: false], options)
+    options = Keyword.merge([scope_prefix: "/phoenix_kit_users", no_migrations: false, no_config: false, force: false], options)
     
     IO.puts("🚀 PhoenixKit Installation Starting...")
     
@@ -143,7 +143,7 @@ defmodule BeamLab.PhoenixKit.Installer do
       BeamLab.PhoenixKit.Installer.generate_routes(dry_run: true)
   """
   def generate_routes(options \\ []) do
-    options = Keyword.merge([scope_prefix: "phoenix_kit_users", dry_run: false, force: false], options)
+    options = Keyword.merge([scope_prefix: "/phoenix_kit_users", dry_run: false, force: false], options)
     
     IO.puts("🛣️  Generating PhoenixKit routes...")
     
@@ -175,52 +175,49 @@ defmodule BeamLab.PhoenixKit.Installer do
   
   Displays the router code that needs to be added manually.
   """
-  def show_router_example(scope_prefix \\ "phoenix_kit_users") do
+  def show_router_example(scope_prefix \\ "/phoenix_kit_users") do
     IO.puts("""
     
     🛣️  Router Configuration Example:
     
     Add the following to your router.ex:
 
-    # Import PhoenixKit authentication functions
-    import BeamLab.PhoenixKitWeb.UserAuth,
-      only: [fetch_current_scope_for_user: 2, redirect_if_user_is_authenticated: 2, require_authenticated_user: 2]
+    defmodule YourAppWeb.Router do
+      use YourAppWeb, :router
+      
+      # Import PhoenixKit routes macro
+      import BeamLab.PhoenixKitWeb, only: [phoenix_kit_routes: 0, phoenix_kit_routes: 1]
+      import BeamLab.PhoenixKitWeb.UserAuth, only: [fetch_current_scope_for_user: 2]
 
-    # Add to your browser pipeline:
-    pipeline :browser do
-      plug :accepts, ["html"]
-      plug :fetch_session
-      plug :fetch_live_flash
-      plug :put_root_layout, html: {YourAppWeb.Layouts, :root}
-      plug :protect_from_forgery
-      plug :put_secure_browser_headers
-      plug :fetch_current_scope_for_user  # Add this line
+      pipeline :browser do
+        plug :accepts, ["html"]
+        plug :fetch_session
+        plug :fetch_live_flash
+        plug :put_root_layout, html: {YourAppWeb.Layouts, :root}
+        plug :protect_from_forgery
+        plug :put_secure_browser_headers
+        plug :fetch_current_scope_for_user  # Add this line
+      end
+
+      # Your existing routes
+      scope "/", YourAppWeb do
+        pipe_through :browser
+        get "/", PageController, :home
+      end
+
+      # PhoenixKit Authentication routes - automatically configured!
+      phoenix_kit_routes("#{scope_prefix}")
+      
+      # Or with default prefix /phoenix_kit_users:
+      # phoenix_kit_routes()
     end
-
-    # PhoenixKit Authentication routes (actual routes used by PhoenixKit):
-    scope "/", BeamLab.PhoenixKitWeb do
-      pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-      get "/#{scope_prefix}/register", UserRegistrationController, :new
-      post "/#{scope_prefix}/register", UserRegistrationController, :create
-    end
-
-    scope "/", BeamLab.PhoenixKitWeb do
-      pipe_through [:browser, :require_authenticated_user]
-
-      get "/#{scope_prefix}/settings", UserSettingsController, :edit
-      put "/#{scope_prefix}/settings", UserSettingsController, :update
-      get "/#{scope_prefix}/settings/confirm-email/:token", UserSettingsController, :confirm_email
-    end
-
-    scope "/", BeamLab.PhoenixKitWeb do
-      pipe_through [:browser]
-
-      get "/#{scope_prefix}/log-in", UserSessionController, :new
-      get "/#{scope_prefix}/log-in/:token", UserSessionController, :confirm
-      post "/#{scope_prefix}/log-in", UserSessionController, :create
-      delete "/#{scope_prefix}/log-out", UserSessionController, :delete
-    end
+    
+    That's it! No manual route configuration needed.
+    Routes will be automatically available at:
+    - #{scope_prefix}/register
+    - #{scope_prefix}/log-in  
+    - #{scope_prefix}/log-out
+    - #{scope_prefix}/settings
     """)
   end
 
@@ -310,17 +307,6 @@ defmodule BeamLab.PhoenixKit.Installer do
       database: System.get_env("DATABASE_NAME", "#{app_name}_dev"),
       pool_size: 10
 
-    # Configure PhoenixKit Endpoint (in library mode)
-    config :phoenix_kit, BeamLab.PhoenixKitWeb.Endpoint,
-      url: [host: "localhost"],
-      adapter: Bandit.PhoenixAdapter,
-      render_errors: [
-        formats: [html: #{Macro.camelize(app_name)}Web.ErrorHTML],
-        layout: false
-      ],
-      pubsub_server: BeamLab.PhoenixKit.PubSub,
-      live_view: [signing_salt: "your-secret-salt"]
-
     # Optional: Configure mailer for email features
     config :phoenix_kit, BeamLab.PhoenixKit.Mailer,
       adapter: Swoosh.Adapters.Local
@@ -353,42 +339,24 @@ defmodule BeamLab.PhoenixKit.Installer do
     
     IO.puts("""
 
-    📋 Manual Setup Required:
+    📋 Simple Integration Steps:
     
-    1. Add PhoenixKit endpoint to your application supervision tree.
-       In lib/#{app_name}/application.ex, add to children list:
+    1. Add router configuration (see below)
     
-       children = [
-         # ... your existing children ...
-         BeamLab.PhoenixKitWeb.Endpoint,  # ← Add this line
-         # ...
-       ]
-    
-    2. Configure PhoenixKit endpoint in config/dev.exs:
-    
-       config :phoenix_kit, BeamLab.PhoenixKitWeb.Endpoint,
-         http: [ip: {0, 0, 0, 0}, port: 4001],  # Different port!
-         debug_errors: true,
-         code_reloader: true,
-         check_origin: false
-
-    3. Add the following router configuration manually:
-    """)
-    
-    show_router_example(scope_prefix)
-    
-    IO.puts("""
-    
-    4. Update your layout template to show authentication state:
+    2. Update your layout template to show authentication state:
     
     <%= if assigns[:current_scope] do %>
       <div>Welcome, <%= @current_scope.user.email %>!</div>
-      <.link href={~p"/#{scope_prefix}/log-out"} method="delete">Log out</.link>
+      <.link href={~p"#{scope_prefix}/log-out"} method="delete">Log out</.link>
     <% else %>
-      <.link navigate={~p"/#{scope_prefix}/log-in"}>Log in</.link>
-      <.link navigate={~p"/#{scope_prefix}/register"}>Sign up</.link>
+      <.link navigate={~p"#{scope_prefix}/log-in"}>Log in</.link>
+      <.link navigate={~p"#{scope_prefix}/register"}>Sign up</.link>
     <% end %>
+
+    Router Configuration:
     """)
+    
+    show_router_example(scope_prefix)
   end
 
   defp show_router_dry_run(router_file, options) do

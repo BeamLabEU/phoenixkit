@@ -154,7 +154,7 @@ defmodule BeamLab.PhoenixKit do
       BeamLab.PhoenixKit.show_router_example()
       BeamLab.PhoenixKit.show_router_example("authentication")
   """
-  defdelegate show_router_example(scope_prefix \\ "auth"), to: BeamLab.PhoenixKit.Installer
+  defdelegate show_router_example(scope_prefix \\ "/phoenix_kit_users"), to: BeamLab.PhoenixKit.Installer
 
   # Delegate to Accounts context for easier API
   defdelegate register_user(attrs), to: BeamLab.PhoenixKit.Accounts
