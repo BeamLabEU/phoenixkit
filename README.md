@@ -35,14 +35,38 @@ mix deps.get
 
 ### Automated Installation (Recommended)
 
+**Important**: When using PhoenixKit as a git dependency, Mix tasks may not be available. Use the programmatic installation instead:
+
+#### Option 1: Programmatic Installation (Works with Git Dependencies)
+
 After adding PhoenixKit to your dependencies:
 
 ```bash
 mix deps.get
+```
+
+Then in your IEx console or create a temporary script:
+
+```elixir
+# Complete installation
+BeamLab.PhoenixKit.install()
+
+# Or with custom options
+BeamLab.PhoenixKit.install(scope_prefix: "authentication")
+
+# Individual functions
+BeamLab.PhoenixKit.generate_migrations()
+BeamLab.PhoenixKit.generate_routes()
+BeamLab.PhoenixKit.show_router_example()
+```
+
+#### Option 2: Mix Tasks (If Available)
+
+```bash
 mix phoenix_kit.install
 ```
 
-This single command will:
+Both methods will:
 - ✅ Copy database migrations with proper timestamps
 - ✅ Generate configuration in `config/config.exs`
 - ✅ Display router setup instructions

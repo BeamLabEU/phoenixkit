@@ -103,6 +103,59 @@ defmodule BeamLab.PhoenixKit do
   """
   def library?, do: mode() == :library
 
+  @doc """
+  Install PhoenixKit authentication system.
+  
+  This function provides a programmatic way to install PhoenixKit when Mix tasks
+  are not available (e.g., when used as a git dependency).
+  
+  ## Examples
+  
+      # Complete installation
+      BeamLab.PhoenixKit.install()
+      
+      # Custom scope prefix
+      BeamLab.PhoenixKit.install(scope_prefix: "authentication")
+      
+      # Skip migrations
+      BeamLab.PhoenixKit.install(no_migrations: true)
+  
+  For more options, see `BeamLab.PhoenixKit.Installer.install/1`.
+  """
+  defdelegate install(options \\ []), to: BeamLab.PhoenixKit.Installer
+
+  @doc """
+  Generate PhoenixKit database migrations.
+  
+  ## Examples
+  
+      BeamLab.PhoenixKit.generate_migrations()
+      BeamLab.PhoenixKit.generate_migrations(force: true)
+  """
+  defdelegate generate_migrations(options \\ []), to: BeamLab.PhoenixKit.Installer
+
+  @doc """
+  Generate PhoenixKit router configuration.
+  
+  ## Examples
+  
+      BeamLab.PhoenixKit.generate_routes()
+      BeamLab.PhoenixKit.generate_routes(scope_prefix: "auth", dry_run: true)
+  """
+  defdelegate generate_routes(options \\ []), to: BeamLab.PhoenixKit.Installer
+
+  @doc """
+  Show router configuration example.
+  
+  Useful when automatic router generation is not possible.
+  
+  ## Examples
+  
+      BeamLab.PhoenixKit.show_router_example()
+      BeamLab.PhoenixKit.show_router_example("authentication")
+  """
+  defdelegate show_router_example(scope_prefix \\ "auth"), to: BeamLab.PhoenixKit.Installer
+
   # Delegate to Accounts context for easier API
   defdelegate register_user(attrs), to: BeamLab.PhoenixKit.Accounts
   defdelegate get_user!(id), to: BeamLab.PhoenixKit.Accounts

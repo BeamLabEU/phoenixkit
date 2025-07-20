@@ -90,6 +90,7 @@ Key modules use conditional compilation to prevent issues in library mode:
 - `version()` - Returns current version
 - `mode()` - Returns :standalone or :library  
 - `register_user/1`, `get_user_by_email/1`, etc. - Delegate functions to Accounts context
+- `install/1`, `generate_migrations/1`, `generate_routes/1` - Programmatic installation functions for git dependency usage
 
 ### Module Structure
 - **BeamLab.PhoenixKit** - Main library API and version management
@@ -136,12 +137,31 @@ This library is designed to be installed as a git dependency:
 
 ### Automated Installation (Recommended)
 
+**Important**: When using PhoenixKit as a git dependency, Mix tasks may not be available. Use the programmatic installation instead:
+
+#### Programmatic Installation (Works with Git Dependencies)
+
+```elixir
+# Complete installation
+BeamLab.PhoenixKit.install()
+
+# Or with custom options
+BeamLab.PhoenixKit.install(scope_prefix: "authentication")
+
+# Individual functions
+BeamLab.PhoenixKit.generate_migrations()
+BeamLab.PhoenixKit.generate_routes()
+BeamLab.PhoenixKit.show_router_example()
+```
+
+#### Mix Tasks (If Available)
+
 ```bash
 # After adding PhoenixKit dependency and running mix deps.get
 mix phoenix_kit.install
 ```
 
-This command will:
+Both methods will:
 - Copy database migrations with proper timestamps
 - Generate configuration files
 - Display router setup instructions

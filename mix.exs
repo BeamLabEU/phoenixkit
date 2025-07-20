@@ -127,7 +127,12 @@ defmodule BeamLab.PhoenixKit.MixProject do
         "tailwind phoenix_kit --minify",
         "esbuild phoenix_kit --minify",
         "phx.digest"
-      ]
+      ],
+      
+      # PhoenixKit installation aliases (available when used as dependency)
+      "phoenix_kit.install": ["run -e \"Mix.Tasks.PhoenixKit.Install.run([])\""],
+      "phoenix_kit.gen.migration": ["run -e \"Mix.Tasks.PhoenixKit.Gen.Migration.run([])\""],
+      "phoenix_kit.gen.routes": ["run -e \"Mix.Tasks.PhoenixKit.Gen.Routes.run([])\""]
     ]
   end
 
