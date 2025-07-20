@@ -122,7 +122,7 @@ defmodule BeamLab.PhoenixKit do
   
   For more options, see `BeamLab.PhoenixKit.Installer.install/1`.
   """
-  defdelegate install(options \\ []), to: BeamLab.PhoenixKit.Installer
+  def install(options \\ []), do: BeamLab.PhoenixKit.Installer.install(options)
 
   @doc """
   Generate PhoenixKit database migrations.
@@ -132,7 +132,7 @@ defmodule BeamLab.PhoenixKit do
       BeamLab.PhoenixKit.generate_migrations()
       BeamLab.PhoenixKit.generate_migrations(force: true)
   """
-  defdelegate generate_migrations(options \\ []), to: BeamLab.PhoenixKit.Installer
+  def generate_migrations(options \\ []), do: BeamLab.PhoenixKit.Installer.generate_migrations(options)
 
   @doc """
   Generate PhoenixKit router configuration.
@@ -142,7 +142,7 @@ defmodule BeamLab.PhoenixKit do
       BeamLab.PhoenixKit.generate_routes()
       BeamLab.PhoenixKit.generate_routes(scope_prefix: "auth", dry_run: true)
   """
-  defdelegate generate_routes(options \\ []), to: BeamLab.PhoenixKit.Installer
+  def generate_routes(options \\ []), do: BeamLab.PhoenixKit.Installer.generate_routes(options)
 
   @doc """
   Show router configuration example.
@@ -154,7 +154,7 @@ defmodule BeamLab.PhoenixKit do
       BeamLab.PhoenixKit.show_router_example()
       BeamLab.PhoenixKit.show_router_example("authentication")
   """
-  defdelegate show_router_example(scope_prefix \\ "/phoenix_kit_users"), to: BeamLab.PhoenixKit.Installer
+  def show_router_example(scope_prefix \\ "/phoenix_kit_users"), do: BeamLab.PhoenixKit.Installer.show_router_example(scope_prefix)
 
   # Delegate to Accounts context for easier API
   defdelegate register_user(attrs), to: BeamLab.PhoenixKit.Accounts
