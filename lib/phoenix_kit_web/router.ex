@@ -1,7 +1,8 @@
 defmodule BeamLab.PhoenixKitWeb.Router do
   use BeamLab.PhoenixKitWeb, :router
 
-  import BeamLab.PhoenixKitWeb.UserAuth
+  import BeamLab.PhoenixKitWeb.UserAuth,
+    only: [fetch_current_scope_for_user: 2, redirect_if_user_is_authenticated: 2, require_authenticated_user: 2]
 
   pipeline :browser do
     plug :accepts, ["html"]

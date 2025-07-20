@@ -27,7 +27,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   use Mix.Task
 
-  alias Mix.Tasks.PhoenixKit.Install.{Generator, Validator, Injector}
+  alias Mix.Tasks.PhoenixKit.Install.Validator
 
   @switches [
     scope_prefix: :string,

@@ -174,7 +174,7 @@ defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
     |> List.to_string()
   end
 
-  defp update_migration_module_name(content, timestamp) do
+  defp update_migration_module_name(content, _timestamp) do
     # Update the module name to match the new timestamp
     String.replace(content, ~r/defmodule \w+\.Repo\.Migrations\./, "defmodule #{Mix.Phoenix.otp_app()}.Repo.Migrations.")
   end
