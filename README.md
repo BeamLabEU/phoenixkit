@@ -20,7 +20,7 @@ Add to your `mix.exs`:
 ```elixir
 def deps do
   [
-    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v0.1.0"}
+    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"}
   ]
 end
 ```
@@ -137,13 +137,15 @@ config :phoenix_kit, BeamLab.PhoenixKit.Repo,
 
 This project uses semantic versioning with Git tags:
 
+- `v1.0.0` - Stable release with library mode support
+- `v0.2.1` - Library mode compatibility fixes
 - `v0.1.0` - Initial release
 - Tags follow the format `vMAJOR.MINOR.PATCH`
 
 To use a specific version:
 
 ```elixir
-{:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v0.1.0"}
+{:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"}
 ```
 
 ## License
