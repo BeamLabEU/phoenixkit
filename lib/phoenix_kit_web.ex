@@ -31,31 +31,22 @@ defmodule BeamLab.PhoenixKitWeb do
   end
 
   @doc """
-  Macro for adding PhoenixKit authentication routes to your router.
-
-  ## Usage
-
-      defmodule YourAppWeb.Router do
-        use YourAppWeb, :router
-        import BeamLab.PhoenixKitWeb, only: [phoenix_kit_routes: 0]
-
-        pipeline :browser do
-          # ... your browser pipeline
-          plug :fetch_current_scope_for_user
-        end
-
-        # Add PhoenixKit routes
-        phoenix_kit_routes()
-      end
-
-  ## Options
-
-  You can also use it with a custom scope prefix:
-
-      phoenix_kit_routes("/custom_auth")
-
+  DEPRECATED: Use `BeamLab.PhoenixKitWeb.Router.phoenix_kit/2` instead.
+  
+  This macro is deprecated in favor of the new router pattern.
+  
+  ## Migration
+  
+      # Old way (deprecated)
+      import BeamLab.PhoenixKitWeb, only: [phoenix_kit_routes: 0]
+      phoenix_kit_routes()
+      
+      # New way (recommended)  
+      import BeamLab.PhoenixKitWeb.Router
+      phoenix_kit "/auth"
   """
   defmacro phoenix_kit_routes(scope_prefix \\ "/phoenix_kit_users") do
+    IO.warn("phoenix_kit_routes/1 is deprecated. Use BeamLab.PhoenixKitWeb.Router.phoenix_kit/2 instead.", Macro.Env.stacktrace(__CALLER__))
     quote do
       import BeamLab.PhoenixKitWeb.UserAuth,
         only: [fetch_current_scope_for_user: 2, redirect_if_user_is_authenticated: 2, require_authenticated_user: 2]
@@ -157,7 +148,7 @@ defmodule BeamLab.PhoenixKitWeb do
       # Use runtime endpoint detection for library mode
       use Phoenix.VerifiedRoutes,
         endpoint: BeamLab.PhoenixKitWeb.get_endpoint_module(),
-        router: BeamLab.PhoenixKitWeb.Router,
+        router: BeamLab.PhoenixKitWeb.StandaloneRouter,
         statics: BeamLab.PhoenixKitWeb.static_paths()
     end
   end

@@ -1,16 +1,25 @@
 defmodule BeamLab.PhoenixKit.Installer do
   @moduledoc """
-  PhoenixKit installer functions for git dependency usage.
+  DEPRECATED: PhoenixKit installer functions.
   
-  When PhoenixKit is used as a git dependency, Mix tasks may not be available.
-  Use these functions instead for installation and setup.
+  As of PhoenixKit v1.0.0, no installation is required. PhoenixKit works out-of-the-box
+  with a simple one-line router integration.
   
-  ## Usage
+  ## Migration Guide
   
-      # In IEx console or in a temporary script
+      # OLD WAY (deprecated)
       BeamLab.PhoenixKit.Installer.install()
-      BeamLab.PhoenixKit.Installer.generate_migrations()
-      BeamLab.PhoenixKit.Installer.generate_routes()
+      
+      # NEW WAY (zero configuration)
+      # 1. Add to your router.ex:
+      import BeamLab.PhoenixKitWeb.Router
+      phoenix_kit()
+      
+      # 2. Add migrations:
+      mix ecto.gen.migration add_phoenix_kit_auth_tables
+      # Copy from deps/phoenix_kit/priv/repo/migrations/
+      
+  The new approach follows Phoenix LiveDashboard pattern for better integration.
   """
 
   require Logger

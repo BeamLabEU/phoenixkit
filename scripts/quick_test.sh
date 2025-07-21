@@ -1,26 +1,26 @@
 #!/bin/bash
 
 # Quick PhoenixKit Test Script
-# Простое тестирование PhoenixKit в новом Phoenix проекте
+# Simple PhoenixKit testing in a new Phoenix project
 
 set -e
 
 echo "🚀 Quick PhoenixKit Test"
 echo "======================"
 
-# Переменные
+# Variables
 TEST_APP="test_phoenix_kit_$(date +%s)"
 PHOENIX_KIT_PATH=$(pwd)
 
-# Проверка
+# Check
 if [[ ! -f "mix.exs" ]] || ! grep -q "phoenix_kit" mix.exs; then
-    echo "❌ Запустите из корневой директории PhoenixKit"
+    echo "❌ Run from PhoenixKit root directory"
     exit 1
 fi
 
 echo "📁 Creating test project: $TEST_APP"
 
-# Создать проект
+# Create project
 cd /tmp
 mix phx.new "$TEST_APP" --no-live --no-dashboard --no-mailer
 
@@ -28,7 +28,7 @@ cd "$TEST_APP"
 
 echo "📦 Adding PhoenixKit dependency..."
 
-# Простое добавление dependency
+# Simple dependency addition
 sed -i.bak 's|def deps do|def deps do\
       {:phoenix_kit, path: "'$PHOENIX_KIT_PATH'"},|' mix.exs
 
@@ -40,7 +40,7 @@ mix compile
 
 echo "🧪 Testing PhoenixKit commands..."
 
-# Тест команд
+# Test commands
 echo "Testing mix phoenix_kit.gen.migration..."
 mix phoenix_kit.gen.migration
 

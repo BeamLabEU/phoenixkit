@@ -16,13 +16,19 @@ defmodule BeamLab.PhoenixKit.Application do
         ]
       false ->
         # Standalone mode: Full application with web layer
-        [
+        base_children = [
           BeamLab.PhoenixKitWeb.Telemetry,
           BeamLab.PhoenixKit.Repo,
-          {DNSCluster, query: Application.get_env(:phoenix_kit, :dns_cluster_query) || :ignore},
           {Phoenix.PubSub, name: BeamLab.PhoenixKit.PubSub},
           BeamLab.PhoenixKitWeb.Endpoint
         ]
+        
+        # Add DNSCluster only if available (optional dependency)
+        if Code.ensure_loaded?(DNSCluster) do
+          [{DNSCluster, query: Application.get_env(:phoenix_kit, :dns_cluster_query) || :ignore} | base_children]
+        else
+          base_children
+        end
     end
 
     # See https://hexdocs.pm/elixir/Supervisor.html

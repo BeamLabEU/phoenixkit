@@ -50,5 +50,5 @@ defmodule BeamLab.PhoenixKitWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug BeamLab.PhoenixKitWeb.Router
+  plug BeamLab.PhoenixKitWeb.StandaloneRouter
 end

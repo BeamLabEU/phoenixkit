@@ -36,15 +36,16 @@ BeamLab PhoenixKit is a professional Phoenix Framework authentication library th
 - `mix test` - Verify library functionality (always runs in standalone mode for complete testing)
 - Git tag format: `v1.0.0` (semantic versioning for library releases)
 
-### Installation Commands (for consumers)
-- `mix phoenix_kit.install` - Complete automated installation in Phoenix app
-- `mix phoenix_kit.gen.migration` - Generate database migrations only
-- `mix phoenix_kit.gen.routes` - Generate router configuration code
+### Deprecated Installation Commands
+**NOTE: As of v1.0.0, these commands are deprecated in favor of zero-configuration router integration:**
+- `mix phoenix_kit.install` - DEPRECATED: Use `phoenix_kit()` macro in router instead
+- `mix phoenix_kit.gen.migration` - DEPRECATED: Copy migrations manually
+- `mix phoenix_kit.gen.routes` - DEPRECATED: Use `phoenix_kit()` macro instead
 
 ### Integration Testing
+- Scripts: `scripts/test_integration.sh` (comprehensive) and `scripts/quick_test.sh` (basic)
 - Manual testing preferred due to Mix tasks loading complexity
 - See `TESTING.md` for comprehensive testing procedures
-- Quick test: create Phoenix project, add dependency, run installation commands
 
 ## Architecture
 
@@ -89,8 +90,9 @@ Key modules use conditional compilation to prevent issues in library mode:
 `BeamLab.PhoenixKit` module serves as the main library API:
 - `version()` - Returns current version
 - `mode()` - Returns :standalone or :library  
+- `standalone?()`, `library?()` - Mode checking functions
 - `register_user/1`, `get_user_by_email/1`, etc. - Delegate functions to Accounts context
-- `install/1`, `generate_migrations/1`, `generate_routes/1` - Programmatic installation functions for git dependency usage
+- `install/1`, `generate_migrations/1`, `generate_routes/1` - Programmatic installation functions for git dependency usage (legacy)
 
 ### Module Structure
 - **BeamLab.PhoenixKit** - Main library API and version management
@@ -99,6 +101,8 @@ Key modules use conditional compilation to prevent issues in library mode:
 - **BeamLab.PhoenixKit.Accounts.UserToken** - Token management for sessions/emails
 - **BeamLab.PhoenixKitWeb** - Web layer (conditional for library mode)
 - **BeamLab.PhoenixKitWeb.UserAuth** - Authentication plugs and helpers
+- **BeamLab.PhoenixKitWeb.Router** - Zero-configuration router integration via `phoenix_kit()` macro
+- **BeamLab.PhoenixKitWeb.AuthRouter** - Dedicated authentication routes handler (used internally by forward/4)
 
 ### Database Schema
 Uses `phoenix_kit_` prefixed tables to avoid conflicts:
@@ -135,9 +139,45 @@ This library is designed to be installed as a git dependency:
 {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"}
 ```
 
-### Automated Installation (Recommended)
+### Modern Integration (v1.0.0+) - Zero Configuration
 
-**Important**: When using PhoenixKit as a git dependency, Mix tasks may not be available. Use the programmatic installation instead:
+**Recommended**: Use the new zero-configuration approach following Phoenix LiveDashboard pattern:
+
+```elixir
+# In your router.ex
+defmodule YourAppWeb.Router do
+  use YourAppWeb, :router
+  import BeamLab.PhoenixKitWeb.Router
+
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {YourAppWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user  # PhoenixKit auth
+  end
+
+  scope "/" do
+    pipe_through :browser
+    get "/", PageController, :home
+  end
+
+  # PhoenixKit authentication - ONE LINE!
+  phoenix_kit()
+end
+```
+
+This approach:
+- Works with git dependencies without Mix tasks
+- Uses Phoenix.Router.forward/4 internally to `/phoenix_kit` routes
+- Follows Phoenix best practices for modular routing
+- Automatically imports authentication plugs
+
+### Legacy Installation (Pre-v1.0.0)
+
+**Deprecated**: The old programmatic installation is still available but deprecated:
 
 #### Programmatic Installation (Works with Git Dependencies)
 
@@ -392,23 +432,63 @@ BeamLab.PhoenixKit.Accounts.deliver_login_instructions(
 
 ## File Structure Notes
 
-- `priv/repo/migrations/20250719233157_create_phoenix_kit_users_auth_tables.exs` - Database migration
+**Core Architecture:**
 - `lib/phoenix_kit.ex` - Main API entry point with delegate functions  
 - `lib/phoenix_kit/accounts.ex` - Complete authentication context (400+ lines)
 - `lib/phoenix_kit/accounts/user.ex` - User schema with validations
 - `lib/phoenix_kit/accounts/user_token.ex` - Token management schema
+
+**Web Layer:**
+- `lib/phoenix_kit_web/router.ex` - Standalone mode router
+- `lib/phoenix_kit_web/router_helpers.ex` - Zero-configuration `phoenix_kit()` macro
+- `lib/phoenix_kit_web/auth_router.ex` - Authentication routes for forward/4 delegation
 - `lib/phoenix_kit_web/user_auth.ex` - Authentication plugs and session management
 - `lib/phoenix_kit_web/controllers/` - Registration, session, settings controllers
 - `lib/phoenix_kit_web/components/` - UI components and layouts
+
+**Development & Testing:**
+- `scripts/test_integration.sh` - Comprehensive integration testing script
+- `scripts/quick_test.sh` - Quick testing script for basic functionality
+- `TESTING.md` / `TESTING.ru.md` - Testing guide (English/Russian)
+- `UPGRADE.md` / `UPGRADE.ru.md` - Upgrade guide (English/Russian)
+
+**Assets & Configuration:**
 - `assets/` - Tailwind CSS and JavaScript assets
-- `lib/mix/tasks/` - Mix tasks for automated installation
-- `priv/templates/` - Template files for code generation
-- `scripts/test_integration.sh` - Integration testing script (experimental)
-- `scripts/quick_test.sh` - Quick testing script (experimental)
-- `UPGRADE.md` - Upgrade guide for existing projects
-- `TESTING.md` - Comprehensive testing guide for module integration
+- `priv/repo/migrations/` - Database migration templates
+- `lib/mix/tasks/` - Deprecated Mix tasks (use router integration instead)
+
+**Key Architectural Notes:**
 - Conditional modules handle library vs standalone compilation differences
+- Router architecture follows Phoenix LiveDashboard forward/4 pattern
+- All routes use `/phoenix_kit/` prefix to avoid conflicts
 
 ## Version Management
 
 Uses semantic versioning with Git tags (v1.0.0, v0.2.1, etc.). Version is defined in `mix.exs` and must be kept in sync with git tags and documentation references.
+
+**Major Version Changes:**
+- **v1.0.0+**: Zero-configuration with `phoenix_kit()` macro, deprecated installation commands
+- **v0.x.x**: Legacy installation requiring `mix phoenix_kit.install` and manual setup
+
+## Key Implementation Patterns
+
+### Router Integration Architecture
+The library uses a sophisticated router delegation pattern:
+
+1. **`BeamLab.PhoenixKitWeb.Router`** - Provides the `phoenix_kit()` macro for zero-configuration integration
+2. **`BeamLab.PhoenixKitWeb.AuthRouter`** - Handles actual authentication routes via Phoenix.Router.forward/4
+3. **Route Prefix**: All authentication routes are prefixed with `/phoenix_kit/` to avoid conflicts
+
+This follows the same pattern as Phoenix LiveDashboard for modular, conflict-free routing.
+
+### Conditional Compilation Strategy
+The library uses environment-aware conditional compilation:
+- Dev/Test: Always runs in `:standalone` mode with full web interface
+- Production: Defaults to `:library` mode with minimal dependencies
+- Configuration: Can be overridden via `config :phoenix_kit, mode: :library`
+
+### Authentication Flow Architecture
+- **Session Management**: Uses Phoenix's built-in session store with secure tokens
+- **Password Security**: BCrypt hashing with secure defaults
+- **Magic Links**: Tokenized passwordless authentication via email
+- **User Scoping**: Uses `@current_scope` assign pattern for authentication state

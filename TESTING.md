@@ -1,228 +1,228 @@
 # PhoenixKit Testing Guide
 
-Руководство по тестированию PhoenixKit в качестве модуля в Phoenix приложении.
+Guide for testing PhoenixKit as a module in Phoenix applications.
 
-## 🧪 Ручное тестирование
+## 🧪 Manual Testing
 
-### Создание тестового проекта
+### Creating Test Project
 
 ```bash
-# Создать новый Phoenix проект
+# Create new Phoenix project
 mix phx.new test_phoenix_kit --no-live --no-dashboard --no-mailer
 cd test_phoenix_kit
 
-# Добавить PhoenixKit в mix.exs
+# Add PhoenixKit to mix.exs
 ```
 
-В `mix.exs` добавьте dependency:
+In `mix.exs` add dependency:
 
 ```elixir
 def deps do
   [
     {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"},
-    # ... остальные dependencies
+    # ... other dependencies
   ]
 end
 ```
 
-### Пошаговое тестирование
+### Step-by-Step Testing
 
-1. **Установка зависимостей:**
+1. **Install dependencies:**
    ```bash
    mix deps.get
    ```
 
-2. **Компиляция проекта:**
+2. **Compile project:**
    ```bash
    mix compile
    ```
 
-3. **Проверка доступности Mix tasks:**
+3. **Check Mix tasks availability:**
    ```bash
    mix help | grep phoenix_kit
    ```
    
-   Должно показать:
+   Should show:
    ```
    mix phoenix_kit.gen.migration # Generates PhoenixKit database migrations
    mix phoenix_kit.gen.routes    # Generates PhoenixKit authentication routes in your router
    mix phoenix_kit.install       # Installs PhoenixKit authentication library into your Phoenix application
    ```
 
-4. **Генерация миграций:**
+4. **Generate migrations:**
    ```bash
    mix phoenix_kit.gen.migration
    ```
    
-   Проверка:
+   Check:
    ```bash
    ls priv/repo/migrations/*phoenix_kit*
    ```
 
-5. **Создание БД и запуск миграций:**
+5. **Create DB and run migrations:**
    ```bash
    mix ecto.create
    mix ecto.migrate
    ```
 
-6. **Тестирование router (dry-run):**
+6. **Test router (dry-run):**
    ```bash
    mix phoenix_kit.gen.routes --dry-run
    ```
 
-7. **Генерация router конфигурации:**
+7. **Generate router configuration:**
    ```bash
    mix phoenix_kit.gen.routes --force
    ```
    
-   Проверка:
+   Check:
    ```bash
    grep -A 10 -B 5 "BeamLab.PhoenixKitWeb" lib/test_phoenix_kit_web/router.ex
    ```
 
-8. **Полная установка:**
+8. **Full installation:**
    ```bash
    mix phoenix_kit.install --force
    ```
 
-9. **Финальная компиляция:**
+9. **Final compilation:**
    ```bash
    mix compile
    ```
 
-10. **Запуск сервера:**
+10. **Start server:**
     ```bash
     mix phx.server
     ```
 
-### Тестирование в браузере
+### Browser Testing
 
-1. Откройте http://localhost:4000
-2. Перейдите на http://localhost:4000/auth/register
-3. Зарегистрируйте пользователя
-4. Попробуйте логин на http://localhost:4000/auth/log-in
-5. Проверьте настройки на http://localhost:4000/auth/settings
+1. Open http://localhost:4000
+2. Navigate to http://localhost:4000/auth/register
+3. Register a user
+4. Try login at http://localhost:4000/auth/log-in
+5. Check settings at http://localhost:4000/auth/settings
 
-## 🔧 Решение проблем
+## 🔧 Troubleshooting
 
-### Проблема: Mix tasks не найдены
+### Problem: Mix tasks not found
 
-**Причина:** PhoenixKit не скомпилирован или не загружен.
+**Cause:** PhoenixKit not compiled or not loaded.
 
-**Решение:**
+**Solution:**
 ```bash
 mix deps.compile phoenix_kit --force
 mix compile
 ```
 
-### Проблема: Router ошибки
+### Problem: Router errors
 
-**Причина:** Конфликт с существующими routes.
+**Cause:** Conflict with existing routes.
 
-**Решение:**
+**Solution:**
 ```bash
-# Посмотреть что будет изменено
+# See what will be changed
 mix phoenix_kit.gen.routes --dry-run
 
-# Принудительно обновить
+# Force update
 mix phoenix_kit.gen.routes --force
 ```
 
-### Проблема: Ошибки миграций
+### Problem: Migration errors
 
-**Причина:** Миграции уже существуют.
+**Cause:** Migrations already exist.
 
-**Решение:**
+**Solution:**
 ```bash
-# Проверить существующие миграции
+# Check existing migrations
 ls priv/repo/migrations/
 
-# Удалить конфликтующие (осторожно!)
+# Remove conflicting ones (careful!)
 rm priv/repo/migrations/*phoenix_kit*
 
-# Сгенерировать заново
+# Generate again
 mix phoenix_kit.gen.migration
 ```
 
-### Проблема: Компиляция не удается
+### Problem: Compilation fails
 
-**Причина:** Отсутствующие зависимости или конфликты.
+**Cause:** Missing dependencies or conflicts.
 
-**Решение:**
+**Solution:**
 ```bash
-# Очистить и пересобрать
+# Clean and rebuild
 mix deps.clean --all
 mix deps.get
 mix compile
 ```
 
-## 📋 Checklist тестирования
+## 📋 Testing Checklist
 
-- [ ] Создан тестовый Phoenix проект
-- [ ] PhoenixKit добавлен в dependencies
-- [ ] `mix deps.get` успешно
-- [ ] `mix compile` без ошибок
-- [ ] Mix tasks `phoenix_kit.*` доступны
-- [ ] Миграции генерируются
-- [ ] База данных создается и мигрируется
-- [ ] Router конфигурируется
-- [ ] Проект компилируется после изменений
-- [ ] Сервер запускается
-- [ ] Registration страница работает
-- [ ] Login страница работает
-- [ ] Settings страница работает
+- [ ] Test Phoenix project created
+- [ ] PhoenixKit added to dependencies
+- [ ] `mix deps.get` successful
+- [ ] `mix compile` without errors
+- [ ] Mix tasks `phoenix_kit.*` available
+- [ ] Migrations generate
+- [ ] Database creates and migrates
+- [ ] Router configures
+- [ ] Project compiles after changes
+- [ ] Server starts
+- [ ] Registration page works
+- [ ] Login page works
+- [ ] Settings page works
 
-## 🚀 Упрощенный тест
+## 🚀 Quick Test
 
-Для быстрой проверки основной функциональности:
+For rapid verification of main functionality:
 
 ```bash
-# Создать проект
+# Create project
 mix phx.new quick_test --no-live --no-dashboard --no-mailer
 cd quick_test
 
-# Добавить в mix.exs:
+# Add to mix.exs:
 # {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git", tag: "v1.0.0"}
 
-# Установить
+# Install
 mix deps.get
 mix compile
 
-# Проверить tasks
+# Check tasks
 mix help | grep phoenix_kit
 
-# Установить PhoenixKit
+# Install PhoenixKit
 mix phoenix_kit.install
 mix ecto.create
 mix ecto.migrate
 
-# Запустить
+# Run
 mix phx.server
-# Открыть http://localhost:4000/auth/register
+# Open http://localhost:4000/auth/register
 ```
 
-## 📞 Помощь
+## 📞 Help
 
-Если возникают проблемы:
+If you encounter problems:
 
-1. Убедитесь что используете Phoenix 1.8+
-2. Проверьте что все зависимости установлены
-3. Проверьте логи ошибок
-4. Создайте issue на GitHub с деталями
+1. Make sure you're using Phoenix 1.8+
+2. Verify all dependencies are installed
+3. Check error logs
+4. Create a GitHub issue with details
 
-### Логи для диагностики
+### Diagnostic Logs
 
 ```bash
-# Проверить версии
+# Check versions
 mix --version
 mix phx.server --version
 
-# Проверить зависимости
+# Check dependencies
 mix deps.tree
 
-# Проверить компиляцию
+# Check compilation
 mix compile --verbose
 
-# Проверить routes
+# Check routes
 mix phx.routes
 ```

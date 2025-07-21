@@ -1,4 +1,4 @@
-defmodule BeamLab.PhoenixKitWeb.Router do
+defmodule BeamLab.PhoenixKitWeb.StandaloneRouter do
   use BeamLab.PhoenixKitWeb, :router
 
   import BeamLab.PhoenixKitWeb.UserAuth,

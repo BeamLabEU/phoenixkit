@@ -1,21 +1,21 @@
 #!/bin/bash
 
 # PhoenixKit Integration Test Script
-# Создает тестовый Phoenix проект и тестирует PhoenixKit как модуль
+# Creates a test Phoenix project and tests PhoenixKit as a module
 
 set -e  # Exit on any error
 
 echo "🧪 PhoenixKit Integration Test"
 echo "============================="
 
-# Цвета для вывода
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Функция для цветного вывода
+# Function for colored output
 log_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
@@ -32,33 +32,33 @@ log_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
-# Переменные
+# Variables
 TEST_APP_NAME="phoenix_kit_test_app"
 TEST_DIR="/tmp/$TEST_APP_NAME"
 PHOENIX_KIT_PATH=$(pwd)
 
-# Проверка что мы в правильной директории
+# Check that we're in the correct directory
 if [[ ! -f "mix.exs" ]] || ! grep -q "phoenix_kit" mix.exs; then
-    log_error "Запустите скрипт из корневой директории PhoenixKit"
+    log_error "Run the script from the PhoenixKit root directory"
     exit 1
 fi
 
 log_info "PhoenixKit path: $PHOENIX_KIT_PATH"
 
-# Функция очистки
+# Cleanup function
 cleanup() {
-    log_warning "Очистка тестовой директории..."
+    log_warning "Cleaning up test directory..."
     rm -rf "$TEST_DIR"
 }
 
-# Обработка прерывания
+# Handle interruption
 trap cleanup EXIT
 
-# Шаг 1: Создание тестового Phoenix проекта
-log_info "Шаг 1: Создание тестового Phoenix проекта"
+# Step 1: Creating test Phoenix project
+log_info "Step 1: Creating test Phoenix project"
 
 if [[ -d "$TEST_DIR" ]]; then
-    log_warning "Удаление существующей тестовой директории..."
+    log_warning "Removing existing test directory..."
     rm -rf "$TEST_DIR"
 fi
 
@@ -66,21 +66,21 @@ cd /tmp
 mix phx.new "$TEST_APP_NAME" --no-live --no-dashboard --no-mailer
 cd "$TEST_APP_NAME"
 
-log_success "Phoenix проект создан"
+log_success "Phoenix project created"
 
-# Шаг 2: Добавление PhoenixKit dependency
-log_info "Шаг 2: Добавление PhoenixKit как dependency"
+# Step 2: Adding PhoenixKit dependency
+log_info "Step 2: Adding PhoenixKit as dependency"
 
-# Создаем backup mix.exs
+# Create backup of mix.exs
 cp mix.exs mix.exs.backup
 
-# Добавляем PhoenixKit dependency
+# Add PhoenixKit dependency
 cat > mix_deps_update.exs << 'EOF'
 defmodule MixUpdate do
   def add_phoenix_kit_dep do
     content = File.read!("mix.exs")
     
-    # Найти deps функцию и добавить PhoenixKit
+    # Find deps function and add PhoenixKit
     phoenix_kit_path = System.get_env("PHOENIX_KIT_PATH")
     updated = String.replace(content, 
       ~r/(defp deps do\s*\[\s*)/,
@@ -99,138 +99,138 @@ export PHOENIX_KIT_PATH="$PHOENIX_KIT_PATH"
 elixir mix_deps_update.exs
 rm mix_deps_update.exs
 
-log_success "PhoenixKit dependency добавлен"
+log_success "PhoenixKit dependency added"
 
-# Показать изменения в mix.exs
-log_info "Проверка mix.exs:"
+# Show changes in mix.exs
+log_info "Checking mix.exs:"
 head -20 mix.exs | grep -A 5 -B 5 phoenix_kit || true
 
-# Шаг 3: Установка зависимостей
-log_info "Шаг 3: Установка зависимостей"
+# Step 3: Installing dependencies
+log_info "Step 3: Installing dependencies"
 mix deps.get
-log_success "Зависимости установлены"
+log_success "Dependencies installed"
 
-# Шаг 3.5: Компиляция проекта
-log_info "Шаг 3.5: Компиляция проекта с PhoenixKit"
+# Step 3.5: Compiling project
+log_info "Step 3.5: Compiling project with PhoenixKit"
 mix compile
-log_success "Проект скомпилирован"
+log_success "Project compiled"
 
-# Шаг 4: Тестирование команд PhoenixKit
-log_info "Шаг 4: Тестирование команд PhoenixKit"
+# Step 4: Testing PhoenixKit commands
+log_info "Step 4: Testing PhoenixKit commands"
 
-# 4.1: Проверка доступности команд
-log_info "4.1: Проверка доступности Mix tasks"
+# 4.1: Check command availability
+log_info "4.1: Checking Mix tasks availability"
 if mix help | grep -q phoenix_kit; then
-    log_success "PhoenixKit Mix tasks доступны"
+    log_success "PhoenixKit Mix tasks available"
     mix help | grep phoenix_kit
 else
-    log_error "PhoenixKit Mix tasks не найдены"
+    log_error "PhoenixKit Mix tasks not found"
     exit 1
 fi
 
-# 4.2: Тест генерации миграций
-log_info "4.2: Тестирование генерации миграций"
+# 4.2: Test migration generation
+log_info "4.2: Testing migration generation"
 mix phoenix_kit.gen.migration
 if ls priv/repo/migrations/*phoenix_kit* >/dev/null 2>&1; then
-    log_success "Миграции сгенерированы"
+    log_success "Migrations generated"
     ls -la priv/repo/migrations/*phoenix_kit*
 else
-    log_error "Миграции не созданы"
+    log_error "Migrations not created"
     exit 1
 fi
 
-# 4.3: Тест dry-run router
-log_info "4.3: Тестирование генерации router (dry-run)"
+# 4.3: Test router dry-run
+log_info "4.3: Testing router generation (dry-run)"
 mix phoenix_kit.gen.routes --dry-run
-log_success "Router dry-run выполнен"
+log_success "Router dry-run completed"
 
-# 4.4: Тест генерации router
-log_info "4.4: Тестирование генерации router"
+# 4.4: Test router generation
+log_info "4.4: Testing router generation"
 mix phoenix_kit.gen.routes --force
 if grep -q "BeamLab.PhoenixKitWeb" lib/${TEST_APP_NAME}_web/router.ex; then
-    log_success "Router обновлен"
+    log_success "Router updated"
     echo "Router content:"
     grep -A 5 -B 5 "BeamLab.PhoenixKitWeb" lib/${TEST_APP_NAME}_web/router.ex
 else
-    log_error "Router не обновлен"
+    log_error "Router not updated"
     exit 1
 fi
 
-# 4.5: Тест полной установки
-log_info "4.5: Тестирование полной установки"
+# 4.5: Test full installation
+log_info "4.5: Testing full installation"
 mix phoenix_kit.install --no-migrations --force
-log_success "Полная установка выполнена"
+log_success "Full installation completed"
 
-# Шаг 5: Тестирование компиляции
-log_info "Шаг 5: Тестирование компиляции"
+# Step 5: Testing compilation
+log_info "Step 5: Testing compilation"
 if mix compile; then
-    log_success "Проект компилируется без ошибок"
+    log_success "Project compiles without errors"
 else
-    log_error "Ошибки компиляции"
+    log_error "Compilation errors"
     exit 1
 fi
 
-# Шаг 6: Создание и запуск миграций
-log_info "Шаг 6: Создание БД и запуск миграций"
+# Step 6: Creating and running migrations
+log_info "Step 6: Creating DB and running migrations"
 mix ecto.create
 mix ecto.migrate
-log_success "База данных создана и миграции выполнены"
+log_success "Database created and migrations executed"
 
-# Шаг 7: Проверка что миграции создали таблицы
-log_info "Шаг 7: Проверка таблиц БД"
+# Step 7: Check that migrations created tables
+log_info "Step 7: Checking DB tables"
 if mix ecto.gen.migration test_check --quiet >/dev/null 2>&1; then
-    # Можем создать миграции, значит БД работает
-    log_success "База данных работает корректно"
+    # Can create migrations, so DB is working
+    log_success "Database working correctly"
 else
-    log_warning "Не удалось проверить БД"
+    log_warning "Could not check DB"
 fi
 
-# Шаг 8: Тестирование запуска сервера (краткий тест)
-log_info "Шаг 8: Тестирование запуска сервера"
+# Step 8: Testing server startup (brief test)
+log_info "Step 8: Testing server startup"
 timeout 10s mix phx.server &
 SERVER_PID=$!
 sleep 5
 
 if kill -0 $SERVER_PID 2>/dev/null; then
-    log_success "Сервер запускается корректно"
+    log_success "Server starts correctly"
     kill $SERVER_PID 2>/dev/null || true
 else
-    log_warning "Сервер не запустился или упал"
+    log_warning "Server failed to start or crashed"
 fi
 
-# Шаг 9: Проверка routes
-log_info "Шаг 9: Проверка routes"
+# Step 9: Check routes
+log_info "Step 9: Checking routes"
 if mix phx.routes | grep -q "phoenix_kit\|auth"; then
-    log_success "PhoenixKit routes найдены"
+    log_success "PhoenixKit routes found"
     echo "PhoenixKit routes:"
     mix phx.routes | grep -E "(phoenix_kit|auth|register|log-in|settings)"
 else
-    log_warning "PhoenixKit routes не найдены"
+    log_warning "PhoenixKit routes not found"
 fi
 
-# Финальный отчет
+# Final report
 echo ""
-echo "🎉 ИНТЕГРАЦИОННЫЙ ТЕСТ ЗАВЕРШЕН"
+echo "🎉 INTEGRATION TEST COMPLETED"
 echo "==============================="
-log_success "Все основные функции PhoenixKit работают корректно!"
+log_success "All main PhoenixKit functions work correctly!"
 
 echo ""
-echo "📋 Результаты тестирования:"
-echo "   ✅ Phoenix проект создан"
-echo "   ✅ PhoenixKit dependency добавлен"
-echo "   ✅ Mix tasks доступны"
-echo "   ✅ Миграции генерируются"
-echo "   ✅ Router конфигурируется"
-echo "   ✅ Проект компилируется"
-echo "   ✅ База данных работает"
-echo "   ✅ Сервер запускается"
-echo "   ✅ Routes настроены"
+echo "📋 Test results:"
+echo "   ✅ Phoenix project created"
+echo "   ✅ PhoenixKit dependency added"
+echo "   ✅ Mix tasks available"
+echo "   ✅ Migrations generate"
+echo "   ✅ Router configures"
+echo "   ✅ Project compiles"
+echo "   ✅ Database works"
+echo "   ✅ Server starts"
+echo "   ✅ Routes configured"
 
 echo ""
-echo "📁 Тестовый проект находится в: $TEST_DIR"
-echo "   Используйте для дальнейшего тестирования или удалите вручную"
+echo "📁 Test project located at: $TEST_DIR"
+echo "   Use for further testing or delete manually"
 
-log_info "Для ручного тестирования:"
+log_info "For manual testing:"
 echo "   cd $TEST_DIR"
 echo "   mix phx.server"
 echo "   Откройте http://localhost:4000/auth/register"

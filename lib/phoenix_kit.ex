@@ -104,35 +104,76 @@ defmodule BeamLab.PhoenixKit do
   def library?, do: mode() == :library
 
   @doc """
-  Install PhoenixKit authentication system.
+  DEPRECATED: PhoenixKit now works without installation commands.
   
-  This function provides a programmatic way to install PhoenixKit when Mix tasks
-  are not available (e.g., when used as a git dependency).
+  PhoenixKit v1.0.0+ follows Phoenix best practices and works out-of-the-box.
+  No installation commands are needed.
   
-  ## Examples
+  ## Migration Guide
   
-      # Complete installation
+      # Old way (deprecated)
       BeamLab.PhoenixKit.install()
       
-      # Custom scope prefix
-      BeamLab.PhoenixKit.install(scope_prefix: "authentication")
+      # New way (zero-configuration)
+      # 1. Add to your router.ex:
+      import BeamLab.PhoenixKitWeb.Router
+      phoenix_kit()
       
-      # Skip migrations
-      BeamLab.PhoenixKit.install(no_migrations: true)
+      # 2. Add migrations: 
+      mix ecto.gen.migration add_phoenix_kit_auth_tables
+      # Then copy content from deps/phoenix_kit/priv/repo/migrations/
+      
+      # That's it! No installation needed.
   
-  For more options, see `BeamLab.PhoenixKit.Installer.install/1`.
+  The new approach follows Phoenix LiveDashboard pattern for better integration.
   """
-  def install(options \\ []), do: BeamLab.PhoenixKit.Installer.install(options)
+  def install(_options \\ []) do
+    IO.warn("BeamLab.PhoenixKit.install/1 is deprecated. PhoenixKit now works without installation commands.")
+    
+    IO.puts("""
+    
+    🎉 PhoenixKit v1.0.0+ works without installation!
+    
+    ## New Simple Integration:
+    
+    1. Add to your router.ex:
+    
+       import BeamLab.PhoenixKitWeb.Router
+       phoenix_kit()
+    
+    2. Generate migrations:
+    
+       mix ecto.gen.migration add_phoenix_kit_auth_tables
+       # Copy from: deps/phoenix_kit/priv/repo/migrations/
+    
+    3. Run migrations:
+    
+       mix ecto.migrate
+    
+    That's it! No installation commands needed.
+    Routes automatically available at /auth/register, /auth/log-in, etc.
+    """)
+    
+    :ok
+  end
 
   @doc """
-  Generate PhoenixKit database migrations.
+  DEPRECATED: Use standard Phoenix migration approach.
   
-  ## Examples
+  ## Migration Guide
   
+      # Old way (deprecated)
       BeamLab.PhoenixKit.generate_migrations()
-      BeamLab.PhoenixKit.generate_migrations(force: true)
+      
+      # New way (standard Phoenix)
+      mix ecto.gen.migration add_phoenix_kit_auth_tables
+      # Then copy from deps/phoenix_kit/priv/repo/migrations/
   """
-  def generate_migrations(options \\ []), do: BeamLab.PhoenixKit.Installer.generate_migrations(options)
+  def generate_migrations(_options \\ []) do
+    IO.warn("BeamLab.PhoenixKit.generate_migrations/1 is deprecated. Use standard Phoenix migrations.")
+    IO.puts("Copy migrations from deps/phoenix_kit/priv/repo/migrations/ to your project.")
+    :ok
+  end
 
   @doc """
   Generate PhoenixKit router configuration.

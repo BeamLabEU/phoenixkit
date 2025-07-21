@@ -71,7 +71,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      # CORE библиотеки (всегда нужны)
+      # CORE libraries (always needed)
       {:phoenix, "~> 1.8.0-rc.4"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
@@ -89,10 +89,10 @@ defmodule BeamLab.PhoenixKit.MixProject do
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
 
-      # DATABASE (опциональная, пользователь может выбрать свою)
+      # DATABASE (optional, user can choose their own)
       {:postgrex, ">= 0.0.0", optional: true},
 
-      # STANDALONE зависимости (только для демо/разработки)
+      # STANDALONE dependencies (only for demo/development)
       {:bandit, "~> 1.5", optional: true},
       {:swoosh, "~> 1.16", optional: true},
       {:req, "~> 0.5", optional: true},
@@ -101,7 +101,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
       {:telemetry_metrics, "~> 1.0", optional: true},
       {:telemetry_poller, "~> 1.0", optional: true},
 
-      # DEVELOPMENT зависимости
+      # DEVELOPMENT dependencies
       {:phoenix_live_reload, "~> 1.2", only: :dev, optional: true},
       {:esbuild, "~> 0.9", runtime: Mix.env() == :dev, optional: true},
       {:floki, ">= 0.30.0", only: :test}
