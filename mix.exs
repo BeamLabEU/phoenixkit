@@ -96,7 +96,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
       {:bandit, "~> 1.5", optional: true},
       {:swoosh, "~> 1.16", optional: true},
       {:req, "~> 0.5", optional: true},
-      {:dns_cluster, "~> 0.1.1", optional: true},
+      # {:dns_cluster, "~> 0.2", optional: true},
       {:phoenix_live_dashboard, "~> 0.8.3", optional: true},
       {:telemetry_metrics, "~> 1.0", optional: true},
       {:telemetry_poller, "~> 1.0", optional: true},
