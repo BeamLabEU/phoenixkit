@@ -7,7 +7,7 @@
             You need to reauthenticate to perform sensitive actions on your account.
           <% else %>
             Don't have an account? <.link
-              navigate={~p"/phoenix_kit_users/register"}
+              navigate={~p"/phoenix_kit/register"}
               class="font-semibold text-brand hover:underline"
               phx-no-format
             >Sign up</.link> for an account now.
@@ -31,7 +31,7 @@
       for={@form}
       as={:user}
       id="login_form_magic"
-      action={~p"/phoenix_kit_users/log-in"}
+      action={~p"/phoenix_kit/log-in"}
     >
       <.input
         readonly={!!@current_scope}
@@ -54,7 +54,7 @@
       for={@form}
       as={:user}
       id="login_form_password"
-      action={~p"/phoenix_kit_users/log-in"}
+      action={~p"/phoenix_kit/log-in"}
     >
       <.input
         readonly={!!@current_scope}

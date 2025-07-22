@@ -45,7 +45,7 @@ defmodule BeamLab.PhoenixKitWeb do
       import BeamLab.PhoenixKitWeb.Router
       phoenix_kit "/auth"
   """
-  defmacro phoenix_kit_routes(scope_prefix \\ "/phoenix_kit_users") do
+  defmacro phoenix_kit_routes(scope_prefix \\ "/phoenix_kit") do
     IO.warn("phoenix_kit_routes/1 is deprecated. Use BeamLab.PhoenixKitWeb.Router.phoenix_kit/2 instead.", Macro.Env.stacktrace(__CALLER__))
     quote do
       import BeamLab.PhoenixKitWeb.UserAuth,
@@ -155,8 +155,22 @@ defmodule BeamLab.PhoenixKitWeb do
 
   @doc false
   def get_endpoint_module do
-    if Application.get_env(:phoenix_kit, :library_mode, false) do
-      Application.get_env(:phoenix_kit, :parent_endpoint, BeamLab.PhoenixKitWeb.Endpoint)
+    if BeamLab.PhoenixKit.library?() do
+      # In library mode, parent_endpoint should be set by the parent app
+      case Application.get_env(:phoenix_kit, :parent_endpoint) do
+        nil -> 
+          raise """
+          PhoenixKit library mode requires :parent_endpoint to be configured.
+          
+          Add this to your application's endpoint module:
+          
+              def init(_key, config) do
+                Application.put_env(:phoenix_kit, :parent_endpoint, __MODULE__)
+                config
+              end
+          """
+        endpoint -> endpoint
+      end
     else
       BeamLab.PhoenixKitWeb.Endpoint
     end

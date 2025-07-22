@@ -37,7 +37,7 @@ defmodule BeamLab.PhoenixKitWeb.ConnCase do
   end
 
   @doc """
-  Setup helper that registers and logs in phoenix_kit_users.
+  Setup helper that registers and logs in phoenix_kit users.
 
       setup :register_and_log_in_user
 

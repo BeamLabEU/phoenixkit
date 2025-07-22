@@ -1,34 +1,25 @@
 <!-- PhoenixKit Layout Integration -->
 <!-- Add this to your lib/<%= app_name %>_web/components/layouts/app.html.heex -->
 
-<!-- Navigation with authentication -->
-<nav class="navbar bg-base-100">
-  <div class="navbar-start">
-    <.link navigate={~p"/"} class="btn btn-ghost text-xl"><%= app_title %></.link>
-  </div>
-  <div class="navbar-end">
-    <%= if assigns[:current_scope] do %>
-      <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-ghost">
-          <%= @current_scope.user.email %>
-        </div>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-          <li><.link navigate={~p"/<%= scope_prefix %>/settings"}>Settings</.link></li>
-          <li>
-            <.link href={~p"/<%= scope_prefix %>/log-out"} method="delete">
-              Log out
-            </.link>
-          </li>
-        </ul>
-      </div>
-    <% else %>
-      <.link navigate={~p"/<%= scope_prefix %>/log-in"} class="btn btn-ghost">Log in</.link>
-      <.link navigate={~p"/<%= scope_prefix %>/register"} class="btn btn-primary">Sign up</.link>
-    <% end %>
-  </div>
-</nav>
+<!-- STEP 1: Import PhoenixKit components in your layout module -->
+<!-- Add to lib/<%= app_name %>_web/components/layouts.ex: -->
+<!-- import BeamLab.PhoenixKitWeb.CoreComponents -->
 
-<!-- Flash messages -->
+<!-- STEP 2: Use one of the navbar components below -->
+
+<!-- Option 1: Simple navbar (minimal styling) -->
+<.simple_navbar current_scope={assigns[:current_scope]} />
+
+<!-- Option 2: Advanced navbar with app branding -->
+<!-- <.advanced_navbar current_scope={assigns[:current_scope]} app_name="<%= app_title %>" /> -->
+
+<!-- Option 3: Advanced navbar with theme toggle -->
+<!-- <.advanced_navbar 
+     current_scope={assigns[:current_scope]} 
+     app_name="<%= app_title %>" 
+     include_theme_toggle={true} /> -->
+
+<!-- Flash messages and content -->
 <main class="container mx-auto px-4">
   <.flash_group flash={@flash} />
   <%= @inner_content %>

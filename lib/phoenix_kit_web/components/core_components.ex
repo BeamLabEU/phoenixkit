@@ -28,6 +28,12 @@ defmodule BeamLab.PhoenixKitWeb.CoreComponents do
   """
   use Phoenix.Component
   use Gettext, backend: BeamLab.PhoenixKitWeb.Gettext
+  
+  # Re-export navigation components for convenience (avoiding circular import)
+  defdelegate simple_navbar(assigns), to: BeamLab.PhoenixKitWeb.NavigationComponents
+  defdelegate advanced_navbar(assigns), to: BeamLab.PhoenixKitWeb.NavigationComponents
+  defdelegate user_menu(assigns), to: BeamLab.PhoenixKitWeb.NavigationComponents
+  defdelegate theme_toggle(assigns), to: BeamLab.PhoenixKitWeb.NavigationComponents
 
   alias Phoenix.LiveView.JS
 

@@ -38,24 +38,24 @@ defmodule BeamLab.PhoenixKitWeb.StandaloneRouter do
   scope "/", BeamLab.PhoenixKitWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-    get "/phoenix_kit_users/register", UserRegistrationController, :new
-    post "/phoenix_kit_users/register", UserRegistrationController, :create
+    get "/phoenix_kit/register", UserRegistrationController, :new
+    post "/phoenix_kit/register", UserRegistrationController, :create
   end
 
   scope "/", BeamLab.PhoenixKitWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    get "/phoenix_kit_users/settings", UserSettingsController, :edit
-    put "/phoenix_kit_users/settings", UserSettingsController, :update
-    get "/phoenix_kit_users/settings/confirm-email/:token", UserSettingsController, :confirm_email
+    get "/phoenix_kit/settings", UserSettingsController, :edit
+    put "/phoenix_kit/settings", UserSettingsController, :update
+    get "/phoenix_kit/settings/confirm-email/:token", UserSettingsController, :confirm_email
   end
 
   scope "/", BeamLab.PhoenixKitWeb do
     pipe_through [:browser]
 
-    get "/phoenix_kit_users/log-in", UserSessionController, :new
-    get "/phoenix_kit_users/log-in/:token", UserSessionController, :confirm
-    post "/phoenix_kit_users/log-in", UserSessionController, :create
-    delete "/phoenix_kit_users/log-out", UserSessionController, :delete
+    get "/phoenix_kit/log-in", UserSessionController, :new
+    get "/phoenix_kit/log-in/:token", UserSessionController, :confirm
+    post "/phoenix_kit/log-in", UserSessionController, :create
+    delete "/phoenix_kit/log-out", UserSessionController, :delete
   end
 end

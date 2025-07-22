@@ -37,24 +37,25 @@ end
    mix compile
    ```
 
-3. **Check Mix tasks availability:**
-   ```bash
-   mix help | grep phoenix_kit
+3. **Check zero-configuration setup:**
+   ```elixir
+   # Verify PhoenixKit is available
+   iex -S mix
+   BeamLab.PhoenixKit.version()
    ```
    
-   Should show:
+   Should return:
    ```
-   mix phoenix_kit.gen.migration # Generates PhoenixKit database migrations
-   mix phoenix_kit.gen.routes    # Generates PhoenixKit authentication routes in your router
-   mix phoenix_kit.install       # Installs PhoenixKit authentication library into your Phoenix application
+   "1.0.0"
    ```
 
-4. **Generate migrations:**
+4. **Add database tables:**
    ```bash
-   mix phoenix_kit.gen.migration
+   # Generate migration file
+   mix ecto.gen.migration add_phoenix_kit_auth_tables
    ```
    
-   Check:
+   Copy migration content from `deps/phoenix_kit/priv/repo/migrations/` or add the tables manually. Check:
    ```bash
    ls priv/repo/migrations/*phoenix_kit*
    ```
@@ -65,32 +66,44 @@ end
    mix ecto.migrate
    ```
 
-6. **Test router (dry-run):**
-   ```bash
-   mix phoenix_kit.gen.routes --dry-run
-   ```
+6. **Configure router (zero-configuration):**
+   Edit `lib/test_phoenix_kit_web/router.ex`:
+   ```elixir
+   defmodule TestPhoenixKitWeb.Router do
+     use TestPhoenixKitWeb, :router
+     import BeamLab.PhoenixKitWeb.Router  # ← Add this import
 
-7. **Generate router configuration:**
-   ```bash
-   mix phoenix_kit.gen.routes --force
+     pipeline :browser do
+       plug :accepts, ["html"]
+       plug :fetch_session
+       plug :fetch_live_flash
+       plug :put_root_layout, html: {TestPhoenixKitWeb.Layouts, :root}
+       plug :protect_from_forgery
+       plug :put_secure_browser_headers
+       plug :fetch_current_scope_for_user  # ← Add PhoenixKit auth
+     end
+
+     scope "/" do
+       pipe_through :browser
+       get "/", PageController, :home
+     end
+
+     # PhoenixKit authentication - ONE LINE!
+     phoenix_kit()  # ← That's it!
+   end
    ```
    
-   Check:
+   Verify setup:
    ```bash
-   grep -A 10 -B 5 "BeamLab.PhoenixKitWeb" lib/test_phoenix_kit_web/router.ex
+   grep -A 5 "phoenix_kit()" lib/test_phoenix_kit_web/router.ex
    ```
 
-8. **Full installation:**
-   ```bash
-   mix phoenix_kit.install --force
-   ```
-
-9. **Final compilation:**
+7. **Final compilation:**
    ```bash
    mix compile
    ```
 
-10. **Start server:**
+8. **Start server:**
     ```bash
     mix phx.server
     ```
@@ -98,14 +111,14 @@ end
 ### Browser Testing
 
 1. Open http://localhost:4000
-2. Navigate to http://localhost:4000/auth/register
+2. Navigate to http://localhost:4000/phoenix_kit/register
 3. Register a user
-4. Try login at http://localhost:4000/auth/log-in
-5. Check settings at http://localhost:4000/auth/settings
+4. Try login at http://localhost:4000/phoenix_kit/log-in
+5. Check settings at http://localhost:4000/phoenix_kit/settings
 
 ## 🔧 Troubleshooting
 
-### Problem: Mix tasks not found
+### Problem: PhoenixKit modules not found
 
 **Cause:** PhoenixKit not compiled or not loaded.
 
@@ -113,35 +126,51 @@ end
 ```bash
 mix deps.compile phoenix_kit --force
 mix compile
+
+# Verify availability:
+iex -S mix
+BeamLab.PhoenixKit.version()
 ```
 
 ### Problem: Router errors
 
-**Cause:** Conflict with existing routes.
+**Cause:** Missing imports or incorrect configuration.
 
 **Solution:**
-```bash
-# See what will be changed
-mix phoenix_kit.gen.routes --dry-run
+Ensure your router has the correct setup:
+```elixir
+defmodule YourAppWeb.Router do
+  use YourAppWeb, :router
+  import BeamLab.PhoenixKitWeb.Router  # ← Must have this
 
-# Force update
-mix phoenix_kit.gen.routes --force
+  pipeline :browser do
+    # ... other plugs ...
+    plug :fetch_current_scope_for_user  # ← Must have this
+  end
+
+  # Must have this macro call
+  phoenix_kit()
+end
 ```
 
 ### Problem: Migration errors
 
-**Cause:** Migrations already exist.
+**Cause:** Migrations already exist or missing tables.
 
 **Solution:**
 ```bash
 # Check existing migrations
 ls priv/repo/migrations/
 
-# Remove conflicting ones (careful!)
+# If you have old ones, remove them (careful!)
 rm priv/repo/migrations/*phoenix_kit*
 
-# Generate again
-mix phoenix_kit.gen.migration
+# Copy correct migration from deps:
+cp deps/phoenix_kit/priv/repo/migrations/* priv/repo/migrations/
+
+# Or create manually:
+mix ecto.gen.migration add_phoenix_kit_auth_tables
+# Then add the migration content from README.md
 ```
 
 ### Problem: Compilation fails
@@ -162,15 +191,15 @@ mix compile
 - [ ] PhoenixKit added to dependencies
 - [ ] `mix deps.get` successful
 - [ ] `mix compile` without errors
-- [ ] Mix tasks `phoenix_kit.*` available
-- [ ] Migrations generate
-- [ ] Database creates and migrates
-- [ ] Router configures
-- [ ] Project compiles after changes
+- [ ] PhoenixKit modules accessible (`BeamLab.PhoenixKit.version()`)
+- [ ] Database migration created and applied
+- [ ] Router configured with zero-config approach
+- [ ] `phoenix_kit()` macro added to routes
+- [ ] Project compiles after router changes
 - [ ] Server starts
-- [ ] Registration page works
-- [ ] Login page works
-- [ ] Settings page works
+- [ ] Registration page works (/phoenix_kit/register)
+- [ ] Login page works (/phoenix_kit/log-in)
+- [ ] Settings page works (/phoenix_kit/settings)
 
 ## 🚀 Quick Test
 
@@ -188,17 +217,25 @@ cd quick_test
 mix deps.get
 mix compile
 
-# Check tasks
-mix help | grep phoenix_kit
-
-# Install PhoenixKit
-mix phoenix_kit.install
+# Create database
 mix ecto.create
+
+# Add database migration
+mix ecto.gen.migration add_phoenix_kit_auth_tables
+# Copy migration content from deps/phoenix_kit/priv/repo/migrations/
+# Or add tables manually as shown in README.md
+
+# Run migration
 mix ecto.migrate
+
+# Update router.ex with zero-config setup:
+# import BeamLab.PhoenixKitWeb.Router
+# Add plug :fetch_current_scope_for_user to browser pipeline  
+# Add phoenix_kit() macro
 
 # Run
 mix phx.server
-# Open http://localhost:4000/auth/register
+# Open http://localhost:4000/phoenix_kit/register
 ```
 
 ## 📞 Help
@@ -215,14 +252,18 @@ If you encounter problems:
 ```bash
 # Check versions
 mix --version
-mix phx.server --version
+elixir --version
 
 # Check dependencies
 mix deps.tree
 
+# Check PhoenixKit availability
+iex -S mix
+BeamLab.PhoenixKit.version()
+
 # Check compilation
 mix compile --verbose
 
-# Check routes
+# Check routes (should see /phoenix_kit/* routes)
 mix phx.routes
 ```

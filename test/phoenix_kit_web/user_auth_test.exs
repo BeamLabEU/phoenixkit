@@ -186,7 +186,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuthTest do
   end
 
   describe "require_sudo_mode/2" do
-    test "allows phoenix_kit_users that have authenticated in the last 10 minutes", %{
+    test "allows phoenix_kit that have authenticated in the last 10 minutes", %{
       conn: conn,
       user: user
     } do
@@ -213,7 +213,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuthTest do
         |> assign(:current_scope, Scope.for_user(user))
         |> UserAuth.require_sudo_mode([])
 
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/log-in"
+      assert redirected_to(conn) == ~p"/phoenix_kit/log-in"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must re-authenticate to access this page."
@@ -251,7 +251,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuthTest do
       conn = conn |> fetch_flash() |> UserAuth.require_authenticated_user([])
       assert conn.halted
 
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/log-in"
+      assert redirected_to(conn) == ~p"/phoenix_kit/log-in"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must log in to access this page."

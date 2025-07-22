@@ -59,7 +59,26 @@ defmodule YourAppWeb.Router do
 end
 ```
 
-### 4. Add Database Tables
+### 4. Configure Endpoint (Required for Library Mode)
+
+Add this to your application's endpoint module:
+
+```elixir
+# lib/your_app_web/endpoint.ex
+defmodule YourAppWeb.Endpoint do
+  use Phoenix.Endpoint, otp_app: :your_app
+
+  # Add this function for PhoenixKit compatibility
+  def init(_key, config) do
+    Application.put_env(:phoenix_kit, :parent_endpoint, __MODULE__)
+    config
+  end
+
+  # ... rest of your endpoint
+end
+```
+
+### 5. Add Database Tables
 
 ```bash
 # Generate migration file
@@ -70,32 +89,37 @@ mix ecto.gen.migration add_phoenix_kit_auth_tables
 mix ecto.migrate
 ```
 
-### 5. Update Layout (Optional but Recommended)
+### 6. Add Navigation (Zero Configuration!)
+
+**Step 1**: Import components in your layout module:
+
+```elixir
+# lib/your_app_web/components/layouts.ex
+defmodule YourAppWeb.Layouts do
+  use YourAppWeb, :html
+  import BeamLab.PhoenixKitWeb.CoreComponents  # ← Add this import
+  
+  # ... rest of your layout module
+end
+```
+
+**Step 2**: Choose your navbar style in template:
 
 ```heex
-<!-- In your app layout (app.html.heex) -->
-<nav class="navbar bg-base-100">
-  <div class="navbar-start">
-    <.link navigate={~p"/"} class="btn btn-ghost text-xl">YourApp</.link>
-  </div>
-  <div class="navbar-end">
-    <%= if @current_scope do %>
-      <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-ghost">
-          <%= @current_scope.user.email %>
-        </div>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-          <li><.link navigate={~p"/phoenix_kit/settings"}>Settings</.link></li>
-          <li><.link href={~p"/phoenix_kit/log-out"} method="delete">Log out</.link></li>
-        </ul>
-      </div>
-    <% else %>
-      <.link navigate={~p"/phoenix_kit/log-in"} class="btn btn-ghost">Log in</.link>
-      <.link navigate={~p"/phoenix_kit/register"} class="btn btn-primary">Sign up</.link>
-    <% end %>
-  </div>
-</nav>
+<!-- Option 1: Simple navbar (minimal, like standalone mode) -->
+<.simple_navbar current_scope={@current_scope} />
+
+<!-- Option 2: Advanced navbar with your app branding -->
+<.advanced_navbar current_scope={@current_scope} app_name="YourApp" />
+
+<!-- Option 3: Advanced navbar with theme toggle -->
+<.advanced_navbar 
+  current_scope={@current_scope} 
+  app_name="YourApp" 
+  include_theme_toggle={true} />
 ```
+
+That's it! **Two imports + one component = zero configuration navbar**.
 
 ## 🎉 That's It!
 
@@ -258,11 +282,20 @@ The new approach follows Phoenix LiveDashboard pattern and requires no installat
 
 1. **Routes not working**: Ensure you imported `BeamLab.PhoenixKitWeb.Router` and added `fetch_current_scope_for_user` to your browser pipeline
 
-2. **Compilation errors**: Make sure all dependencies are installed with `mix deps.get`
+2. **Endpoint configuration error**: Make sure you added the `init/2` function to your endpoint as shown in step 4
 
-3. **Database errors**: Run `mix ecto.migrate` after copying the migration content
+3. **Compilation errors**: Make sure all dependencies are installed with `mix deps.get`
 
-4. **Styles not loading**: Ensure your Tailwind configuration includes PhoenixKit paths
+4. **Database errors**: Run `mix ecto.migrate` after copying the migration content
+
+5. **Styles not loading**: Ensure your Tailwind configuration includes PhoenixKit paths
+
+### Library Mode Requirements
+
+PhoenixKit in library mode requires:
+- Your application's endpoint must have the `init/2` function configured (step 4)
+- Phoenix routes must be accessible (imported `BeamLab.PhoenixKitWeb.Router`)
+- Database connection available for authentication data
 
 ## Architecture
 

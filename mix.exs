@@ -14,8 +14,8 @@ defmodule BeamLab.PhoenixKit.MixProject do
       aliases: aliases(),
       deps: deps(),
       
-      # Phoenix Code Reloader
-      listeners: listeners(Mix.env()),
+      # Phoenix Code Reloader (only for standalone dev mode)
+      listeners: listeners(Mix.env(), phoenix_kit_mode()),
       
       # Package metadata
       description: description(),
@@ -73,11 +73,11 @@ defmodule BeamLab.PhoenixKit.MixProject do
     [
       # CORE libraries (always needed)
       {:phoenix, "~> 1.8.0-rc.4"},
-      {:phoenix_ecto, "~> 4.5"},
-      {:ecto_sql, "~> 3.10"},
-      {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix_html, "~> 4.1"},
-      {:phoenix_live_view, "~> 1.0.9"},
+      {:phoenix_ecto, "~> 4.6"},
+      {:ecto_sql, "~> 3.13"},
+      {:bcrypt_elixir, "~> 3.3"},
+      {:phoenix_html, "~> 4.2"},
+      {:phoenix_live_view, "~> 0.20"},
       {:tailwind, "~> 0.3"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
@@ -102,7 +102,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
       {:telemetry_poller, "~> 1.0", optional: true},
 
       # DEVELOPMENT dependencies
-      {:phoenix_live_reload, "~> 1.2", only: :dev, optional: true},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:esbuild, "~> 0.9", runtime: Mix.env() == :dev, optional: true},
       {:floki, ">= 0.30.0", only: :test}
 
@@ -204,7 +204,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
     ]
   end
 
-  # Phoenix Code Reloader listeners (only in dev mode)
-  defp listeners(:dev), do: [Phoenix.CodeReloader]
-  defp listeners(_), do: []
+  # Phoenix Code Reloader listeners (only for standalone dev mode)
+  defp listeners(:dev, :standalone), do: [Phoenix.CodeReloader]
+  defp listeners(_env, _mode), do: []
 end

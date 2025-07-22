@@ -217,7 +217,7 @@ defmodule BeamLab.PhoenixKit.Installer do
       # PhoenixKit Authentication routes - automatically configured!
       phoenix_kit_routes("#{scope_prefix}")
       
-      # Or with default prefix /phoenix_kit_users:
+      # Or with default prefix /phoenix_kit:
       # phoenix_kit_routes()
     end
     

@@ -97,7 +97,7 @@ defmodule BeamLab.PhoenixKitWeb.Router do
     Application.put_env(:phoenix_kit, :auth_options, opts)
     
     # Ensure library mode is enabled when used as router
-    Application.put_env(:phoenix_kit, :library_mode, true)
+    Application.put_env(:phoenix_kit, :mode, :library)
     
     # Set parent endpoint if not already configured
     unless Application.get_env(:phoenix_kit, :parent_endpoint) do

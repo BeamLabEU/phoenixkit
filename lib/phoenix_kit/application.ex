@@ -7,14 +7,14 @@ defmodule BeamLab.PhoenixKit.Application do
 
   @impl true
   def start(_type, _args) do
-    children = case Application.get_env(:phoenix_kit, :library_mode, false) do
-      true ->
+    children = case BeamLab.PhoenixKit.mode() do
+      :library ->
         # Library mode: Only core services, no web layer
         [
           BeamLab.PhoenixKit.Repo,
           {Phoenix.PubSub, name: BeamLab.PhoenixKit.PubSub}
         ]
-      false ->
+      :standalone ->
         # Standalone mode: Full application with web layer
         base_children = [
           BeamLab.PhoenixKitWeb.Telemetry,
@@ -42,7 +42,7 @@ defmodule BeamLab.PhoenixKit.Application do
   @impl true
   def config_change(changed, _new, removed) do
     # Only update endpoint config in standalone mode
-    unless Application.get_env(:phoenix_kit, :library_mode, false) do
+    if BeamLab.PhoenixKit.standalone?() do
       BeamLab.PhoenixKitWeb.Endpoint.config_change(changed, removed)
     end
     :ok

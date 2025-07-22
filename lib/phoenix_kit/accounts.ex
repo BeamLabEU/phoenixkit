@@ -251,7 +251,7 @@ defmodule BeamLab.PhoenixKit.Accounts do
 
   ## Examples
 
-      iex> deliver_user_update_email_instructions(user, current_email, &url(~p"/phoenix_kit_users/settings/confirm-email/#{&1}"))
+      iex> deliver_user_update_email_instructions(user, current_email, &url(~p"/phoenix_kit/settings/confirm-email/#{&1}"))
       {:ok, %{to: ..., body: ...}}
 
   """

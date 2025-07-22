@@ -8,12 +8,12 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
     %{unconfirmed_user: unconfirmed_user_fixture(), user: user_fixture()}
   end
 
-  describe "GET /phoenix_kit_users/log-in" do
+  describe "GET /phoenix_kit/log-in" do
     test "renders login page", %{conn: conn} do
-      conn = get(conn, ~p"/phoenix_kit_users/log-in")
+      conn = get(conn, ~p"/phoenix_kit/log-in")
       response = html_response(conn, 200)
       assert response =~ "Log in"
-      assert response =~ ~p"/phoenix_kit_users/register"
+      assert response =~ ~p"/phoenix_kit/register"
       assert response =~ "Log in with email"
     end
 
@@ -21,7 +21,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
       html =
         conn
         |> log_in_user(user)
-        |> get(~p"/phoenix_kit_users/log-in")
+        |> get(~p"/phoenix_kit/log-in")
         |> html_response(200)
 
       assert html =~ "You need to reauthenticate"
@@ -33,22 +33,22 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
     end
 
     test "renders login page (email + password)", %{conn: conn} do
-      conn = get(conn, ~p"/phoenix_kit_users/log-in?mode=password")
+      conn = get(conn, ~p"/phoenix_kit/log-in?mode=password")
       response = html_response(conn, 200)
       assert response =~ "Log in"
-      assert response =~ ~p"/phoenix_kit_users/register"
+      assert response =~ ~p"/phoenix_kit/register"
       assert response =~ "Log in with email"
     end
   end
 
-  describe "GET /phoenix_kit_users/log-in/:token" do
+  describe "GET /phoenix_kit/log-in/:token" do
     test "renders confirmation page for unconfirmed user", %{conn: conn, unconfirmed_user: user} do
       token =
         extract_user_token(fn url ->
           Accounts.deliver_login_instructions(user, url)
         end)
 
-      conn = get(conn, ~p"/phoenix_kit_users/log-in/#{token}")
+      conn = get(conn, ~p"/phoenix_kit/log-in/#{token}")
       assert html_response(conn, 200) =~ "Confirm and stay logged in"
     end
 
@@ -58,27 +58,27 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
           Accounts.deliver_login_instructions(user, url)
         end)
 
-      conn = get(conn, ~p"/phoenix_kit_users/log-in/#{token}")
+      conn = get(conn, ~p"/phoenix_kit/log-in/#{token}")
       html = html_response(conn, 200)
       refute html =~ "Confirm my account"
       assert html =~ "Log in"
     end
 
     test "raises error for invalid token", %{conn: conn} do
-      conn = get(conn, ~p"/phoenix_kit_users/log-in/invalid-token")
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/log-in"
+      conn = get(conn, ~p"/phoenix_kit/log-in/invalid-token")
+      assert redirected_to(conn) == ~p"/phoenix_kit/log-in"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "Magic link is invalid or it has expired."
     end
   end
 
-  describe "POST /phoenix_kit_users/log-in - email and password" do
+  describe "POST /phoenix_kit/log-in - email and password" do
     test "logs the user in", %{conn: conn, user: user} do
       user = set_password(user)
 
       conn =
-        post(conn, ~p"/phoenix_kit_users/log-in", %{
+        post(conn, ~p"/phoenix_kit/log-in", %{
           "user" => %{"email" => user.email, "password" => valid_user_password()}
         })
 
@@ -89,15 +89,15 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
       conn = get(conn, ~p"/")
       response = html_response(conn, 200)
       assert response =~ user.email
-      assert response =~ ~p"/phoenix_kit_users/settings"
-      assert response =~ ~p"/phoenix_kit_users/log-out"
+      assert response =~ ~p"/phoenix_kit/settings"
+      assert response =~ ~p"/phoenix_kit/log-out"
     end
 
     test "logs the user in with remember me", %{conn: conn, user: user} do
       user = set_password(user)
 
       conn =
-        post(conn, ~p"/phoenix_kit_users/log-in", %{
+        post(conn, ~p"/phoenix_kit/log-in", %{
           "user" => %{
             "email" => user.email,
             "password" => valid_user_password(),
@@ -115,7 +115,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
       conn =
         conn
         |> init_test_session(user_return_to: "/foo/bar")
-        |> post(~p"/phoenix_kit_users/log-in", %{
+        |> post(~p"/phoenix_kit/log-in", %{
           "user" => %{
             "email" => user.email,
             "password" => valid_user_password()
@@ -128,7 +128,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
 
     test "emits error message with invalid credentials", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/phoenix_kit_users/log-in?mode=password", %{
+        post(conn, ~p"/phoenix_kit/log-in?mode=password", %{
           "user" => %{"email" => user.email, "password" => "invalid_password"}
         })
 
@@ -138,10 +138,10 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
     end
   end
 
-  describe "POST /phoenix_kit_users/log-in - magic link" do
+  describe "POST /phoenix_kit/log-in - magic link" do
     test "sends magic link email when user exists", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/phoenix_kit_users/log-in", %{
+        post(conn, ~p"/phoenix_kit/log-in", %{
           "user" => %{"email" => user.email}
         })
 
@@ -155,7 +155,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
       {token, _hashed_token} = generate_user_magic_link_token(user)
 
       conn =
-        post(conn, ~p"/phoenix_kit_users/log-in", %{
+        post(conn, ~p"/phoenix_kit/log-in", %{
           "user" => %{"token" => token}
         })
 
@@ -166,8 +166,8 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
       conn = get(conn, ~p"/")
       response = html_response(conn, 200)
       assert response =~ user.email
-      assert response =~ ~p"/phoenix_kit_users/settings"
-      assert response =~ ~p"/phoenix_kit_users/log-out"
+      assert response =~ ~p"/phoenix_kit/settings"
+      assert response =~ ~p"/phoenix_kit/log-out"
     end
 
     test "confirms unconfirmed user", %{conn: conn, unconfirmed_user: user} do
@@ -175,7 +175,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
       refute user.confirmed_at
 
       conn =
-        post(conn, ~p"/phoenix_kit_users/log-in", %{
+        post(conn, ~p"/phoenix_kit/log-in", %{
           "user" => %{"token" => token},
           "_action" => "confirmed"
         })
@@ -190,13 +190,13 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
       conn = get(conn, ~p"/")
       response = html_response(conn, 200)
       assert response =~ user.email
-      assert response =~ ~p"/phoenix_kit_users/settings"
-      assert response =~ ~p"/phoenix_kit_users/log-out"
+      assert response =~ ~p"/phoenix_kit/settings"
+      assert response =~ ~p"/phoenix_kit/log-out"
     end
 
     test "emits error message when magic link is invalid", %{conn: conn} do
       conn =
-        post(conn, ~p"/phoenix_kit_users/log-in", %{
+        post(conn, ~p"/phoenix_kit/log-in", %{
           "user" => %{"token" => "invalid"}
         })
 
@@ -204,16 +204,16 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionControllerTest do
     end
   end
 
-  describe "DELETE /phoenix_kit_users/log-out" do
+  describe "DELETE /phoenix_kit/log-out" do
     test "logs the user out", %{conn: conn, user: user} do
-      conn = conn |> log_in_user(user) |> delete(~p"/phoenix_kit_users/log-out")
+      conn = conn |> log_in_user(user) |> delete(~p"/phoenix_kit/log-out")
       assert redirected_to(conn) == ~p"/"
       refute get_session(conn, :user_token)
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
     end
 
     test "succeeds even if the user is not logged in", %{conn: conn} do
-      conn = delete(conn, ~p"/phoenix_kit_users/log-out")
+      conn = delete(conn, ~p"/phoenix_kit/log-out")
       assert redirected_to(conn) == ~p"/"
       refute get_session(conn, :user_token)
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"

@@ -22,7 +22,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsController do
         Accounts.deliver_user_update_email_instructions(
           Ecto.Changeset.apply_action!(changeset, :insert),
           user.email,
-          &url(~p"/phoenix_kit_users/settings/confirm-email/#{&1}")
+          &url(~p"/phoenix_kit/settings/confirm-email/#{&1}")
         )
 
         conn
@@ -30,7 +30,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsController do
           :info,
           "A link to confirm your email change has been sent to the new address."
         )
-        |> redirect(to: ~p"/phoenix_kit_users/settings")
+        |> redirect(to: ~p"/phoenix_kit/settings")
 
       changeset ->
         render(conn, :edit, email_changeset: %{changeset | action: :insert}, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
@@ -45,7 +45,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsController do
       {:ok, {user, _}} ->
         conn
         |> put_flash(:info, "Password updated successfully.")
-        |> put_session(:user_return_to, ~p"/phoenix_kit_users/settings")
+        |> put_session(:user_return_to, ~p"/phoenix_kit/settings")
         |> UserAuth.log_in_user(user)
 
       {:error, changeset} ->
@@ -58,12 +58,12 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsController do
       {:ok, _user} ->
         conn
         |> put_flash(:info, "Email changed successfully.")
-        |> redirect(to: ~p"/phoenix_kit_users/settings")
+        |> redirect(to: ~p"/phoenix_kit/settings")
 
       {:error, _} ->
         conn
         |> put_flash(:error, "Email change link is invalid or it has expired.")
-        |> redirect(to: ~p"/phoenix_kit_users/settings")
+        |> redirect(to: ~p"/phoenix_kit/settings")
     end
   end
 

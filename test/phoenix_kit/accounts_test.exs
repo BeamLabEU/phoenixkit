@@ -77,7 +77,7 @@ defmodule BeamLab.PhoenixKit.AccountsTest do
       assert "has already been taken" in errors_on(changeset).email
     end
 
-    test "registers phoenix_kit_users without password" do
+    test "registers phoenix_kit without password" do
       email = unique_user_email()
       {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
       assert user.email == email

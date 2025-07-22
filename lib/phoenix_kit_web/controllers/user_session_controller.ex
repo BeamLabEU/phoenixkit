@@ -53,7 +53,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionController do
     if user = Accounts.get_user_by_email(email) do
       Accounts.deliver_login_instructions(
         user,
-        &url(~p"/phoenix_kit_users/log-in/#{&1}")
+        &url(~p"/phoenix_kit/log-in/#{&1}")
       )
     end
 
@@ -62,7 +62,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionController do
 
     conn
     |> put_flash(:info, info)
-    |> redirect(to: ~p"/phoenix_kit_users/log-in")
+    |> redirect(to: ~p"/phoenix_kit/log-in")
   end
 
   def confirm(conn, %{"token" => token}) do
@@ -76,7 +76,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionController do
     else
       conn
       |> put_flash(:error, "Magic link is invalid or it has expired.")
-      |> redirect(to: ~p"/phoenix_kit_users/log-in")
+      |> redirect(to: ~p"/phoenix_kit/log-in")
     end
   end
 

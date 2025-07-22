@@ -7,7 +7,7 @@
     :if={!@user.confirmed_at}
     for={@form}
     id="confirmation_form"
-    action={~p"/phoenix_kit_users/log-in?_action=confirmed"}
+    action={~p"/phoenix_kit/log-in?_action=confirmed"}
     phx-mounted={JS.focus_first()}
   >
     <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
@@ -29,7 +29,7 @@
     :if={@user.confirmed_at}
     for={@form}
     id="login_form"
-    action={~p"/phoenix_kit_users/log-in"}
+    action={~p"/phoenix_kit/log-in"}
     phx-mounted={JS.focus_first()}
   >
     <input type="hidden" name={@form[:token].name} value={@form[:token].value} />

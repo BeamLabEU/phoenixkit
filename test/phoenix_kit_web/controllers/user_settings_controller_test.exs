@@ -6,33 +6,33 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
 
   setup :register_and_log_in_user
 
-  describe "GET /phoenix_kit_users/settings" do
+  describe "GET /phoenix_kit/settings" do
     test "renders settings page", %{conn: conn} do
-      conn = get(conn, ~p"/phoenix_kit_users/settings")
+      conn = get(conn, ~p"/phoenix_kit/settings")
       response = html_response(conn, 200)
       assert response =~ "Settings"
     end
 
     test "redirects if user is not logged in" do
       conn = build_conn()
-      conn = get(conn, ~p"/phoenix_kit_users/settings")
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/log-in"
+      conn = get(conn, ~p"/phoenix_kit/settings")
+      assert redirected_to(conn) == ~p"/phoenix_kit/log-in"
     end
 
     @tag token_authenticated_at: DateTime.add(DateTime.utc_now(:second), -11, :minute)
     test "redirects if user is not in sudo mode", %{conn: conn} do
-      conn = get(conn, ~p"/phoenix_kit_users/settings")
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/log-in"
+      conn = get(conn, ~p"/phoenix_kit/settings")
+      assert redirected_to(conn) == ~p"/phoenix_kit/log-in"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must re-authenticate to access this page."
     end
   end
 
-  describe "PUT /phoenix_kit_users/settings (change password form)" do
+  describe "PUT /phoenix_kit/settings (change password form)" do
     test "updates the user password and resets tokens", %{conn: conn, user: user} do
       new_password_conn =
-        put(conn, ~p"/phoenix_kit_users/settings", %{
+        put(conn, ~p"/phoenix_kit/settings", %{
           "action" => "update_password",
           "user" => %{
             "password" => "new valid password",
@@ -40,7 +40,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
           }
         })
 
-      assert redirected_to(new_password_conn) == ~p"/phoenix_kit_users/settings"
+      assert redirected_to(new_password_conn) == ~p"/phoenix_kit/settings"
 
       assert get_session(new_password_conn, :user_token) != get_session(conn, :user_token)
 
@@ -52,7 +52,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
 
     test "does not update password on invalid data", %{conn: conn} do
       old_password_conn =
-        put(conn, ~p"/phoenix_kit_users/settings", %{
+        put(conn, ~p"/phoenix_kit/settings", %{
           "action" => "update_password",
           "user" => %{
             "password" => "too short",
@@ -69,16 +69,16 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
     end
   end
 
-  describe "PUT /phoenix_kit_users/settings (change email form)" do
+  describe "PUT /phoenix_kit/settings (change email form)" do
     @tag :capture_log
     test "updates the user email", %{conn: conn, user: user} do
       conn =
-        put(conn, ~p"/phoenix_kit_users/settings", %{
+        put(conn, ~p"/phoenix_kit/settings", %{
           "action" => "update_email",
           "user" => %{"email" => unique_user_email()}
         })
 
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/settings"
+      assert redirected_to(conn) == ~p"/phoenix_kit/settings"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "A link to confirm your email"
@@ -88,7 +88,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
 
     test "does not update email on invalid data", %{conn: conn} do
       conn =
-        put(conn, ~p"/phoenix_kit_users/settings", %{
+        put(conn, ~p"/phoenix_kit/settings", %{
           "action" => "update_email",
           "user" => %{"email" => "with spaces"}
         })
@@ -99,7 +99,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
     end
   end
 
-  describe "GET /phoenix_kit_users/settings/confirm-email/:token" do
+  describe "GET /phoenix_kit/settings/confirm-email/:token" do
     setup %{user: user} do
       email = unique_user_email()
 
@@ -112,8 +112,8 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
     end
 
     test "updates the user email once", %{conn: conn, user: user, token: token, email: email} do
-      conn = get(conn, ~p"/phoenix_kit_users/settings/confirm-email/#{token}")
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/settings"
+      conn = get(conn, ~p"/phoenix_kit/settings/confirm-email/#{token}")
+      assert redirected_to(conn) == ~p"/phoenix_kit/settings"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "Email changed successfully"
@@ -121,17 +121,17 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
       refute Accounts.get_user_by_email(user.email)
       assert Accounts.get_user_by_email(email)
 
-      conn = get(conn, ~p"/phoenix_kit_users/settings/confirm-email/#{token}")
+      conn = get(conn, ~p"/phoenix_kit/settings/confirm-email/#{token}")
 
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/settings"
+      assert redirected_to(conn) == ~p"/phoenix_kit/settings"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "Email change link is invalid or it has expired"
     end
 
     test "does not update email with invalid token", %{conn: conn, user: user} do
-      conn = get(conn, ~p"/phoenix_kit_users/settings/confirm-email/oops")
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/settings"
+      conn = get(conn, ~p"/phoenix_kit/settings/confirm-email/oops")
+      assert redirected_to(conn) == ~p"/phoenix_kit/settings"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "Email change link is invalid or it has expired"
@@ -141,8 +141,8 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsControllerTest do
 
     test "redirects if user is not logged in", %{token: token} do
       conn = build_conn()
-      conn = get(conn, ~p"/phoenix_kit_users/settings/confirm-email/#{token}")
-      assert redirected_to(conn) == ~p"/phoenix_kit_users/log-in"
+      conn = get(conn, ~p"/phoenix_kit/settings/confirm-email/#{token}")
+      assert redirected_to(conn) == ~p"/phoenix_kit/log-in"
     end
   end
 end

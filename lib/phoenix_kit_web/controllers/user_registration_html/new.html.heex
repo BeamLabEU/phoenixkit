@@ -5,7 +5,7 @@
       <:subtitle>
         Already registered?
         <.link
-          navigate={~p"/phoenix_kit_users/log-in"}
+          navigate={~p"/phoenix_kit/log-in"}
           class="font-semibold text-brand hover:underline"
         >
           Log in
@@ -15,7 +15,7 @@
     </.header>
   </div>
 
-  <.form :let={f} for={@changeset} action={~p"/phoenix_kit_users/register"}>
+  <.form :let={f} for={@changeset} action={~p"/phoenix_kit/register"}>
     <.input
       field={f[:email]}
       type="email"

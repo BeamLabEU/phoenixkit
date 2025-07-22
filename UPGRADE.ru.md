@@ -27,45 +27,78 @@ mix deps.update phoenix_kit
 mix deps.get
 ```
 
-### Шаг 3: Использовать новые команды установки
+### Шаг 3: Zero-Configuration настройка
 
-Теперь доступны автоматизированные команды:
+В v1.0.0+ PhoenixKit использует zero-configuration подход:
 
-```bash
-# Проверить что будет обновлено (без изменения файлов)
-mix phoenix_kit.gen.routes --dry-run
+```elixir
+# В lib/your_app_web/router.ex
+defmodule YourAppWeb.Router do
+  use YourAppWeb, :router
+  import BeamLab.PhoenixKitWeb.Router  # ← Добавить этот import
 
-# Обновить router конфигурацию
-mix phoenix_kit.gen.routes --force
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {YourAppWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user  # ← Добавить PhoenixKit auth
+  end
 
-# Обновить миграции (если появились новые)
-mix phoenix_kit.gen.migration
+  scope "/" do
+    pipe_through :browser
+    get "/", PageController, :home
+  end
 
-# Полная переустановка (осторожно!)
-mix phoenix_kit.install --force
+  # PhoenixKit аутентификация - ОДНА СТРОКА!
+  phoenix_kit()  # ← Вот и всё!
+end
 ```
 
-### Шаг 4: Проверить изменения
+### Шаг 4: Добавить таблицы БД
 
-1. **Router configuration** - убедитесь что routes правильно обновлены:
-   ```elixir
-   # Должно быть:
-   import BeamLab.PhoenixKitWeb.UserAuth,
-     only: [fetch_current_scope_for_user: 2, redirect_if_user_is_authenticated: 2, require_authenticated_user: 2]
-   
-   # В browser pipeline:
-   plug :fetch_current_scope_for_user
-   ```
+```bash
+# Создать файл миграции
+mix ecto.gen.migration add_phoenix_kit_auth_tables
+```
 
-2. **Configuration** - проверьте `config/config.exs`:
-   ```elixir
-   config :phoenix_kit, mode: :library
-   ```
+Скопируйте содержимое миграции из `deps/phoenix_kit/priv/repo/migrations/` или добавьте это:
 
-3. **Migrations** - запустите новые миграции:
-   ```bash
-   mix ecto.migrate
-   ```
+```elixir
+defmodule YourApp.Repo.Migrations.AddPhoenixKitAuthTables do
+  use Ecto.Migration
+
+  def change do
+    create table(:phoenix_kit_users) do
+      add :email, :citext, null: false
+      add :hashed_password, :string
+      add :confirmed_at, :utc_datetime
+      timestamps(type: :utc_datetime)
+    end
+
+    create unique_index(:phoenix_kit_users, [:email])
+
+    create table(:phoenix_kit_users_tokens) do
+      add :user_id, references(:phoenix_kit_users, on_delete: :delete_all), null: false
+      add :token, :binary, null: false
+      add :context, :string, null: false
+      add :sent_to, :string
+      add :authenticated_at, :utc_datetime
+      timestamps(type: :utc_datetime, updated_at: false)
+    end
+
+    create index(:phoenix_kit_users_tokens, [:user_id])
+    create unique_index(:phoenix_kit_users_tokens, [:context, :token])
+  end
+end
+```
+
+Затем запустите:
+```bash
+mix ecto.migrate
+```
 
 ### Шаг 5: Тестирование
 
@@ -87,12 +120,21 @@ mix phx.server
 **Симптом:** Ошибки компиляции в router.ex
 
 **Решение:**
-```bash
-# Покажет что нужно исправить
-mix phoenix_kit.gen.routes --dry-run
+Убедитесь что у вас правильная настройка import и plugin:
+```elixir
+# В lib/your_app_web/router.ex
+defmodule YourAppWeb.Router do
+  use YourAppWeb, :router
+  import BeamLab.PhoenixKitWeb.Router  # ← Обязательно нужен этот import
 
-# Автоматически исправит
-mix phoenix_kit.gen.routes --force
+  pipeline :browser do
+    # ... другие plug'и ...
+    plug :fetch_current_scope_for_user  # ← Обязательно нужен этот plug
+  end
+
+  # Обязательно нужен этот вызов макроса
+  phoenix_kit()
+end
 ```
 
 ### Проблема: Миграции уже существуют
@@ -104,11 +146,14 @@ mix phoenix_kit.gen.routes --force
 # Проверить существующие миграции
 ls priv/repo/migrations/ | grep phoenix_kit
 
-# Удалить старые миграции PhoenixKit (осторожно!)
+# Если у вас есть старые миграции PhoenixKit, удалите их (осторожно!)
 rm priv/repo/migrations/*phoenix_kit*
 
-# Создать новые
-mix phoenix_kit.gen.migration
+# Скопируйте правильную миграцию из deps
+cp deps/phoenix_kit/priv/repo/migrations/* priv/repo/migrations/
+
+# Или создайте вручную с содержимым миграции выше
+mix ecto.gen.migration add_phoenix_kit_auth_tables
 ```
 
 ### Проблема: Конфликты конфигурации
@@ -116,22 +161,25 @@ mix phoenix_kit.gen.migration
 **Симптом:** Дублирующая конфигурация в config.exs
 
 **Решение:**
-```bash
-# Удалить старые строки PhoenixKit из config/config.exs
-# Затем запустить:
-mix phoenix_kit.install --no-migrations
+Убедитесь что у вас настроен library mode:
+```elixir
+# config/config.exs
+config :phoenix_kit, mode: :library
 ```
+
+Удалите старые строки конфигурации PhoenixKit. Zero-config подходу нужна минимальная конфигурация.
 
 ## 📋 Checklist обновления
 
-- [ ] Обновил dependency в mix.exs
+- [ ] Обновил dependency в mix.exs до v1.0.0+
 - [ ] Запустил `mix deps.update phoenix_kit`
-- [ ] Проверил router configuration
-- [ ] Обновил миграции
-- [ ] Проверил конфигурацию
+- [ ] Добавил `import BeamLab.PhoenixKitWeb.Router` в router
+- [ ] Добавил `plug :fetch_current_scope_for_user` в browser pipeline
+- [ ] Добавил `phoenix_kit()` макрос в routes
+- [ ] Создал и запустил миграции базы данных
 - [ ] Протестировал компиляцию
 - [ ] Протестировал запуск сервера
-- [ ] Проверил авторизацию работает
+- [ ] Проверил что authentication routes работают (/phoenix_kit/register, /phoenix_kit/log-in)
 
 ## 🆘 Откат к предыдущей версии
 
@@ -159,4 +207,4 @@ mix phoenix_kit.install --no-migrations
 
 1. Проверьте [Issues на GitHub](https://github.com/BeamLabEU/phoenixkit/issues)
 2. Создайте новый issue с деталями проблемы
-3. Приложите вывод команд `mix compile` и `mix phoenix_kit.install --dry-run`
+3. Приложите вывод команды `mix compile` и убедитесь что ваша настройка router соответствует zero-config паттерну выше

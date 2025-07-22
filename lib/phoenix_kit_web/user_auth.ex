@@ -176,7 +176,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
       conn
       |> put_flash(:error, "You must re-authenticate to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/phoenix_kit_users/log-in")
+      |> redirect(to: ~p"/phoenix_kit/log-in")
       |> halt()
     end
   end
@@ -206,7 +206,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
       conn
       |> put_flash(:error, "You must log in to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/phoenix_kit_users/log-in")
+      |> redirect(to: ~p"/phoenix_kit/log-in")
       |> halt()
     end
   end

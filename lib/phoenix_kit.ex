@@ -151,7 +151,7 @@ defmodule BeamLab.PhoenixKit do
        mix ecto.migrate
     
     That's it! No installation commands needed.
-    Routes automatically available at /auth/register, /auth/log-in, etc.
+    Routes automatically available at /phoenix_kit/register, /phoenix_kit/log-in, etc.
     """)
     
     :ok
@@ -195,7 +195,7 @@ defmodule BeamLab.PhoenixKit do
       BeamLab.PhoenixKit.show_router_example()
       BeamLab.PhoenixKit.show_router_example("authentication")
   """
-  def show_router_example(scope_prefix \\ "/phoenix_kit_users"), do: BeamLab.PhoenixKit.Installer.show_router_example(scope_prefix)
+  def show_router_example(scope_prefix \\ "/phoenix_kit"), do: BeamLab.PhoenixKit.Installer.show_router_example(scope_prefix)
 
   # Delegate to Accounts context for easier API
   defdelegate register_user(attrs), to: BeamLab.PhoenixKit.Accounts
