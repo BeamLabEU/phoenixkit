@@ -1,2 +1,7 @@
+# Test helper for PhoenixModuleTemplate
+
+# Start ExUnit
 ExUnit.start()
-Ecto.Adapters.SQL.Sandbox.mode(BeamLab.PhoenixKit.Repo, :manual)
+
+# Start the repository for testing
+Ecto.Adapters.SQL.Sandbox.mode(PhoenixModuleTemplate.Repo, :manual)
