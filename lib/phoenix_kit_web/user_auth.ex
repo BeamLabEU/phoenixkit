@@ -51,7 +51,10 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
     user_token && Accounts.delete_user_session_token(user_token)
 
     if live_socket_id = get_session(conn, :live_socket_id) do
-      BeamLab.PhoenixKitWeb.get_endpoint_module().broadcast(live_socket_id, "disconnect", %{})
+      # Only broadcast in standalone mode to avoid endpoint dependency issues
+      if BeamLab.PhoenixKit.standalone?() do
+        BeamLab.PhoenixKitWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+      end
     end
 
     conn
