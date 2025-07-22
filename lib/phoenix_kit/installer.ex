@@ -356,10 +356,10 @@ defmodule BeamLab.PhoenixKit.Installer do
     
     <%= if assigns[:current_scope] do %>
       <div>Welcome, <%= @current_scope.user.email %>!</div>
-      <.link href={~p"#{scope_prefix}/log-out"} method="delete">Log out</.link>
+      <.link href={"#{scope_prefix}/log-out"} method="delete">Log out</.link>
     <% else %>
-      <.link navigate={~p"#{scope_prefix}/log-in"}>Log in</.link>
-      <.link navigate={~p"#{scope_prefix}/register"}>Sign up</.link>
+      <.link navigate={"#{scope_prefix}/log-in"}>Log in</.link>
+      <.link navigate={"#{scope_prefix}/register"}>Sign up</.link>
     <% end %>
 
     Router Configuration:

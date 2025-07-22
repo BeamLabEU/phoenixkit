@@ -92,7 +92,7 @@ defmodule BeamLab.PhoenixKitWeb.CoreComponents do
 
       <.button>Send!</.button>
       <.button phx-click="go" variant="primary">Send!</.button>
-      <.button navigate={~p"/"}>Home</.button>
+      <.button navigate={"/"}>Home</.button>
   """
   attr :rest, :global, include: ~w(href navigate patch method)
   attr :variant, :string, values: ~w(primary)

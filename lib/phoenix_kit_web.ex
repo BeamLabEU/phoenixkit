@@ -138,8 +138,8 @@ defmodule BeamLab.PhoenixKitWeb do
       alias Phoenix.LiveView.JS
       alias BeamLab.PhoenixKitWeb.Layouts
 
-      # Routes generation with the ~p sigil
-      unquote(verified_routes())
+      # Routes generation disabled in library mode for compile-time compatibility
+      # unquote(verified_routes())
     end
   end
 

@@ -15,7 +15,7 @@ defmodule BeamLab.PhoenixKitWeb.UserRegistrationController do
         {:ok, _} =
           Accounts.deliver_login_instructions(
             user,
-            &url(~p"/phoenix_kit/log-in/#{&1}")
+            &url("/phoenix_kit/log-in/#{&1}")
           )
 
         conn
@@ -23,7 +23,7 @@ defmodule BeamLab.PhoenixKitWeb.UserRegistrationController do
           :info,
           "An email was sent to #{user.email}, please access it to confirm your account."
         )
-        |> redirect(to: ~p"/phoenix_kit/log-in")
+        |> redirect(to: "/phoenix_kit/log-in")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new, changeset: changeset, layout: {BeamLab.PhoenixKitWeb.Layouts, :app})
