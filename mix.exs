@@ -14,13 +14,10 @@ defmodule BeamLab.PhoenixKit.MixProject do
     ]
   end
 
-  # Configuration for the OTP application.
-  #
-  # Type `mix help compile.app` for more information.
+  # Library mode: no OTP application
   def application do
     [
-      mod: {BeamLab.PhoenixKit.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger]
     ]
   end
 
