@@ -53,7 +53,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSessionController do
     if user = Accounts.get_user_by_email(email) do
       Accounts.deliver_login_instructions(
         user,
-        &url("/phoenix_kit/log-in/#{&1}")
+        &("/phoenix_kit/log-in/#{&1}")
       )
     end
 

@@ -22,7 +22,7 @@ defmodule BeamLab.PhoenixKitWeb.UserSettingsController do
         Accounts.deliver_user_update_email_instructions(
           Ecto.Changeset.apply_action!(changeset, :insert),
           user.email,
-          &url("/phoenix_kit/settings/confirm-email/#{&1}")
+          &("/phoenix_kit/settings/confirm-email/#{&1}")
         )
 
         conn

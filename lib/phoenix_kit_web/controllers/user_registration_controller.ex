@@ -15,7 +15,7 @@ defmodule BeamLab.PhoenixKitWeb.UserRegistrationController do
         {:ok, _} =
           Accounts.deliver_login_instructions(
             user,
-            &url("/phoenix_kit/log-in/#{&1}")
+            &("/phoenix_kit/log-in/#{&1}")
           )
 
         conn
