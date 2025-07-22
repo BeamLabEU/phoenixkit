@@ -1,5 +1,6 @@
 defmodule BeamLab.PhoenixKitWeb.UserAuth do
   # LIBRARY MODE COMPATIBILITY: Avoid VerifiedRoutes compile-time dependencies
+  # The following line is INTENTIONALLY commented out to prevent compile-time errors
   # use BeamLab.PhoenixKitWeb, :verified_routes
 
   import Plug.Conn
