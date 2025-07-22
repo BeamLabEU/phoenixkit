@@ -1,5 +1,6 @@
 defmodule BeamLab.PhoenixKitWeb.UserAuth do
-  use BeamLab.PhoenixKitWeb, :verified_routes
+  # LIBRARY MODE COMPATIBILITY: Avoid VerifiedRoutes compile-time dependencies
+  # use BeamLab.PhoenixKitWeb, :verified_routes
 
   import Plug.Conn
   import Phoenix.Controller
@@ -56,7 +57,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
     conn
     |> renew_session(nil)
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: ~p"/")
+    |> redirect(to: "/")
   end
 
   @doc """
@@ -176,7 +177,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
       conn
       |> put_flash(:error, "You must re-authenticate to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/phoenix_kit/log-in")
+      |> redirect(to: "/phoenix_kit/log-in")
       |> halt()
     end
   end
@@ -194,7 +195,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
     end
   end
 
-  defp signed_in_path(_conn), do: ~p"/"
+  defp signed_in_path(_conn), do: "/"
 
   @doc """
   Plug for routes that require the user to be authenticated.
@@ -206,7 +207,7 @@ defmodule BeamLab.PhoenixKitWeb.UserAuth do
       conn
       |> put_flash(:error, "You must log in to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/phoenix_kit/log-in")
+      |> redirect(to: "/phoenix_kit/log-in")
       |> halt()
     end
   end

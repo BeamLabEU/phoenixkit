@@ -144,10 +144,18 @@ defmodule BeamLab.PhoenixKitWeb do
   end
 
   def verified_routes do
+    # Determine endpoint at macro expansion time, not runtime
+    endpoint_module = if BeamLab.PhoenixKit.standalone?() do
+      BeamLab.PhoenixKitWeb.Endpoint
+    else
+      # In library mode, use a placeholder and resolve at runtime
+      BeamLab.PhoenixKitWeb.Endpoint
+    end
+    
     quote do
-      # Use runtime endpoint detection for library mode
+      # Use conditional endpoint for library mode compatibility
       use Phoenix.VerifiedRoutes,
-        endpoint: BeamLab.PhoenixKitWeb.get_endpoint_module(),
+        endpoint: unquote(endpoint_module),
         router: BeamLab.PhoenixKitWeb.StandaloneRouter,
         statics: BeamLab.PhoenixKitWeb.static_paths()
     end
