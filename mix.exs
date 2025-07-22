@@ -77,7 +77,7 @@ defmodule BeamLab.PhoenixKit.MixProject do
       {:ecto_sql, "~> 3.13"},
       {:bcrypt_elixir, "~> 3.3"},
       {:phoenix_html, "~> 4.2"},
-      {:phoenix_live_view, "~> 0.20"},
+      {:phoenix_live_view, ">= 0.18.0"},
       {:tailwind, "~> 0.3"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
