@@ -23,7 +23,8 @@ config :phoenix_kit, :scopes,
 config :phoenix_kit,
   namespace: BeamLab.PhoenixKit,
   ecto_repos: [BeamLab.PhoenixKit.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  mode: :library
 
 # Configures the endpoint
 config :phoenix_kit, BeamLab.PhoenixKitWeb.Endpoint,

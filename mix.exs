@@ -14,8 +14,8 @@ defmodule BeamLab.PhoenixKit.MixProject do
       aliases: aliases(),
       deps: deps(),
       
-      # Phoenix Code Reloader (only for standalone dev mode)
-      listeners: listeners(Mix.env(), phoenix_kit_mode()),
+      # Phoenix Code Reloader (only for standalone dev mode) 
+      listeners: listeners(),
       
       # Package metadata
       description: description(),
@@ -52,13 +52,32 @@ defmodule BeamLab.PhoenixKit.MixProject do
 
   # Determines if Phoenix Kit should run as standalone app or library
   defp phoenix_kit_mode do
-    case {Mix.env(), Application.get_env(:phoenix_kit, :mode)} do
-      {:dev, _} -> :standalone  # Always standalone in dev for easier development
-      {:test, _} -> :standalone  # Always standalone in test for complete testing
-      {_, :standalone} -> :standalone
-      {_, :library} -> :library
-      {_, nil} -> :library  # Default to library mode
-      {_, _} -> :library
+    # ВСЕГДА по умолчанию library режим для безопасной установки как зависимость
+    case Application.get_env(:phoenix_kit, :mode) do
+      :standalone -> :standalone  # Только если явно указано
+      _ -> :library  # По умолчанию library
+    end
+  end
+  
+  # Check if this is the main project being compiled (not a dependency)
+  defp is_main_project? do
+    # Multiple checks to ensure this is the main PhoenixKit project
+    cond do
+      # Check if we're in a deps directory (compiled as dependency)
+      String.contains?(File.cwd!(), "/deps/phoenix_kit") -> false
+      
+      # Check if this app is phoenix_kit AND we're in the right directory
+      Mix.Project.config()[:app] == :phoenix_kit and 
+      Path.basename(File.cwd!()) == "phoenix_kit" -> true
+      
+      # Check if Mix.Project.deps includes phoenix_kit (we're a dependency)
+      Enum.any?(Mix.Project.deps_paths(), fn {app, _path} -> app == :phoenix_kit end) -> false
+      
+      # Default: if app name is phoenix_kit, assume it's main project
+      Mix.Project.config()[:app] == :phoenix_kit -> true
+      
+      # Otherwise, we're definitely a library
+      true -> false
     end
   end
 
@@ -70,42 +89,56 @@ defmodule BeamLab.PhoenixKit.MixProject do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
+    base_deps() ++ mode_specific_deps(phoenix_kit_mode())
+  end
+
+  defp base_deps do
     [
-      # CORE libraries (always needed)
-      {:phoenix, "~> 1.8.0-rc.4"},
-      {:phoenix_ecto, "~> 4.6"},
-      {:ecto_sql, "~> 3.13"},
+      # Минимальные CORE библиотеки для аутентификации
       {:bcrypt_elixir, "~> 3.3"},
-      {:phoenix_html, "~> 4.2"},
-      {:phoenix_live_view, ">= 0.18.0"},
-      {:tailwind, "~> 0.3"},
-      {:heroicons,
-       github: "tailwindlabs/heroicons",
-       tag: "v2.1.1",
-       sparse: "optimized",
-       app: false,
-       compile: false,
-       depth: 1},
       {:gettext, "~> 0.26"},
-      {:jason, "~> 1.2"},
-
-      # DATABASE (optional, user can choose their own)
-      {:postgrex, ">= 0.0.0", optional: true},
-
-      # STANDALONE dependencies (only for demo/development)
-      {:bandit, "~> 1.5", optional: true},
-      {:swoosh, "~> 1.16", optional: true},
-      {:req, "~> 0.5", optional: true},
-      # {:dns_cluster, "~> 0.2", optional: true},
-      {:phoenix_live_dashboard, "~> 0.8.3", optional: true},
-      {:telemetry_metrics, "~> 1.0", optional: true},
-      {:telemetry_poller, "~> 1.0", optional: true},
-
-      # DEVELOPMENT dependencies
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:esbuild, "~> 0.9", runtime: Mix.env() == :dev, optional: true},
+      
+      # DEVELOPMENT dependencies  
       {:floki, ">= 0.30.0", only: :test}
+    ]
+  end
 
+  # Mode-specific dependencies
+  defp mode_specific_deps(:standalone) do
+    [
+      # Standalone mode: Use specific Phoenix versions for compatibility
+      {:phoenix, "~> 1.7.0"},
+      {:phoenix_live_view, "~> 0.20.0"},
+      {:tailwind, "~> 0.3"},
+      
+      # Standalone runtime dependencies
+      {:bandit, "~> 1.5"},
+      {:swoosh, "~> 1.16"},
+      {:req, "~> 0.5"},
+      {:phoenix_live_dashboard, "~> 0.8.3"},
+      {:telemetry_metrics, "~> 1.0"},
+      {:telemetry_poller, "~> 1.0"},
+
+      # Development dependencies (only for standalone)
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:esbuild, "~> 0.9", runtime: Mix.env() == :dev}
+    ]
+  end
+  
+  defp mode_specific_deps(:library) do
+    [
+      # Library mode: Минимальные зависимости, используем версии родительского приложения
+      {:phoenix, ">= 1.6.0", optional: true},
+      {:phoenix_live_view, ">= 0.18.0", optional: true},
+      {:phoenix_ecto, ">= 4.0.0", optional: true},
+      {:ecto_sql, ">= 3.0.0", optional: true},
+      {:phoenix_html, ">= 3.0.0", optional: true},
+      {:jason, ">= 1.0.0", optional: true},
+      
+      # UI зависимости (полностью опциональные)
+      {:heroicons, github: "tailwindlabs/heroicons", tag: "v2.1.1", optional: true, sparse: "optimized", app: false, compile: false},
+      {:tailwind, "~> 0.3", optional: true},
+      {:esbuild, "~> 0.9", optional: true}
     ]
   end
 
@@ -205,6 +238,31 @@ defmodule BeamLab.PhoenixKit.MixProject do
   end
 
   # Phoenix Code Reloader listeners (only for standalone dev mode)
-  defp listeners(:dev, :standalone), do: [Phoenix.CodeReloader]
-  defp listeners(_env, _mode), do: []
+  defp listeners() do
+    # Safely determine if we should add listeners without calling potentially problematic functions
+    cond do
+      # Only add listeners if we're in dev environment AND this is the main project
+      Mix.env() == :dev and is_main_project_safe?() ->
+        # Use proper child_spec for Phoenix.CodeReloader
+        [%{
+          id: Phoenix.CodeReloader,
+          start: {Phoenix.CodeReloader, :start_link, []},
+          type: :worker,
+          restart: :permanent,
+          shutdown: 5000
+        }]
+      
+      # In all other cases, no listeners
+      true -> []
+    end
+  end
+  
+  # Safe version of is_main_project that won't fail during dependency compilation
+  defp is_main_project_safe? do
+    try do
+      is_main_project?()
+    rescue
+      _ -> false
+    end
+  end
 end

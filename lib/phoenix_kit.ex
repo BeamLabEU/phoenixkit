@@ -71,13 +71,18 @@ defmodule BeamLab.PhoenixKit do
 
   """
   def mode do
-    case {Mix.env(), Application.get_env(:phoenix_kit, :mode)} do
-      {:dev, _} -> :standalone
-      {:test, _} -> :standalone  # Always standalone in test for complete testing
-      {_, :standalone} -> :standalone
-      {_, :library} -> :library
-      {_, nil} -> :library
-      {_, _} -> :library
+    # ВСЕГДА по умолчанию library режим для безопасной установки
+    case Application.get_env(:phoenix_kit, :mode) do
+      :standalone -> :standalone  # Только если явно указано
+      _ -> :library  # По умолчанию library
+    end
+  end
+  
+  # Check if PhoenixKit application has been started (indicates standalone mode)
+  defp application_started? do
+    case Application.get_application(__MODULE__) do
+      :phoenix_kit -> true
+      _ -> false
     end
   end
 
