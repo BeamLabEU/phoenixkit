@@ -22,7 +22,7 @@ defmodule PhoenixKitWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import PhoenixKitWeb.Gettext
+      use Gettext, backend: PhoenixKitWeb.Gettext
     end
   end
 
@@ -33,7 +33,7 @@ defmodule PhoenixKitWeb do
         layouts: [html: PhoenixKitWeb.Layouts]
 
       import Plug.Conn
-      import PhoenixKitWeb.Gettext
+      use Gettext, backend: PhoenixKitWeb.Gettext
       import PhoenixKitWeb.CoreComponents
 
       unquote(verified_routes())
@@ -45,7 +45,7 @@ defmodule PhoenixKitWeb do
       use Phoenix.LiveView,
         layout: {PhoenixKitWeb.Layouts, :app}
 
-      import PhoenixKitWeb.Gettext
+      use Gettext, backend: PhoenixKitWeb.Gettext
       import PhoenixKitWeb.CoreComponents
 
       unquote(html_helpers())
@@ -56,7 +56,7 @@ defmodule PhoenixKitWeb do
     quote do
       use Phoenix.LiveComponent
 
-      import PhoenixKitWeb.Gettext
+      use Gettext, backend: PhoenixKitWeb.Gettext
 
       unquote(html_helpers())
     end
@@ -70,7 +70,7 @@ defmodule PhoenixKitWeb do
         only: [get_csrf_token: 0, view_module: 1, view_template: 1]
 
       import PhoenixKitWeb.CoreComponents
-      import PhoenixKitWeb.Gettext
+      use Gettext, backend: PhoenixKitWeb.Gettext
 
       unquote(html_helpers())
     end

@@ -68,6 +68,7 @@ defmodule PhoenixModuleTemplate.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:esbuild, "~> 0.8", only: :dev},
       {:tailwind, "~> 0.2", only: :dev},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
 
       # Authentication
       {:bcrypt_elixir, "~> 3.0"},

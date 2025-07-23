@@ -7,7 +7,7 @@ defmodule PhoenixKitWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  import PhoenixKitWeb.Gettext
+  use Gettext, backend: PhoenixKitWeb.Gettext
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -307,7 +307,7 @@ defmodule PhoenixKitWeb.CoreComponents do
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
       id={@id}
-      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
+      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide_flash("##{@id}")}
       role="alert"
       class={[
         "fixed top-2 right-2 mr-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
@@ -375,7 +375,7 @@ defmodule PhoenixKitWeb.CoreComponents do
     """
   end
 
-  defp hide(js \\ %JS{}, selector) do
+  defp hide_flash(js, selector) do
     JS.hide(js,
       to: selector,
       time: 200,
