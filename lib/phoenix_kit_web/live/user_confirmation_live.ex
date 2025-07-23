@@ -16,8 +16,8 @@ defmodule PhoenixKitWeb.UserConfirmationLive do
       </.simple_form>
 
       <p class="text-center mt-4">
-        <.link href={~p"/users/register"}>Register</.link>
-        | <.link href={~p"/users/log_in"}>Log in</.link>
+        <.link href={"./register"}>Register</.link>
+        | <.link href={"./log_in"}>Log in</.link>
       </p>
     </div>
     """
@@ -36,7 +36,7 @@ defmodule PhoenixKitWeb.UserConfirmationLive do
         {:noreply,
          socket
          |> put_flash(:info, "User confirmed successfully.")
-         |> redirect(to: ~p"/")}
+         |> redirect(to: "../")}
 
       :error ->
         # If there is a current user and the account was already confirmed,
@@ -45,13 +45,13 @@ defmodule PhoenixKitWeb.UserConfirmationLive do
         # a warning message.
         case socket.assigns do
           %{current_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
-            {:noreply, redirect(socket, to: ~p"/")}
+            {:noreply, redirect(socket, to: "../")}
 
           %{} ->
             {:noreply,
              socket
              |> put_flash(:error, "User confirmation link is invalid or it has expired.")
-             |> redirect(to: ~p"/")}
+             |> redirect(to: "../")}
         end
     end
   end

@@ -42,6 +42,12 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix hex.build` - Build package for Hex.pm
 - `mix hex.publish` - Publish to Hex.pm (requires auth)
 
+### Version Management
+- **Current Version**: 0.1.2 (in mix.exs)
+- **Version Strategy**: Semantic versioning (MAJOR.MINOR.PATCH)
+- **Before Publishing**: Always increment version number and update CHANGELOG.md
+- **Critical**: Update version in mix.exs before any release or significant changes
+
 ## Architecture
 
 ### Library Structure

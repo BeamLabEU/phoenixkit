@@ -59,7 +59,7 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
         {:ok, _} =
           Accounts.deliver_user_confirmation_instructions(
             user,
-            &url("./confirm/#{&1}")
+            fn token -> "./confirm/#{token}" end
           )
 
         changeset = Accounts.change_user_registration(user)
