@@ -15,6 +15,7 @@ defmodule PhoenixKitWeb.AuthRouter do
     plug :fetch_current_user
   end
 
+
   scope "/" do
     pipe_through [:browser]
 

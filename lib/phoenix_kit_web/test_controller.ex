@@ -16,13 +16,13 @@ defmodule PhoenixKitWeb.TestController do
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Register for an account
             </h2>
-            #{if get_flash(conn, :error) do
-              "<div class=\"mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded\">#{get_flash(conn, :error)}</div>"
+            #{if Phoenix.Flash.get(conn.assigns.flash, :error) do
+              "<div class=\"mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded\">#{Phoenix.Flash.get(conn.assigns.flash, :error)}</div>"
             else
               ""
             end}
-            #{if get_flash(conn, :info) do
-              "<div class=\"mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded\">#{get_flash(conn, :info)}</div>"
+            #{if Phoenix.Flash.get(conn.assigns.flash, :info) do
+              "<div class=\"mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded\">#{Phoenix.Flash.get(conn.assigns.flash, :info)}</div>"
             else
               ""
             end}
@@ -82,13 +82,13 @@ defmodule PhoenixKitWeb.TestController do
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Log in to account
             </h2>
-            #{if get_flash(conn, :error) do
-              "<div class=\"mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded\">#{get_flash(conn, :error)}</div>"
+            #{if Phoenix.Flash.get(conn.assigns.flash, :error) do
+              "<div class=\"mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded\">#{Phoenix.Flash.get(conn.assigns.flash, :error)}</div>"
             else
               ""
             end}
-            #{if get_flash(conn, :info) do
-              "<div class=\"mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded\">#{get_flash(conn, :info)}</div>"
+            #{if Phoenix.Flash.get(conn.assigns.flash, :info) do
+              "<div class=\"mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded\">#{Phoenix.Flash.get(conn.assigns.flash, :info)}</div>"
             else
               ""
             end}

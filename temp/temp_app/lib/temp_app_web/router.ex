@@ -23,8 +23,8 @@ defmodule TempAppWeb.Router do
     get "/", PageController, :home
   end
 
-  # Add PhoenixKit authentication routes
-  phoenix_kit_auth_routes("/phoenix_kit")
+  # Add PhoenixKit authentication routes  
+  phoenix_kit_auth_routes()
 
   # Other scopes may use custom stacks.
   # scope "/api", TempAppWeb do

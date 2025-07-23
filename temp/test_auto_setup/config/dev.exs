@@ -6,28 +6,18 @@ import Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-# Configure the database
-config :temp_app, TempApp.Repo,
-  username: "postgres",
-  password: "postgres", 
-  hostname: "localhost",
-  database: "temp_app_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
-config :temp_app, TempAppWeb.Endpoint,
+config :test_auto_setup, TestAutoSetupWeb.Endpoint,
   # Bind to 0.0.0.0 to expose the server to the docker host machine.
   # This makes make the service accessible from any network interface.
   # Change to `ip: {127, 0, 0, 1}` to allow access only from the server machine.
-  http: [ip: {0, 0, 0, 0}, port: 4001],
+  http: [ip: {0, 0, 0, 0}, port: 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "2F4ekfjyxEtHWp+f8qpOd6zWEZhmzL+akEocxPzhNyHMJS9ADpmgNATk8qjy9+Vt",
+  secret_key_base: "zHq0I/Je4iJ3xcwu685ryXGq0Q5EuI9PPGgcFVwoTPdtGo0c2Ihc27rgtWrnuOCe",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:temp_app, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:temp_app, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:test_auto_setup, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:test_auto_setup, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -54,16 +44,17 @@ config :temp_app, TempAppWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :temp_app, TempAppWeb.Endpoint,
+config :test_auto_setup, TestAutoSetupWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"lib/temp_app_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"priv/gettext/.*(po)$",
+      ~r"lib/test_auto_setup_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :temp_app, dev_routes: true
+config :test_auto_setup, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
@@ -80,3 +71,6 @@ config :phoenix_live_view,
   debug_heex_annotations: true,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
+
+# Disable swoosh api client as it is only required for production adapters.
+config :swoosh, :api_client, false
