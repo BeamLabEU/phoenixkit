@@ -1,5 +1,8 @@
 defmodule TempAppWeb.Router do
   use TempAppWeb, :router
+  
+  # Import PhoenixKit integration helpers
+  import PhoenixKitWeb.Integration
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -19,6 +22,9 @@ defmodule TempAppWeb.Router do
 
     get "/", PageController, :home
   end
+
+  # Add PhoenixKit authentication routes
+  phoenix_kit_auth_routes("/phoenix_kit")
 
   # Other scopes may use custom stacks.
   # scope "/api", TempAppWeb do
