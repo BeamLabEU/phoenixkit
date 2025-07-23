@@ -3,11 +3,11 @@ defmodule PhoenixModuleTemplate.MixProject do
 
   @version "0.1.0"
   @description "Professional Phoenix module template with PostgreSQL support"
-  @source_url "https://github.com/your-org/phoenix_module_template"
+  @source_url "https://github.com/BeamLabEU/phoenixkit"
 
   def project do
     [
-      app: :phoenix_module_template,
+      app: :phoenix_kit,
       version: @version,
       description: @description,
       elixir: "~> 1.15",
@@ -55,10 +55,10 @@ defmodule PhoenixModuleTemplate.MixProject do
       {:postgrex, ">= 0.0.0"},
 
       # Optional Phoenix integration (peer dependencies)
-      {:phoenix, "~> 1.7", optional: true},
-      {:phoenix_ecto, "~> 4.4", optional: true},
+      {:phoenix, ">= 1.7.0", optional: true},
+      {:phoenix_ecto, "~> 4.6", optional: true},
       {:phoenix_html, "~> 4.0", optional: true},
-      {:phoenix_live_view, "~> 0.20", optional: true},
+      {:phoenix_live_view, "~> 1.0", optional: true},
 
       # Development and testing
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
@@ -74,8 +74,8 @@ defmodule PhoenixModuleTemplate.MixProject do
   # Package configuration for Hex.pm
   defp package do
     [
-      name: "phoenix_module_template",
-      maintainers: ["Your Name"],
+      name: "phoenix_kit",
+      maintainers: ["BeamLab EU"],
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url},
       files: ~w(lib priv mix.exs README.md LICENSE CHANGELOG.md)
