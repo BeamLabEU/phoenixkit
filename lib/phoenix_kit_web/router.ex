@@ -35,12 +35,14 @@ defmodule PhoenixKitWeb.Router do
     # If your application does not have an admins-only section yet,
     # you can use Plug.BasicAuth to set up some basic authentication
     # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
+    if Code.ensure_loaded?(Phoenix.LiveDashboard.Router) do
+      import Phoenix.LiveDashboard.Router
 
-    scope "/dev" do
-      pipe_through :browser
+      scope "/dev" do
+        pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: PhoenixKitWeb.Telemetry
+        live_dashboard "/dashboard", metrics: PhoenixKitWeb.Telemetry
+      end
     end
   end
 

@@ -59,7 +59,7 @@ defmodule PhoenixModuleTemplate.MixProject do
       {:phoenix_ecto, "~> 4.6"},
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_view, "~> 1.0"},
-      {:phoenix_live_dashboard, "~> 0.8", only: :dev},
+      {:phoenix_live_dashboard, "~> 0.8", only: :dev, optional: true},
 
       # Web functionality
       {:gettext, "~> 0.24"},
