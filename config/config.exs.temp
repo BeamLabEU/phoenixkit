@@ -1,29 +1,30 @@
+# This file is responsible for configuring your application
+# and its dependencies with the aid of the Config module.
+#
+# This configuration file is loaded before any dependency and
+# is restricted to this project.
+
+# General application configuration
 import Config
 
-# Configuration for PhoenixKit with web layer support
+config :temp_app,
+  generators: [timestamp_type: :utc_datetime]
 
-# Configure the database repository
-config :phoenix_kit,
-  ecto_repos: [PhoenixKit.Repo]
-
-# Configure Ecto repository for development
-config :phoenix_kit, PhoenixKit.Repo, adapter: Ecto.Adapters.Postgres
-
-# Configure the endpoint
-config :phoenix_kit, PhoenixKitWeb.Endpoint,
+# Configures the endpoint
+config :temp_app, TempAppWeb.Endpoint,
   url: [host: "localhost"],
-  adapter: Phoenix.Endpoint.Cowboy2Adapter,
+  adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: PhoenixKitWeb.ErrorHTML, json: PhoenixKitWeb.ErrorJSON],
+    formats: [html: TempAppWeb.ErrorHTML, json: TempAppWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: PhoenixKit.PubSub,
-  live_view: [signing_salt: "UHVYcLyP"]
+  pubsub_server: TempApp.PubSub,
+  live_view: [signing_salt: "WZWYZ4HX"]
 
 # Configure esbuild (the version is required)
 config :esbuild,
-  version: "0.21.5",
-  phoenix_kit: [
+  version: "0.17.11",
+  temp_app: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
@@ -32,8 +33,8 @@ config :esbuild,
 
 # Configure tailwind (the version is required)
 config :tailwind,
-  version: "3.4.0",
-  phoenix_kit: [
+  version: "3.4.3",
+  temp_app: [
     args: ~w(
       --config=tailwind.config.js
       --input=css/app.css
@@ -49,9 +50,6 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
-# Configure mailer
-config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

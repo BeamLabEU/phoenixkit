@@ -1,4 +1,4 @@
-defmodule PhoenixModuleTemplate.Repo do
+defmodule PhoenixKit.Repo do
   @moduledoc """
   Repository module for PhoenixModuleTemplate.
 
@@ -36,7 +36,7 @@ defmodule PhoenixModuleTemplate.Repo do
   """
 
   use Ecto.Repo,
-    otp_app: :phoenix_module_template,
+    otp_app: :phoenix_kit,
     adapter: Ecto.Adapters.Postgres
 
   @doc """

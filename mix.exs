@@ -1,7 +1,7 @@
 defmodule PhoenixModuleTemplate.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.1.1"
   @description "Professional Phoenix module template with PostgreSQL support"
   @source_url "https://github.com/BeamLabEU/phoenixkit"
 
@@ -39,7 +39,7 @@ defmodule PhoenixModuleTemplate.MixProject do
   # The parent Phoenix application will handle supervision
   def application do
     [
-      extra_applications: [:logger, :ecto, :postgrex]
+      extra_applications: [:logger, :ecto, :postgrex, :crypto, :gettext]
     ]
   end
 
@@ -54,20 +54,34 @@ defmodule PhoenixModuleTemplate.MixProject do
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
 
-      # Optional Phoenix integration (peer dependencies)
-      {:phoenix, ">= 1.7.0", optional: true},
-      {:phoenix_ecto, "~> 4.6", optional: true},
-      {:phoenix_html, "~> 4.0", optional: true},
-      {:phoenix_live_view, "~> 1.0", optional: true},
+      # Phoenix web layer - required for authentication module
+      {:phoenix, "~> 1.7.0"},
+      {:phoenix_ecto, "~> 4.6"},
+      {:phoenix_html, "~> 4.0"},
+      {:phoenix_live_view, "~> 1.0"},
+      {:phoenix_live_dashboard, "~> 0.8", only: :dev},
+
+      # Web functionality
+      {:gettext, "~> 0.24"},
+      {:telemetry_metrics, "~> 1.0"},
+      {:telemetry_poller, "~> 1.0"},
+      {:plug_cowboy, "~> 2.5"},
+      {:esbuild, "~> 0.8", only: :dev},
+      {:tailwind, "~> 0.2", only: :dev},
+
+      # Authentication
+      {:bcrypt_elixir, "~> 3.0"},
+      {:swoosh, "~> 1.4"},
 
       # Development and testing
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:floki, ">= 0.30.0", only: :test},
 
       # Utilities
-      {:jason, "~> 1.4", optional: true}
+      {:jason, "~> 1.4"}
     ]
   end
 
