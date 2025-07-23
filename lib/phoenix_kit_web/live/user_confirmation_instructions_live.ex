@@ -21,8 +21,7 @@ defmodule PhoenixKitWeb.UserConfirmationInstructionsLive do
       </.simple_form>
 
       <p class="text-center mt-4">
-        <.link href={"./register"}>Register</.link>
-        | <.link href={"./log_in"}>Log in</.link>
+        <.link href="./register">Register</.link> | <.link href="./log_in">Log in</.link>
       </p>
     </div>
     """

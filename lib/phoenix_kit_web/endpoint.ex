@@ -27,7 +27,6 @@ defmodule PhoenixKitWeb.Endpoint do
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :phoenix_kit
   end
 
-
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 

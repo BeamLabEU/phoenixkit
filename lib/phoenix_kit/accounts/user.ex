@@ -1,15 +1,18 @@
 defmodule PhoenixKit.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
-  
+
   # Bcrypt functions for password hashing
   if Code.ensure_loaded?(Bcrypt) do
     defp hash_password(password), do: Bcrypt.hash_pwd_salt(password)
-    defp verify_password(password, hash) when is_binary(hash), do: Bcrypt.verify_pass(password, hash)
+
+    defp verify_password(password, hash) when is_binary(hash),
+      do: Bcrypt.verify_pass(password, hash)
+
     defp no_user_verify(), do: Bcrypt.no_user_verify()
   else
     # Fallback if Bcrypt is not available
-    defp hash_password(_password), do: raise "Bcrypt is required for password hashing"
+    defp hash_password(_password), do: raise("Bcrypt is required for password hashing")
     defp verify_password(_password, _hash), do: false
     defp no_user_verify(), do: :ok
   end

@@ -1,0 +1,51 @@
+<div class="hero bg-base-200 min-h-screen">
+  <div class="hero-content flex-col lg:flex-row-reverse">
+    <!-- Welcome Section (Left side on desktop) -->
+    <div class="text-center lg:text-left">
+      <h1 class="text-5xl font-bold">Join PhoenixKit!</h1>
+      <p class="py-6">
+        Create your account to access secure authentication features. 
+        Get started with our professional authentication system designed for Phoenix applications.
+      </p>
+      <div class="text-sm opacity-75">
+        Already have an account?
+        <.link navigate="./log-in" class="font-semibold text-primary hover:underline">
+          Sign in here
+        </.link>
+      </div>
+    </div>
+
+    <!-- Registration Form Card (Right side on desktop) -->
+    <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
+      <div class="card-body">
+        <h2 class="card-title justify-center">{assigns[:page_title] || "Create account"}</h2>
+        
+        {@inner_content}
+        
+        <!-- Development Mode Notice -->
+        <div class="alert alert-info text-sm mt-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="stroke-current shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            >
+            </path>
+          </svg>
+          <span>
+            Development mode: Powered by 
+            <a href="https://hex.pm/packages/phoenix_kit" class="font-semibold underline" target="_blank" rel="noopener">
+              PhoenixKit
+            </a>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
