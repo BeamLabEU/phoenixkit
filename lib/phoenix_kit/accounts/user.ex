@@ -1,6 +1,18 @@
 defmodule PhoenixKit.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  
+  # Bcrypt functions for password hashing
+  if Code.ensure_loaded?(Bcrypt) do
+    defp hash_password(password), do: Bcrypt.hash_pwd_salt(password)
+    defp verify_password(password, hash) when is_binary(hash), do: Bcrypt.verify_pass(password, hash)
+    defp no_user_verify(), do: Bcrypt.no_user_verify()
+  else
+    # Fallback if Bcrypt is not available
+    defp hash_password(_password), do: raise "Bcrypt is required for password hashing"
+    defp verify_password(_password, _hash), do: false
+    defp no_user_verify(), do: :ok
+  end
 
   schema "users" do
     field :email, :string
@@ -71,7 +83,7 @@ defmodule PhoenixKit.Accounts.User do
       |> validate_length(:password, max: 72, count: :bytes)
       # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
       # would keep the database transaction open longer and hurt performance.
-      |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
+      |> put_change(:hashed_password, hash_password(password))
       |> delete_change(:password)
     else
       changeset
@@ -138,11 +150,11 @@ defmodule PhoenixKit.Accounts.User do
   """
   def valid_password?(%PhoenixKit.Accounts.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
-    Bcrypt.verify_pass(password, hashed_password)
+    verify_password(password, hashed_password)
   end
 
   def valid_password?(_, _) do
-    Bcrypt.no_user_verify()
+    no_user_verify()
     false
   end
 
