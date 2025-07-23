@@ -6,6 +6,8 @@ defmodule PhoenixKit.Accounts do
   import Ecto.Query, warn: false
   alias PhoenixKit.Repo
 
+  # This module will be populated by mix phx.gen.auth
+
   alias PhoenixKit.Accounts.{User, UserToken, UserNotifier}
 
   ## Database getters
@@ -162,7 +164,7 @@ defmodule PhoenixKit.Accounts do
 
   ## Examples
 
-      iex> deliver_user_update_email_instructions(user, current_email, &url(~p"/users/settings/confirm_email/#{&1}"))
+      iex> deliver_user_update_email_instructions(user, current_email, &"/phoenix_kit/settings/confirm_email/#{&1}")
       {:ok, %{to: ..., body: ...}}
 
   """
@@ -249,10 +251,10 @@ defmodule PhoenixKit.Accounts do
 
   ## Examples
 
-      iex> deliver_user_confirmation_instructions(user, &url(~p"/users/confirm/#{&1}"))
+      iex> deliver_user_confirmation_instructions(user, &"/phoenix_kit/confirm/#{&1}")
       {:ok, %{to: ..., body: ...}}
 
-      iex> deliver_user_confirmation_instructions(confirmed_user, &url(~p"/users/confirm/#{&1}"))
+      iex> deliver_user_confirmation_instructions(confirmed_user, &"/phoenix_kit/confirm/#{&1}")
       {:error, :already_confirmed}
 
   """
@@ -296,7 +298,7 @@ defmodule PhoenixKit.Accounts do
 
   ## Examples
 
-      iex> deliver_user_reset_password_instructions(user, &url(~p"/users/reset_password/#{&1}"))
+      iex> deliver_user_reset_password_instructions(user, &"/phoenix_kit/reset_password/#{&1}")
       {:ok, %{to: ..., body: ...}}
 
   """

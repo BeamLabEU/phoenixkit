@@ -38,13 +38,13 @@ defmodule PhoenixKitWeb.Router do
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{PhoenixKitWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", UserRegistrationLive, :new
-      live "/users/log_in", UserLoginLive, :new
-      live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+      live "/phoenix_kit/register", UserRegistrationLive, :new
+      live "/phoenix_kit/log_in", UserLoginLive, :new
+      live "/phoenix_kit/reset_password", UserForgotPasswordLive, :new
+      live "/phoenix_kit/reset_password/:token", UserResetPasswordLive, :edit
     end
 
-    post "/users/log_in", UserSessionController, :create
+    post "/phoenix_kit/log_in", UserSessionController, :create
   end
 
   scope "/", PhoenixKitWeb do
@@ -52,20 +52,20 @@ defmodule PhoenixKitWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{PhoenixKitWeb.UserAuth, :ensure_authenticated}] do
-      live "/users/settings", UserSettingsLive, :edit
-      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      live "/phoenix_kit/settings", UserSettingsLive, :edit
+      live "/phoenix_kit/settings/confirm_email/:token", UserSettingsLive, :confirm_email
     end
   end
 
   scope "/", PhoenixKitWeb do
     pipe_through [:browser]
 
-    delete "/users/log_out", UserSessionController, :delete
+    delete "/phoenix_kit/log_out", UserSessionController, :delete
 
     live_session :current_user,
       on_mount: [{PhoenixKitWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
+      live "/phoenix_kit/confirm/:token", UserConfirmationLive, :edit
+      live "/phoenix_kit/confirm", UserConfirmationInstructionsLive, :new
     end
   end
 end

@@ -21,7 +21,7 @@ defmodule PhoenixKitWeb.UserAuthTest do
     test "stores the user token in the session", %{conn: conn, user: user} do
       conn = UserAuth.log_in_user(conn, user)
       assert token = get_session(conn, :user_token)
-      assert get_session(conn, :live_socket_id) == "users_sessions:#{Base.url_encode64(token)}"
+      assert get_session(conn, :live_socket_id) == "phoenix_kit_sessions:#{Base.url_encode64(token)}"
       assert redirected_to(conn) == ~p"/"
       assert Accounts.get_user_by_session_token(token)
     end
@@ -65,7 +65,7 @@ defmodule PhoenixKitWeb.UserAuthTest do
     end
 
     test "broadcasts to the given live_socket_id", %{conn: conn} do
-      live_socket_id = "users_sessions:abcdef-token"
+      live_socket_id = "phoenix_kit_sessions:abcdef-token"
       PhoenixKitWeb.Endpoint.subscribe(live_socket_id)
 
       conn
@@ -106,7 +106,7 @@ defmodule PhoenixKitWeb.UserAuthTest do
       assert get_session(conn, :user_token) == user_token
 
       assert get_session(conn, :live_socket_id) ==
-               "users_sessions:#{Base.url_encode64(user_token)}"
+               "phoenix_kit_sessions:#{Base.url_encode64(user_token)}"
     end
 
     test "does not authenticate if data is missing", %{conn: conn, user: user} do
@@ -231,7 +231,7 @@ defmodule PhoenixKitWeb.UserAuthTest do
       conn = conn |> fetch_flash() |> UserAuth.require_authenticated_user([])
       assert conn.halted
 
-      assert redirected_to(conn) == ~p"/users/log_in"
+      assert redirected_to(conn) == "/phoenix_kit/log_in"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must log in to access this page."

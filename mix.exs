@@ -1,7 +1,7 @@
 defmodule PhoenixModuleTemplate.MixProject do
   use Mix.Project
 
-  @version "0.1.3"
+  @version "0.1.5"
   @description "Professional Phoenix module template with PostgreSQL support"
   @source_url "https://github.com/BeamLabEU/phoenixkit"
 

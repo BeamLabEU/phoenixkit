@@ -31,7 +31,8 @@ defmodule PhoenixKitWeb.UserResetPasswordLive do
       </.simple_form>
 
       <p class="text-center text-sm mt-4">
-        <.link href="./register">Register</.link> | <.link href="./log_in">Log in</.link>
+        <.link href={"/phoenix_kit/register"}>Register</.link>
+        | <.link href={"/phoenix_kit/log_in"}>Log in</.link>
       </p>
     </div>
     """
@@ -60,7 +61,7 @@ defmodule PhoenixKitWeb.UserResetPasswordLive do
         {:noreply,
          socket
          |> put_flash(:info, "Password reset successfully.")
-         |> redirect(to: "./log_in")}
+         |> redirect(to: "/phoenix_kit/log_in")}
 
       {:error, changeset} ->
         {:noreply, assign_form(socket, Map.put(changeset, :action, :insert))}
@@ -78,7 +79,7 @@ defmodule PhoenixKitWeb.UserResetPasswordLive do
     else
       socket
       |> put_flash(:error, "Reset password link is invalid or it has expired.")
-      |> redirect(to: "../")
+      |> redirect(to: "/")
     end
   end
 

@@ -8,20 +8,20 @@ defmodule PhoenixKitWeb.UserLoginLive do
         Log in to account
         <:subtitle>
           Don't have an account?
-          <.link navigate="./register" class="font-semibold text-brand hover:underline">
+          <.link navigate={"/phoenix_kit/register"} class="font-semibold text-brand hover:underline">
             Sign up
           </.link>
           for an account now.
         </:subtitle>
       </.header>
 
-      <.simple_form for={@form} id="login_form" action="./log-in" phx-update="ignore">
+      <.simple_form for={@form} id="login_form" action={"/phoenix_kit/log_in"} phx-update="ignore">
         <.input field={@form[:email]} type="email" label="Email" required />
         <.input field={@form[:password]} type="password" label="Password" required />
 
         <:actions>
           <.input field={@form[:remember_me]} type="checkbox" label="Keep me logged in" />
-          <.link href="./reset-password" class="text-sm font-semibold">
+          <.link href={"/phoenix_kit/reset_password"} class="text-sm font-semibold">
             Forgot your password?
           </.link>
         </:actions>

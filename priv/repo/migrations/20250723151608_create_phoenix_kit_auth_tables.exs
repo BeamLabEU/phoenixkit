@@ -1,10 +1,10 @@
-defmodule PhoenixKit.Repo.Migrations.CreateUsersAuthTables do
+defmodule PhoenixKit.Repo.Migrations.CreatePhoenixKitAuthTables do
   use Ecto.Migration
 
   def change do
     execute "CREATE EXTENSION IF NOT EXISTS citext", ""
 
-    create table(:users) do
+    create table(:phoenix_kit) do
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :naive_datetime
@@ -12,10 +12,10 @@ defmodule PhoenixKit.Repo.Migrations.CreateUsersAuthTables do
       timestamps()
     end
 
-    create unique_index(:users, [:email])
+    create unique_index(:phoenix_kit, [:email])
 
-    create table(:users_tokens) do
-      add :user_id, references(:users, on_delete: :delete_all), null: false
+    create table(:phoenix_kit_tokens) do
+      add :user_id, references(:phoenix_kit, on_delete: :delete_all), null: false
       add :token, :binary, null: false
       add :context, :string, null: false
       add :sent_to, :string
@@ -23,7 +23,7 @@ defmodule PhoenixKit.Repo.Migrations.CreateUsersAuthTables do
       timestamps(updated_at: false)
     end
 
-    create index(:users_tokens, [:user_id])
-    create unique_index(:users_tokens, [:context, :token])
+    create index(:phoenix_kit_tokens, [:user_id])
+    create unique_index(:phoenix_kit_tokens, [:context, :token])
   end
 end

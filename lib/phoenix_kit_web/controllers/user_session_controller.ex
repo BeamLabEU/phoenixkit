@@ -10,7 +10,7 @@ defmodule PhoenixKitWeb.UserSessionController do
 
   def create(conn, %{"_action" => "password_updated"} = params) do
     conn
-    |> put_session(:user_return_to, "./settings")
+    |> put_session(:user_return_to, "/phoenix_kit/settings")
     |> create(params, "Password updated successfully!")
   end
 
@@ -30,7 +30,7 @@ defmodule PhoenixKitWeb.UserSessionController do
       conn
       |> put_flash(:error, "Invalid email or password")
       |> put_flash(:email, String.slice(email, 0, 160))
-      |> redirect(to: "./log_in")
+      |> redirect(to: "/phoenix_kit/log_in")
     end
   end
 

@@ -21,7 +21,8 @@ defmodule PhoenixKitWeb.UserConfirmationInstructionsLive do
       </.simple_form>
 
       <p class="text-center mt-4">
-        <.link href="./register">Register</.link> | <.link href="./log_in">Log in</.link>
+        <.link href={"/phoenix_kit/register"}>Register</.link>
+        | <.link href={"/phoenix_kit/log_in"}>Log in</.link>
       </p>
     </div>
     """
@@ -35,7 +36,7 @@ defmodule PhoenixKitWeb.UserConfirmationInstructionsLive do
     if user = Accounts.get_user_by_email(email) do
       Accounts.deliver_user_confirmation_instructions(
         user,
-        fn token -> "./confirm/#{token}" end
+        &"/phoenix_kit/confirm/#{&1}"
       )
     end
 
@@ -45,6 +46,6 @@ defmodule PhoenixKitWeb.UserConfirmationInstructionsLive do
     {:noreply,
      socket
      |> put_flash(:info, info)
-     |> redirect(to: "../")}
+     |> redirect(to: "/")}
   end
 end

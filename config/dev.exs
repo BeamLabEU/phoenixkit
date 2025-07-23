@@ -3,8 +3,8 @@ import Config
 # Database configuration for PhoenixKit development
 config :phoenix_kit, PhoenixKit.Repo,
   username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
+  password: "yourrandompassword",
+  hostname: "172.18.0.2",
   database: "phoenix_kit_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
