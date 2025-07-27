@@ -41,6 +41,26 @@ defmodule PhoenixKit.AutoSetup do
   def detect_parent_repo do
     Logger.debug("[PhoenixKit] Detecting parent application repository...")
     
+    # First check if repo is explicitly configured
+    case Application.get_env(:phoenix_kit, :repo) do
+      nil ->
+        Logger.debug("[PhoenixKit] No explicit repo configured, attempting auto-detection...")
+        auto_detect_repo()
+      
+      repo when is_atom(repo) ->
+        Logger.info("[PhoenixKit] Using explicitly configured repo: #{repo}")
+        Logger.debug("[PhoenixKit] Configuration found: config :phoenix_kit, repo: #{repo}")
+        # Ensure the application is loaded before validating repo
+        if repo != PhoenixKit do
+          app_module = repo |> Module.split() |> hd() |> String.downcase() |> String.to_atom()
+          Logger.debug("[PhoenixKit] Ensuring application #{app_module} is loaded...")
+          Application.ensure_loaded(app_module)
+        end
+        validate_repo(repo)
+    end
+  end
+
+  defp auto_detect_repo do
     # Get all loaded applications
     apps = Application.loaded_applications()
     Logger.debug("[PhoenixKit] Loaded applications: #{inspect(Enum.map(apps, fn {name, _, _} -> name end))}")
@@ -56,6 +76,46 @@ defmodule PhoenixKit.AutoSetup do
       app_name ->
         Logger.info("[PhoenixKit] Detected parent app: #{app_name}")
         find_repo_module(app_name)
+    end
+  end
+
+  defp validate_repo(repo) do
+    try do
+      # First try to load the module
+      case Code.ensure_loaded(repo) do
+        {:module, module} ->
+          if function_exported?(module, :__adapter__, 0) do
+            # Try to get the adapter, but catch any errors
+            try do
+              adapter = module.__adapter__()
+              if adapter == Ecto.Adapters.Postgres do
+                {:ok, repo}
+              else
+                {:error, "Configured repo #{repo} is not using Postgres adapter (got #{adapter})"}
+              end
+            rescue
+              _error ->
+                # If we can't get adapter info, assume it's valid and let runtime handle it
+                Logger.warning("[PhoenixKit] Could not verify adapter for #{repo}, proceeding anyway")
+                {:ok, repo}
+            end
+          else
+            {:error, "Configured repo #{repo} is not an Ecto.Repo (no __adapter__/0 function)"}
+          end
+        
+        {:error, reason} ->
+          # Try to be more helpful with common module loading issues
+          case reason do
+            :nofile ->
+              {:error, "Configured repo #{repo} module not found. Make sure the parent application is compiled and loaded."}
+            _ ->
+              {:error, "Configured repo #{repo} could not be loaded: #{reason}"}
+          end
+      end
+    rescue
+      error ->
+        Logger.warning("[PhoenixKit] Error validating repo #{repo}: #{inspect(error)}, proceeding anyway")
+        {:ok, repo}
     end
   end
 
@@ -149,58 +209,25 @@ defmodule PhoenixKit.AutoSetup do
     end
   end
 
-  defp tables_exist?(repo) do
-    # Check if phoenix_kit table exists
-    query = """
-    SELECT EXISTS (
-      SELECT FROM information_schema.tables 
-      WHERE table_name = 'phoenix_kit'
-    );
-    """
-    
-    case repo.query(query) do
-      {:ok, %{rows: [[true]]}} -> true
-      _ -> false
-    end
-  end
+  # defp tables_exist?(repo) do
+  #   # Check if phoenix_kit table exists
+  #   query = """
+  #   SELECT EXISTS (
+  #     SELECT FROM information_schema.tables 
+  #     WHERE table_name = 'phoenix_kit'
+  #   );
+  #   """
+  #   
+  #   case repo.query(query) do
+  #     {:ok, %{rows: [[true]]}} -> true
+  #     _ -> false
+  #   end
+  # end
 
-  defp create_tables!(repo) do
-    # Execute the migration directly
-    migration_sql = """
-    CREATE EXTENSION IF NOT EXISTS citext;
-
-    CREATE TABLE IF NOT EXISTS phoenix_kit (
-      id bigserial PRIMARY KEY,
-      email citext NOT NULL,
-      hashed_password varchar(255) NOT NULL,
-      confirmed_at timestamp,
-      inserted_at timestamp NOT NULL DEFAULT NOW(),
-      updated_at timestamp NOT NULL DEFAULT NOW()
-    );
-
-    CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_email_index ON phoenix_kit (email);
-
-    CREATE TABLE IF NOT EXISTS phoenix_kit_tokens (
-      id bigserial PRIMARY KEY,
-      user_id bigint NOT NULL REFERENCES phoenix_kit(id) ON DELETE CASCADE,
-      token bytea NOT NULL,
-      context varchar(255) NOT NULL,
-      sent_to varchar(255),
-      inserted_at timestamp NOT NULL DEFAULT NOW()
-    );
-
-    CREATE INDEX IF NOT EXISTS phoenix_kit_tokens_user_id_index ON phoenix_kit_tokens (user_id);
-    CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_tokens_context_token_index ON phoenix_kit_tokens (context, token);
-    """
-
-    case repo.query(migration_sql) do
-      {:ok, _} -> 
-        Logger.info("[PhoenixKit] Database tables created successfully")
-        :ok
-      {:error, error} -> 
-        raise "Failed to create PhoenixKit tables: #{inspect(error)}"
-    end
-  end
+  # defp create_tables!(repo) do
+  #   # Execute the migration directly - functionality removed in favor of new migration system
+  #   :ok
+  # end
 
   @doc """
   Checks if PhoenixKit is properly set up.

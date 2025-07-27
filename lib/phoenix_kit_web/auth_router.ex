@@ -15,9 +15,17 @@ defmodule PhoenixKitWeb.AuthRouter do
     plug :fetch_current_user
   end
 
+  pipeline :redirect_if_authenticated do
+    plug :redirect_if_user_is_authenticated
+  end
+
+  pipeline :require_authenticated do
+    plug :require_authenticated_user
+  end
+
 
   scope "/" do
-    pipe_through [:browser]
+    pipe_through [:browser, :redirect_if_authenticated]
 
     # Test routes with static HTML forms
     get "/register", PhoenixKitWeb.TestController, :register
@@ -30,17 +38,21 @@ defmodule PhoenixKitWeb.AuthRouter do
 
     post "/log_in", PhoenixKitWeb.UserSessionController, :create
 
-    delete "/log_out", PhoenixKitWeb.UserSessionController, :delete
-
     live "/reset_password", PhoenixKitWeb.UserForgotPasswordLive, :new
     live "/reset_password/:token", PhoenixKitWeb.UserResetPasswordLive, :edit
+  end
+
+  scope "/" do
+    pipe_through [:browser]
+    
+    delete "/log_out", PhoenixKitWeb.UserSessionController, :delete
 
     live "/confirm/:token", PhoenixKitWeb.UserConfirmationLive, :edit
     live "/confirm", PhoenixKitWeb.UserConfirmationInstructionsLive, :new
   end
 
   scope "/" do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :require_authenticated]
 
     live "/settings", PhoenixKitWeb.UserSettingsLive, :edit
     live "/settings/confirm_email/:token", PhoenixKitWeb.UserSettingsLive, :confirm_email

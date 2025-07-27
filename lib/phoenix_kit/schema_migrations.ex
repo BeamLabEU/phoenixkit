@@ -14,10 +14,10 @@ defmodule PhoenixKit.SchemaMigrations do
   @current_schema_version "1.0.0"
   
   # Schema version history - each version defines required changes
-  @schema_versions [
-    "0.1.0",  # Initial version (implicit)
-    "1.0.0"   # Current version with citext and proper indexes
-  ]
+  # @schema_versions [
+  #   "0.1.0",  # Initial version (implicit)
+  #   "1.0.0"   # Current version with citext and proper indexes
+  # ]
 
   @doc """
   Gets the current schema version installed in the database.
@@ -82,22 +82,25 @@ defmodule PhoenixKit.SchemaMigrations do
   Creates the schema version tracking table if it doesn't exist.
   """
   def ensure_version_table(repo) do
-    create_version_table_sql = """
-    CREATE TABLE IF NOT EXISTS phoenix_kit_schema_versions (
-      id bigserial PRIMARY KEY,
-      version varchar(50) NOT NULL,
-      applied_at timestamp NOT NULL DEFAULT NOW(),
-      inserted_at timestamp NOT NULL DEFAULT NOW()
-    );
+    # Execute commands separately to avoid prepared statement issues
+    version_table_commands = [
+      """
+      CREATE TABLE IF NOT EXISTS phoenix_kit_schema_versions (
+        id bigserial PRIMARY KEY,
+        version varchar(50) NOT NULL,
+        applied_at timestamp NOT NULL DEFAULT NOW(),
+        inserted_at timestamp NOT NULL DEFAULT NOW()
+      )
+      """,
+      "CREATE INDEX IF NOT EXISTS phoenix_kit_schema_versions_version_index ON phoenix_kit_schema_versions (version)"
+    ]
     
-    CREATE INDEX IF NOT EXISTS phoenix_kit_schema_versions_version_index 
-      ON phoenix_kit_schema_versions (version);
-    """
-    
-    case repo.query(create_version_table_sql) do
-      {:ok, _} -> :ok
-      {:error, error} -> {:error, error}
-    end
+    Enum.reduce_while(version_table_commands, :ok, fn sql, _acc ->
+      case repo.query(sql) do
+        {:ok, _} -> {:cont, :ok}
+        {:error, error} -> {:halt, {:error, error}}
+      end
+    end)
   end
 
   @doc """
@@ -194,45 +197,51 @@ defmodule PhoenixKit.SchemaMigrations do
     
     # This migration ensures we have the current schema
     # It's safe to run multiple times (idempotent)
-    migration_sql = """
-    -- Ensure citext extension exists
-    CREATE EXTENSION IF NOT EXISTS citext;
-
-    -- Create or update phoenix_kit table
-    CREATE TABLE IF NOT EXISTS phoenix_kit (
-      id bigserial PRIMARY KEY,
-      email citext NOT NULL,
-      hashed_password varchar(255) NOT NULL,
-      confirmed_at timestamp,
-      inserted_at timestamp NOT NULL DEFAULT NOW(),
-      updated_at timestamp NOT NULL DEFAULT NOW()
-    );
-
-    -- Ensure unique index on email
-    CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_email_index ON phoenix_kit (email);
-
-    -- Create or update phoenix_kit_tokens table
-    CREATE TABLE IF NOT EXISTS phoenix_kit_tokens (
-      id bigserial PRIMARY KEY,
-      user_id bigint NOT NULL REFERENCES phoenix_kit(id) ON DELETE CASCADE,
-      token bytea NOT NULL,
-      context varchar(255) NOT NULL,
-      sent_to varchar(255),
-      inserted_at timestamp NOT NULL DEFAULT NOW()
-    );
-
-    -- Ensure indexes on tokens table
-    CREATE INDEX IF NOT EXISTS phoenix_kit_tokens_user_id_index ON phoenix_kit_tokens (user_id);
-    CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_tokens_context_token_index ON phoenix_kit_tokens (context, token);
-    """
+    # Execute each command separately to avoid prepared statement issues
+    migration_commands = [
+      "CREATE EXTENSION IF NOT EXISTS citext",
+      """
+      CREATE TABLE IF NOT EXISTS phoenix_kit (
+        id bigserial PRIMARY KEY,
+        email citext NOT NULL,
+        hashed_password varchar(255) NOT NULL,
+        confirmed_at timestamp,
+        inserted_at timestamp NOT NULL DEFAULT NOW(),
+        updated_at timestamp NOT NULL DEFAULT NOW()
+      )
+      """,
+      "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_email_index ON phoenix_kit (email)",
+      """
+      CREATE TABLE IF NOT EXISTS phoenix_kit_tokens (
+        id bigserial PRIMARY KEY,
+        user_id bigint NOT NULL REFERENCES phoenix_kit(id) ON DELETE CASCADE,
+        token bytea NOT NULL,
+        context varchar(255) NOT NULL,
+        sent_to varchar(255),
+        inserted_at timestamp NOT NULL DEFAULT NOW()
+      )
+      """,
+      "CREATE INDEX IF NOT EXISTS phoenix_kit_tokens_user_id_index ON phoenix_kit_tokens (user_id)",
+      "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_tokens_context_token_index ON phoenix_kit_tokens (context, token)"
+    ]
     
-    case repo.query(migration_sql) do
-      {:ok, _} -> 
+    # Execute each command separately
+    Enum.reduce_while(migration_commands, :ok, fn sql, _acc ->
+      case repo.query(sql) do
+        {:ok, _} -> 
+          {:cont, :ok}
+        {:error, error} -> 
+          Logger.error("[PhoenixKit] Schema migration to 1.0.0 failed on command: #{String.slice(sql, 0, 50)}...")
+          Logger.error("[PhoenixKit] Error: #{inspect(error)}")
+          {:halt, {:error, error}}
+      end
+    end)
+    |> case do
+      :ok -> 
         Logger.info("[PhoenixKit] Schema migration to 1.0.0 completed successfully")
         :ok
-      {:error, error} -> 
-        Logger.error("[PhoenixKit] Schema migration to 1.0.0 failed: #{inspect(error)}")
-        {:error, error}
+      error -> 
+        error
     end
   end
 

@@ -1,124 +1,124 @@
 defmodule Mix.Tasks.PhoenixKit.Install do
   @moduledoc """
-  Install PhoenixKit migrations into the parent application.
+  Install and configure PhoenixKit for use in an application.
 
-  This task copies the necessary migration files from PhoenixKit
-  into the parent application's priv/repo/migrations directory.
+  ## Example
 
-  ## Usage
+  Install using the default Ecto repo and matching engine:
 
-      mix phoenix_kit.install
+  ```bash
+  mix phoenix_kit.install
+  ```
 
-  This will copy the migration files and allow you to run:
+  Specify a custom repo and prefix explicitly:
 
-      mix ecto.migrate
+  ```bash
+  mix phoenix_kit.install --repo MyApp.CustomRepo --prefix "auth"
+  ```
 
   ## Options
 
-    * `--migrations-only` - Only copy migration files, don't update configuration
-
+  * `--prefix` or `-p` — Specify a PostgreSQL schema prefix, defaults to "public"
+  * `--repo` or `-r` — Specify an Ecto repo for PhoenixKit to use
+  * `--create-schema` — Create schema if using custom prefix (default: true for non-public prefixes)
   """
-  @shortdoc "Install PhoenixKit migrations into parent application"
+
+  @shortdoc "Install and configure PhoenixKit for use in an application"
 
   use Mix.Task
 
+  @switches [prefix: :string, repo: :string, create_schema: :boolean]
+  @aliases [p: :prefix, r: :repo]
+
   @impl Mix.Task
   def run(args) do
-    opts = parse_args(args)
+    {opts, _} = OptionParser.parse!(args, switches: @switches, aliases: @aliases)
+
+    app_name = Mix.Project.config()[:app]
+    repo = find_repo(opts[:repo])
+    prefix = opts[:prefix] || "public"
+    create_schema = opts[:create_schema] != false && prefix != "public"
+
+    migration_content = """
+    use Ecto.Migration
+
+    def up, do: PhoenixKit.Migration.up(#{migration_opts(prefix, create_schema)})
+
+    def down, do: PhoenixKit.Migration.down(#{migration_opts(prefix, create_schema)})
+    """
+
+    # Generate migration
+    timestamp = generate_timestamp()
+    migration_name = "add_phoenix_kit_auth_tables"
+    migration_file = "#{timestamp}_#{migration_name}.exs"
     
-    # Find the source migrations directory
-    phoenix_kit_priv = find_phoenix_kit_priv()
-    source_migrations = Path.join(phoenix_kit_priv, "repo/migrations")
+    migrations_path = Path.join([File.cwd!(), "priv", "repo", "migrations"])
+    File.mkdir_p!(migrations_path)
     
-    # Find the target migrations directory
-    target_migrations = "priv/repo/migrations"
+    migration_path = Path.join(migrations_path, migration_file)
     
-    if File.exists?(source_migrations) do
-      File.mkdir_p!(target_migrations)
-      copy_migrations(source_migrations, target_migrations)
+    module_name = "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.#{Macro.camelize(migration_name)}"
+    
+    full_migration = """
+    defmodule #{module_name} do
+      #{migration_content}
+    end
+    """
+
+    File.write!(migration_path, full_migration)
+
+    Mix.shell().info([:green, "* creating ", :reset, migration_path])
+    
+    # Add configuration if not exists
+    config_path = "config/config.exs"
+    if File.exists?(config_path) do
+      config_content = File.read!(config_path)
       
-      unless opts[:migrations_only] do
-        print_setup_instructions()
+      config_line = "config :phoenix_kit, repo: #{inspect(repo)}"
+      
+      unless String.contains?(config_content, config_line) do
+        updated_config = config_content <> "\n\n# PhoenixKit configuration\n#{config_line}\n"
+        File.write!(config_path, updated_config)
+        Mix.shell().info([:green, "* updating ", :reset, config_path])
       end
-    else
-      Mix.shell().error("PhoenixKit migrations not found at #{source_migrations}")
-      Mix.shell().error("Make sure PhoenixKit is properly installed as a dependency.")
+    end
+
+    Mix.shell().info([
+      :green, "\nPhoenixKit installation complete!\n",
+      :reset, "\nNext steps:\n",
+      "  1. Run: ", :bright, "mix ecto.migrate", :reset, "\n",
+      "  2. Add PhoenixKit routes to your router.ex\n"
+    ])
+  end
+
+  defp find_repo(nil) do
+    case get_ecto_repos() do
+      [repo | _] -> repo
+      [] -> 
+        Mix.raise("No Ecto repos found. Please specify a repo with --repo option.")
     end
   end
 
-  defp parse_args(args) do
-    {opts, _, _} = OptionParser.parse(args, switches: [migrations_only: :boolean])
-    opts
+  defp find_repo(repo_string) do
+    Module.concat([repo_string])
   end
 
-  defp find_phoenix_kit_priv do
-    # Try to find PhoenixKit in deps
-    deps_path = Mix.Project.deps_path()
-    phoenix_kit_dep = Path.join([deps_path, "phoenix_kit", "priv"])
-    
-    if File.exists?(phoenix_kit_dep) do
-      phoenix_kit_dep
-    else
-      # Fallback to local development
-      Path.join([File.cwd!(), "priv"])
-    end
+  defp get_ecto_repos do
+    Mix.Project.config()[:ecto_repos] || []
   end
 
-  defp copy_migrations(source, target) do
-    auth_migration = "create_phoenix_kit_auth_tables.exs"
-    
-    # Find the auth migration file
-    source_files = File.ls!(source)
-    auth_file = Enum.find(source_files, &String.ends_with?(&1, auth_migration))
-    
-    if auth_file do
-      timestamp = generate_timestamp()
-      new_filename = "#{timestamp}_#{auth_migration}"
-      
-      source_path = Path.join(source, auth_file)
-      target_path = Path.join(target, new_filename)
-      
-      File.copy!(source_path, target_path)
-      
-      Mix.shell().info("✅ Copied migration: #{new_filename}")
-    else
-      Mix.shell().error("❌ Auth migration file not found")
-    end
+  defp migration_opts("public", false), do: ""
+  defp migration_opts(prefix, create_schema) when is_binary(prefix) do
+    opts = [prefix: prefix]
+    opts = if create_schema, do: Keyword.put(opts, :create_schema, true), else: opts
+    inspect(opts)  
   end
 
   defp generate_timestamp do
-    {{year, month, day}, {hour, minute, second}} = :calendar.universal_time()
-    
-    :io_lib.format("~4..0B~2..0B~2..0B~2..0B~2..0B~2..0B", 
-                   [year, month, day, hour, minute, second])
-    |> to_string()
+    {{y, m, d}, {hh, mm, ss}} = :calendar.universal_time()
+    "#{y}#{pad(m)}#{pad(d)}#{pad(hh)}#{pad(mm)}#{pad(ss)}"
   end
 
-  defp print_setup_instructions do
-    Mix.shell().info("""
-
-    ✅ PhoenixKit migrations installed successfully!
-
-    Next steps:
-    
-    1. Add PhoenixKit configuration to your config/config.exs:
-    
-        config :phoenix_kit,
-          repo: YourApp.Repo
-    
-    2. Add PhoenixKit routes to your router:
-    
-        # lib/your_app_web/router.ex
-        import PhoenixKitWeb.Integration
-        phoenix_kit_auth_routes("/auth")
-    
-    3. Run the migration:
-    
-        mix ecto.migrate
-    
-    4. Start using PhoenixKit authentication!
-    
-    For more information, see: https://github.com/BeamLabEU/phoenixkit
-    """)
-  end
+  defp pad(i) when i < 10, do: <<?0, ?0 + i>>
+  defp pad(i), do: to_string(i)
 end

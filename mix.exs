@@ -79,6 +79,7 @@ defmodule PhoenixModuleTemplate.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:floki, ">= 0.30.0", only: :test},
+      {:hackney, "~> 1.9"},
 
       # Utilities
       {:jason, "~> 1.4"}

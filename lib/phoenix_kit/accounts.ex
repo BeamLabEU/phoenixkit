@@ -4,7 +4,7 @@ defmodule PhoenixKit.Accounts do
   """
 
   import Ecto.Query, warn: false
-  alias PhoenixKit.Repo
+  alias PhoenixKit.RepoHelper, as: Repo
 
   # This module will be populated by mix phx.gen.auth
 

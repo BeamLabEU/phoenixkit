@@ -25,6 +25,14 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix ecto.reset` - Drop and recreate database with fresh data
 - `mix ecto.setup` - Create database, run migrations, and seed data
 
+### PhoenixKit Migration System
+- `mix phoenix_kit.install` - Install PhoenixKit with auto-detected repo
+- `mix phoenix_kit.install --prefix "auth"` - Install with custom schema prefix
+- `mix phoenix_kit.install --repo MyApp.Repo` - Install with specific repo
+- **Professional versioned migrations** - Oban-style migration system with version tracking
+- **Prefix support** - Isolate PhoenixKit tables using PostgreSQL schemas
+- **Idempotent operations** - Safe to run migrations multiple times
+
 ### Testing
 - `mix test` - Run all tests with database sandbox
 - `mix test --cover` - Run tests with coverage report
@@ -43,8 +51,10 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix hex.publish` - Publish to Hex.pm (requires auth)
 
 ### Version Management
-- **Current Version**: 0.1.2 (in mix.exs)
+- **Current Version**: 0.1.3 (in mix.exs)
 - **Version Strategy**: Semantic versioning (MAJOR.MINOR.PATCH)
+- **Migration Version**: V01 (current auth tables)
+- **Database Versioning**: Professional system with version tracking in table comments
 - **Before Publishing**: Always increment version number and update CHANGELOG.md
 - **Critical**: Update version in mix.exs before any release or significant changes
 
@@ -55,6 +65,13 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - **PhoenixModuleTemplate.Context** - Business logic following Phoenix Context pattern
 - **PhoenixModuleTemplate.Schema.Example** - Ecto schema with validations  
 - **PhoenixModuleTemplate.Repo** - Database repository configuration
+
+### Migration Architecture
+- **PhoenixKit.Migration** - Main migration interface with behaviour
+- **PhoenixKit.Migrations.Postgres** - PostgreSQL-specific migrator
+- **PhoenixKit.Migrations.Postgres.V01** - Version 1 auth tables migration
+- **Mix.Tasks.PhoenixKit.Install** - Automated installation task
+- **Versioned system** - Oban-style architecture for professional database management
 
 ### Key Design Principles
 - **No Circular Dependencies** - Optional Phoenix deps prevent import cycles
