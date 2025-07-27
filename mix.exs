@@ -1,8 +1,8 @@
-defmodule PhoenixModuleTemplate.MixProject do
+defmodule PhoenixKit.MixProject do
   use Mix.Project
 
   @version "0.1.5"
-  @description "Professional Phoenix module template with PostgreSQL support"
+  @description "Professional authentication library for Phoenix applications with zero-config setup"
   @source_url "https://github.com/BeamLabEU/phoenixkit"
 
   def project do
@@ -100,7 +100,7 @@ defmodule PhoenixModuleTemplate.MixProject do
   # Documentation configuration
   defp docs do
     [
-      name: "Phoenix Module Template",
+      name: "PhoenixKit",
       source_ref: "v#{@version}",
       source_url: @source_url,
       main: "readme",
