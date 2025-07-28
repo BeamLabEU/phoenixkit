@@ -2,9 +2,9 @@
 
 > Professional authentication library for Phoenix applications with zero-config setup
 
-[![Hex.pm](https://img.shields.io/hexpm/v/phoenix_kit.svg)](https://hex.pm/packages/phoenix_kit)
+<!-- [![Hex.pm](https://img.shields.io/hexpm/v/phoenix_kit.svg)](https://hex.pm/packages/phoenix_kit)
 [![Documentation](https://img.shields.io/badge/docs-hexpm-blue.svg)](https://hexdocs.pm/phoenix_kit)
-[![License](https://img.shields.io/hexpm/l/phoenix_kit.svg)](LICENSE)
+[![License](https://img.shields.io/hexpm/l/phoenix_kit.svg)](LICENSE) -->
 
 ## Overview
 
