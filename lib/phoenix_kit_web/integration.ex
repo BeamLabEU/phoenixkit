@@ -40,6 +40,7 @@ defmodule PhoenixKitWeb.Integration do
   - GET /phoenix_kit/log_in - User login page  
   - POST /phoenix_kit/log_in - User login form submission
   - DELETE /phoenix_kit/log_out - User logout
+  - GET /phoenix_kit/log_out - User logout (direct URL access)
   - GET /phoenix_kit/reset_password - Password reset request page
   - GET /phoenix_kit/reset_password/:token - Password reset form
   - GET /phoenix_kit/settings - User settings page
@@ -66,7 +67,7 @@ defmodule PhoenixKitWeb.Integration do
       end
 
       pipeline :phoenix_kit_redirect_if_authenticated do
-        plug PhoenixKitWeb.UserAuth, :redirect_if_user_is_authenticated
+        plug PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated
       end
 
       pipeline :phoenix_kit_require_authenticated do
@@ -83,6 +84,7 @@ defmodule PhoenixKitWeb.Integration do
         pipe_through [:browser, :phoenix_kit_auto_setup]
         
         delete "/log_out", UserSessionController, :delete
+        get "/log_out", UserSessionController, :get_logout
       end
 
       # LiveView routes with proper authentication
@@ -90,7 +92,7 @@ defmodule PhoenixKitWeb.Integration do
         pipe_through [:browser, :phoenix_kit_auto_setup]
 
         live_session :phoenix_kit_redirect_if_user_is_authenticated,
-          on_mount: [{PhoenixKitWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}] do
           live "/test", TestLive, :index
           live "/register", UserRegistrationLive, :new
           live "/log_in", UserLoginLive, :new

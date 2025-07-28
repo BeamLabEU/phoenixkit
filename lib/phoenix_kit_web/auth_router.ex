@@ -15,8 +15,8 @@ defmodule PhoenixKitWeb.AuthRouter do
     plug :fetch_current_user
   end
 
-  pipeline :redirect_if_authenticated do
-    plug :redirect_if_user_is_authenticated
+  pipeline :phoenix_kit_redirect_if_authenticated do
+    plug PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated
   end
 
   pipeline :require_authenticated do
@@ -24,7 +24,7 @@ defmodule PhoenixKitWeb.AuthRouter do
   end
 
   scope "/" do
-    pipe_through [:browser, :redirect_if_authenticated]
+    pipe_through [:browser, :phoenix_kit_redirect_if_authenticated]
 
     # Test LiveView 
     live "/test", PhoenixKitWeb.TestLive, :index
@@ -43,6 +43,7 @@ defmodule PhoenixKitWeb.AuthRouter do
     pipe_through [:browser]
     
     delete "/log_out", PhoenixKitWeb.UserSessionController, :delete
+    get "/log_out", PhoenixKitWeb.UserSessionController, :get_logout
 
     live "/confirm/:token", PhoenixKitWeb.UserConfirmationLive, :edit
     live "/confirm", PhoenixKitWeb.UserConfirmationInstructionsLive, :new

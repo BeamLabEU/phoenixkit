@@ -39,4 +39,11 @@ defmodule PhoenixKitWeb.UserSessionController do
     |> put_flash(:info, "Logged out successfully.")
     |> UserAuth.log_out_user()
   end
+
+  # Support GET logout for direct URL access
+  def get_logout(conn, _params) do
+    conn
+    |> put_flash(:info, "Logged out successfully.")
+    |> UserAuth.log_out_user()
+  end
 end

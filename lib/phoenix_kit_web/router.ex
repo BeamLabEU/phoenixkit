@@ -17,8 +17,8 @@ defmodule PhoenixKitWeb.Router do
     plug :accepts, ["json"]
   end
 
-  pipeline :redirect_if_authenticated do
-    plug :redirect_if_user_is_authenticated
+  pipeline :phoenix_kit_redirect_if_authenticated do
+    plug PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated
   end
 
   pipeline :require_authenticated do
@@ -33,7 +33,7 @@ defmodule PhoenixKitWeb.Router do
 
   # Authentication routes with LiveView integration (with /phoenix_kit prefix for library usage)
   scope "/phoenix_kit", PhoenixKitWeb do
-    pipe_through [:browser, :redirect_if_authenticated]
+    pipe_through [:browser, :phoenix_kit_redirect_if_authenticated]
 
     post "/log_in", UserSessionController, :create
   end
@@ -42,14 +42,15 @@ defmodule PhoenixKitWeb.Router do
     pipe_through :browser
     
     delete "/log_out", UserSessionController, :delete
+    get "/log_out", UserSessionController, :get_logout
   end
 
   # LiveView routes with proper authentication
   scope "/phoenix_kit", PhoenixKitWeb do
     pipe_through :browser
 
-    live_session :redirect_if_user_is_authenticated,
-      on_mount: [{PhoenixKitWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+    live_session :phoenix_kit_redirect_if_user_is_authenticated,
+      on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}] do
       live "/test", TestLive, :index
       live "/register", UserRegistrationLive, :new
       live "/log_in", UserLoginLive, :new

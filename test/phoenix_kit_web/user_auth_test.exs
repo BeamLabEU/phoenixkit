@@ -185,14 +185,14 @@ defmodule PhoenixKitWeb.UserAuthTest do
     end
   end
 
-  describe "on_mount :redirect_if_user_is_authenticated" do
+  describe "on_mount :phoenix_kit_redirect_if_user_is_authenticated" do
     test "redirects if there is an authenticated  user ", %{conn: conn, user: user} do
       user_token = Accounts.generate_user_session_token(user)
       session = conn |> put_session(:user_token, user_token) |> get_session()
 
       assert {:halt, _updated_socket} =
                UserAuth.on_mount(
-                 :redirect_if_user_is_authenticated,
+                 :phoenix_kit_redirect_if_user_is_authenticated,
                  %{},
                  session,
                  %LiveView.Socket{}
@@ -204,7 +204,7 @@ defmodule PhoenixKitWeb.UserAuthTest do
 
       assert {:cont, _updated_socket} =
                UserAuth.on_mount(
-                 :redirect_if_user_is_authenticated,
+                 :phoenix_kit_redirect_if_user_is_authenticated,
                  %{},
                  session,
                  %LiveView.Socket{}

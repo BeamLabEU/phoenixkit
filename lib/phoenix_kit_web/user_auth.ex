@@ -124,7 +124,7 @@ defmodule PhoenixKitWeb.UserAuth do
       on user_token.
       Redirects to login page if there's no logged user.
 
-    * `:redirect_if_user_is_authenticated` - Authenticates the user from the session.
+    * `:phoenix_kit_redirect_if_user_is_authenticated` - Authenticates the user from the session.
       Redirects to signed_in_path if there's a logged user.
 
   ## Examples
@@ -164,7 +164,7 @@ defmodule PhoenixKitWeb.UserAuth do
     end
   end
 
-  def on_mount(:redirect_if_user_is_authenticated, _params, session, socket) do
+  def on_mount(:phoenix_kit_redirect_if_user_is_authenticated, _params, session, socket) do
     socket = mount_current_user(socket, session)
 
     if socket.assigns.current_user do
@@ -186,7 +186,7 @@ defmodule PhoenixKitWeb.UserAuth do
   def init(opts), do: opts
 
   @doc false
-  def call(conn, :redirect_if_user_is_authenticated), do: redirect_if_user_is_authenticated(conn, [])
+  def call(conn, :phoenix_kit_redirect_if_user_is_authenticated), do: redirect_if_user_is_authenticated(conn, [])
 
   @doc false
   def call(conn, :require_authenticated_user), do: require_authenticated_user(conn, [])

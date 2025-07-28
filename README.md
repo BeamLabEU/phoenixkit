@@ -156,6 +156,7 @@ PhoenixKit provides these LiveView routes under your chosen prefix:
 - `GET /phoenix_kit/log_in` - Login form (LiveView)
 - `POST /phoenix_kit/log_in` - User login
 - `DELETE /phoenix_kit/log_out` - User logout
+- `GET /phoenix_kit/log_out` - User logout (direct URL access)
 - `GET /phoenix_kit/reset_password` - Password reset request (LiveView)
 - `GET /phoenix_kit/reset_password/:token` - Password reset form (LiveView)
 - `GET /phoenix_kit/settings` - User settings (LiveView, requires login)
@@ -225,7 +226,7 @@ import PhoenixKitWeb.UserAuth
 plug :require_authenticated_user
 
 # Redirect if already logged in  
-plug :redirect_if_user_is_authenticated
+plug :phoenix_kit_redirect_if_user_is_authenticated
 ```
 
 ## Architecture
