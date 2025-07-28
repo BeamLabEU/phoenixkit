@@ -77,7 +77,7 @@ defmodule PhoenixKitWeb.UserAuth do
     user_token && Accounts.delete_user_session_token(user_token)
 
     if live_socket_id = get_session(conn, :live_socket_id) do
-      PhoenixKitWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+      broadcast_disconnect(live_socket_id)
     end
 
     conn
@@ -235,4 +235,27 @@ defmodule PhoenixKitWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: "/"
+
+  defp broadcast_disconnect(live_socket_id) do
+    case get_parent_endpoint() do
+      {:ok, endpoint} ->
+        try do
+          endpoint.broadcast(live_socket_id, "disconnect", %{})
+        rescue
+          error ->
+            require Logger
+            Logger.warning("[PhoenixKit] Failed to broadcast disconnect: #{inspect(error)}")
+        end
+      {:error, reason} ->
+        require Logger
+        Logger.warning("[PhoenixKit] Could not find parent endpoint for broadcast: #{reason}")
+    end
+  end
+
+  defp get_parent_endpoint do
+    case PhoenixKit.AutoSetup.detect_parent_endpoint() do
+      {:ok, endpoint} -> {:ok, endpoint}
+      {:error, reason} -> {:error, reason}
+    end
+  end
 end

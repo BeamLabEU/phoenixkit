@@ -24,14 +24,31 @@ defmodule PhoenixKit.SchemaMigrations do
   Returns nil if no version table exists (fresh install).
   """
   def get_installed_version(repo) do
-    if version_table_exists?(repo) do
-      case repo.query("SELECT version FROM phoenix_kit_schema_versions ORDER BY inserted_at DESC LIMIT 1") do
-        {:ok, %{rows: [[version]]}} -> version
-        {:ok, %{rows: []}} -> nil
-        {:error, _} -> nil
+    try do
+      if version_table_exists?(repo) do
+        case repo.query("SELECT version FROM phoenix_kit_schema_versions ORDER BY inserted_at DESC LIMIT 1") do
+          {:ok, %{rows: [[version]]}} -> 
+            Logger.debug("[PhoenixKit] get_installed_version -> #{version}")
+            version
+          {:ok, %{rows: []}} -> 
+            Logger.debug("[PhoenixKit] get_installed_version -> nil (no rows)")
+            nil
+          {:error, error} -> 
+            Logger.debug("[PhoenixKit] get_installed_version -> nil (query error: #{inspect(error)})")
+            nil
+        end
+      else
+        Logger.debug("[PhoenixKit] get_installed_version -> nil (no version table)")
+        nil
       end
-    else
-      nil
+    rescue
+      error ->
+        Logger.debug("[PhoenixKit] get_installed_version -> nil (exception: #{inspect(error)})")
+        nil
+    catch
+      :error, reason ->
+        Logger.debug("[PhoenixKit] get_installed_version -> nil (caught: #{inspect(reason)})")
+        nil
     end
   end
 
@@ -44,13 +61,26 @@ defmodule PhoenixKit.SchemaMigrations do
   Checks if a schema migration is required.
   """
   def migration_required?(repo) do
-    installed = get_installed_version(repo)
-    target = get_target_version()
-    
-    case installed do
-      nil -> true  # Fresh install
-      ^target -> false  # Already up to date
-      _ -> version_compare(installed, target) == :lt  # Upgrade needed
+    try do
+      installed = get_installed_version(repo)
+      target = get_target_version()
+      
+      result = case installed do
+        nil -> true  # Fresh install
+        ^target -> false  # Already up to date
+        _ -> version_compare(installed, target) == :lt  # Upgrade needed
+      end
+      
+      Logger.debug("[PhoenixKit] migration_required? -> #{result} (installed: #{installed}, target: #{target})")
+      result
+    rescue
+      error ->
+        Logger.debug("[PhoenixKit] migration_required? -> true (error: #{inspect(error)})")
+        true  # Assume migration needed if we can't check
+    catch
+      :error, reason ->
+        Logger.debug("[PhoenixKit] migration_required? -> true (caught error: #{inspect(reason)})")
+        true  # Assume migration needed if we can't check
     end
   end
 
@@ -135,9 +165,23 @@ defmodule PhoenixKit.SchemaMigrations do
     );
     """
     
-    case repo.query(query) do
-      {:ok, %{rows: [[true]]}} -> true
-      _ -> false
+    try do
+      case repo.query(query) do
+        {:ok, %{rows: [[true]]}} -> 
+          Logger.debug("[PhoenixKit] version_table_exists? -> true")
+          true
+        result -> 
+          Logger.debug("[PhoenixKit] version_table_exists? -> false (result: #{inspect(result)})")
+          false
+      end
+    rescue
+      error ->
+        Logger.debug("[PhoenixKit] version_table_exists? -> false (exception: #{inspect(error)})")
+        false
+    catch
+      :error, reason ->
+        Logger.debug("[PhoenixKit] version_table_exists? -> false (caught: #{inspect(reason)})")
+        false
     end
   end
 

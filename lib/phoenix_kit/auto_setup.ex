@@ -120,9 +120,17 @@ defmodule PhoenixKit.AutoSetup do
   end
 
   defp find_main_app(apps) do
+    # Exclude common library applications that are not the main Phoenix app
+    excluded_apps = [
+      :phoenix_kit, :phoenix, :phoenix_pubsub, :phoenix_live_view, 
+      :phoenix_live_reload, :phoenix_live_dashboard, :phoenix_html,
+      :phoenix_template, :plug, :plug_cowboy, :cowboy, :ecto, :ecto_sql,
+      :postgrex, :gettext, :swoosh, :jason, :bandit, :thousand_island
+    ]
+    
     apps
     |> Enum.find(fn {app_name, _, _} -> 
-      app_name != :phoenix_kit and has_phoenix_dependency?(app_name)
+      app_name not in excluded_apps and has_phoenix_dependency?(app_name)
     end)
     |> case do
       {app_name, _, _} -> app_name
@@ -167,6 +175,36 @@ defmodule PhoenixKit.AutoSetup do
       repo_module -> 
         Logger.info("[PhoenixKit] Found repo: #{repo_module}")
         {:ok, repo_module}
+    end
+  end
+
+  defp find_endpoint_module(app_name) do
+    # Common endpoint module patterns
+    possible_endpoints = [
+      Module.concat([Macro.camelize(to_string(app_name)) <> "Web", "Endpoint"]),
+      Module.concat([Macro.camelize(to_string(app_name)), "Web", "Endpoint"]),
+      Module.concat([Macro.camelize(to_string(app_name)), "Endpoint"])
+    ]
+
+    Logger.debug("[PhoenixKit] Looking for endpoint in: #{inspect(possible_endpoints)}")
+
+    endpoint = Enum.find(possible_endpoints, fn module ->
+      loaded = Code.ensure_loaded?(module)
+      is_endpoint = loaded && function_exported?(module, :call, 2) && function_exported?(module, :broadcast, 3)
+      
+      Logger.debug("[PhoenixKit] Checking #{module}: loaded=#{loaded}, is_endpoint=#{is_endpoint}")
+      
+      is_endpoint
+    end)
+
+    case endpoint do
+      nil -> 
+        Logger.error("[PhoenixKit] Could not find Phoenix.Endpoint module in parent application")
+        Logger.error("[PhoenixKit] Tried: #{inspect(possible_endpoints)}")
+        {:error, "Could not find Phoenix.Endpoint module in parent application"}
+      endpoint_module -> 
+        Logger.info("[PhoenixKit] Found endpoint: #{endpoint_module}")
+        {:ok, endpoint_module}
     end
   end
 
@@ -230,17 +268,49 @@ defmodule PhoenixKit.AutoSetup do
   # end
 
   @doc """
+  Detects the parent application's Phoenix endpoint.
+  """
+  def detect_parent_endpoint do
+    Logger.debug("[PhoenixKit] Detecting parent application endpoint...")
+    
+    # Get all loaded applications
+    apps = Application.loaded_applications()
+    
+    # Find the main Phoenix application (not PhoenixKit)
+    main_app = find_main_app(apps)
+    
+    case main_app do
+      nil -> 
+        Logger.error("[PhoenixKit] Could not detect parent Phoenix application for endpoint")
+        {:error, "Could not detect parent Phoenix application"}
+      app_name ->
+        Logger.info("[PhoenixKit] Detected parent app for endpoint: #{app_name}")
+        find_endpoint_module(app_name)
+    end
+  end
+
+  @doc """
   Checks if PhoenixKit is properly set up.
   """
   def setup_complete? do
     case Application.get_env(:phoenix_kit, :repo) do
-      nil -> false
+      nil -> 
+        Logger.debug("[PhoenixKit] setup_complete? -> false (no repo configured)")
+        false
       repo -> 
         try do
           # Check if schema is up to date
-          not PhoenixKit.SchemaMigrations.migration_required?(repo)
+          result = not PhoenixKit.SchemaMigrations.migration_required?(repo)
+          Logger.debug("[PhoenixKit] setup_complete? -> #{result} (repo: #{repo})")
+          result
         rescue
-          _ -> false
+          error ->
+            Logger.debug("[PhoenixKit] setup_complete? -> false (error: #{inspect(error)})")
+            false
+        catch
+          :error, reason ->
+            Logger.debug("[PhoenixKit] setup_complete? -> false (caught error: #{inspect(reason)})")
+            false
         end
     end
   end
