@@ -51,9 +51,12 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Configure PhoenixKit (using PhoenixKit's own repo for testing)
+# Configure PhoenixKit to use TempApp's repo
 config :phoenix_kit,
-  repo: PhoenixKit.Repo
+  repo: TempApp.Repo
+
+# Configure PhoenixKit Mailer for email delivery
+config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
