@@ -22,10 +22,19 @@ defmodule PhoenixKit.Migrations.Postgres do
 
     cond do
       initial == 0 ->
-        change(@initial_version..opts.version, :up, opts)
+        # Check if we're in runtime context (has :repo key)
+        if Map.has_key?(opts, :repo) do
+          runtime_up(opts)
+        else
+          change(@initial_version..opts.version, :up, opts)
+        end
 
       initial < opts.version ->
-        change((initial + 1)..opts.version, :up, opts)
+        if Map.has_key?(opts, :repo) do
+          runtime_up(opts)
+        else
+          change((initial + 1)..opts.version, :up, opts)
+        end
 
       true ->
         :ok
@@ -46,7 +55,20 @@ defmodule PhoenixKit.Migrations.Postgres do
   def migrated_version(opts) do
     opts = with_defaults(opts, @initial_version)
 
-    repo = Map.get_lazy(opts, :repo, fn -> repo() end)
+    repo = case Map.get(opts, :repo) do
+      nil -> 
+        try do
+          repo()
+        rescue
+          _ -> 
+            # Fallback for auto-setup context
+            case Application.get_env(:phoenix_kit, :repo) do
+              nil -> raise "No repo configured"
+              configured_repo -> configured_repo
+            end
+        end
+      configured_repo -> configured_repo
+    end
     escaped_prefix = Map.fetch!(opts, :escaped_prefix)
 
     query = """
@@ -80,8 +102,61 @@ defmodule PhoenixKit.Migrations.Postgres do
 
   defp record_version(_opts, 0), do: :ok
 
+  defp record_version(%{prefix: prefix, repo: repo}, version) do
+    sql = "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit_users IS '#{version}'"
+    case repo.query(sql) do
+      {:ok, _} -> :ok
+      error -> error
+    end
+  end
+
   defp record_version(%{prefix: prefix}, version) do
+    # Fallback for migration context - use execute
     execute "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit_users IS '#{version}'"
+  end
+
+  # Runtime migration for auto-setup context
+  defp runtime_up(%{repo: repo, prefix: prefix} = opts) do
+    migration_commands = [
+      "CREATE EXTENSION IF NOT EXISTS citext",
+      """
+      CREATE TABLE IF NOT EXISTS #{prefix}.phoenix_kit_users (
+        id bigserial PRIMARY KEY,
+        email citext NOT NULL,
+        hashed_password varchar(255) NOT NULL,
+        confirmed_at timestamp,
+        inserted_at timestamp NOT NULL DEFAULT NOW(),
+        updated_at timestamp NOT NULL DEFAULT NOW()
+      )
+      """,
+      "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_users_email_index ON #{prefix}.phoenix_kit_users (email)",
+      """
+      CREATE TABLE IF NOT EXISTS #{prefix}.phoenix_kit_users_tokens (
+        id bigserial PRIMARY KEY,
+        user_id bigint NOT NULL REFERENCES #{prefix}.phoenix_kit_users(id) ON DELETE CASCADE,
+        token bytea NOT NULL,
+        context varchar(255) NOT NULL,
+        sent_to varchar(255),
+        inserted_at timestamp NOT NULL DEFAULT NOW()
+      )
+      """,
+      "CREATE INDEX IF NOT EXISTS phoenix_kit_users_tokens_user_id_index ON #{prefix}.phoenix_kit_users_tokens (user_id)",
+      "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_users_tokens_context_token_index ON #{prefix}.phoenix_kit_users_tokens (context, token)"
+    ]
+    
+    # Execute each command
+    Enum.reduce_while(migration_commands, :ok, fn sql, _acc ->
+      case repo.query(sql) do
+        {:ok, _} -> {:cont, :ok}
+        {:error, error} -> {:halt, {:error, error}}
+      end
+    end)
+    |> case do
+      :ok -> 
+        record_version(opts, @current_version)
+      error -> 
+        error
+    end
   end
 
   defp with_defaults(opts, version) do

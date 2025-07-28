@@ -298,7 +298,8 @@ defmodule PhoenixKit.AutoSetup do
       _repo -> 
         try do
           # Check if migration has been completed by looking for version comment
-          opts = %{prefix: "public", escaped_prefix: "public"}
+          repo = Application.get_env(:phoenix_kit, :repo)
+          opts = %{prefix: "public", escaped_prefix: "public", repo: repo}
           version = PhoenixKit.Migrations.Postgres.migrated_version(opts)
           version > 0
         rescue
