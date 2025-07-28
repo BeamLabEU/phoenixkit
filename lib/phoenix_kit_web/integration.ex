@@ -21,12 +21,16 @@ defmodule PhoenixKitWeb.Integration do
         
         # ... your existing pipelines ...
         
-        # Add PhoenixKit auth routes under /phoenix_kit prefix (default)
-        phoenix_kit_auth_routes()
+        # Add PhoenixKit auth routes - they work independently of your :browser pipeline!
+        phoenix_kit_auth_routes()  # Uses /phoenix_kit prefix by default
         
         # Or with custom prefix if needed
-        phoenix_kit_auth_routes("/auth")
+        phoenix_kit_auth_routes("/authentication")
       end
+
+  **Note:** PhoenixKit routes work completely independently and don't require 
+  your application's :browser pipeline. They create their own pipeline with 
+  all necessary plugs for LiveView forms to work properly.
 
   ## Routes created
 
@@ -60,10 +64,51 @@ defmodule PhoenixKitWeb.Integration do
       pipeline :phoenix_kit_auto_setup do
         plug PhoenixKitWeb.Integration, :phoenix_kit_auto_setup
       end
+
+      pipeline :phoenix_kit_redirect_if_authenticated do
+        plug PhoenixKitWeb.UserAuth, :redirect_if_user_is_authenticated
+      end
+
+      pipeline :phoenix_kit_require_authenticated do
+        plug PhoenixKitWeb.UserAuth, :require_authenticated_user
+      end
       
-      scope unquote(prefix) do
+      scope unquote(prefix), PhoenixKitWeb do
+        pipe_through [:browser, :phoenix_kit_auto_setup, :phoenix_kit_redirect_if_authenticated]
+
+        post "/log_in", UserSessionController, :create
+      end
+
+      scope unquote(prefix), PhoenixKitWeb do
         pipe_through [:browser, :phoenix_kit_auto_setup]
-        forward "/", PhoenixKitWeb.AuthRouter
+        
+        delete "/log_out", UserSessionController, :delete
+      end
+
+      # LiveView routes with proper authentication
+      scope unquote(prefix), PhoenixKitWeb do
+        pipe_through [:browser, :phoenix_kit_auto_setup]
+
+        live_session :phoenix_kit_redirect_if_user_is_authenticated,
+          on_mount: [{PhoenixKitWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+          live "/test", TestLive, :index
+          live "/register", UserRegistrationLive, :new
+          live "/log_in", UserLoginLive, :new
+          live "/reset_password", UserForgotPasswordLive, :new
+          live "/reset_password/:token", UserResetPasswordLive, :edit
+        end
+
+        live_session :phoenix_kit_current_user,
+          on_mount: [{PhoenixKitWeb.UserAuth, :mount_current_user}] do
+          live "/confirm/:token", UserConfirmationLive, :edit
+          live "/confirm", UserConfirmationInstructionsLive, :new
+        end
+
+        live_session :phoenix_kit_require_authenticated_user,
+          on_mount: [{PhoenixKitWeb.UserAuth, :ensure_authenticated}] do
+          live "/settings", UserSettingsLive, :edit
+          live "/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+        end
       end
     end
   end

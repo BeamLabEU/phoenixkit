@@ -18,6 +18,7 @@ PhoenixKit is a production-ready authentication library for Phoenix applications
 - 🎯 **Library-First Design** - No OTP application, integrates into any Phoenix app
 - 📦 **Production Ready** - Comprehensive error handling and logging
 - 🛠️ **Developer Friendly** - Single command installation with automatic setup
+- 🎨 **LiveView Ready** - All authentication pages use Phoenix LiveView
 
 ## Quick Start
 
@@ -27,7 +28,9 @@ PhoenixKit is a production-ready authentication library for Phoenix applications
 # mix.exs
 def deps do
   [
-    {:phoenix_kit, "~> 0.1.5"}
+    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"}
+    # Or when published to Hex:
+    # {:phoenix_kit, "~> 0.1.5"}
   ]
 end
 ```
@@ -36,47 +39,72 @@ end
 
 ```bash
 mix deps.get
-mix phoenix_kit.install
+mix phoenix_kit.install --repo MyApp.Repo
 ```
 
-This automatically:
-- Detects your Ecto repository
-- Generates migration files
-- Adds configuration to `config/config.exs`
-- Provides next steps
+**Important:** The `--repo` parameter is **REQUIRED**!
 
-### 3. Add Routes
+This automatically:
+- Generates migration files for authentication tables
+- Adds configuration to `config/config.exs` 
+- Provides next steps for integration
+
+### 3. Configure Mailer (CRITICAL)
+
+Add to your `config/config.exs`:
+
+```elixir
+# Required: Configure PhoenixKit repository
+config :phoenix_kit,
+  repo: MyApp.Repo
+
+# Required: Configure PhoenixKit Mailer for email delivery
+config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
+```
+
+**⚠️ Without mailer configuration, user registration will fail!**
+
+For production, use appropriate adapter:
+```elixir
+# Production example with SMTP
+config :phoenix_kit, PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.gmail.com",
+  username: "your-email@gmail.com",
+  password: "your-password"
+```
+
+### 4. Add Routes
 
 ```elixir
 # lib/your_app_web/router.ex
 defmodule YourAppWeb.Router do
   use YourAppWeb, :router
   import PhoenixKitWeb.Integration
-  import PhoenixKitWeb.UserAuth
 
+  # Your existing pipelines...
   pipeline :browser do
     # ... your existing plugs ...
-    plug :fetch_current_user  # Add PhoenixKit user fetching
   end
 
-  # Add PhoenixKit authentication routes
-  phoenix_kit_auth_routes("/auth")
+  # Add PhoenixKit authentication routes - they work independently!
+  phoenix_kit_auth_routes()  # Default prefix: /phoenix_kit
 end
 ```
 
-### 4. Run Migration
+### 5. Run Migration
 
 ```bash
 mix ecto.migrate
 ```
 
-### 5. Start Your App
+### 6. Start Your App
 
 ```bash
 mix phx.server
 ```
 
-Visit `http://localhost:4000/auth/register` to see PhoenixKit in action!
+Visit `http://localhost:4000/phoenix_kit/register` to see PhoenixKit in action!
 
 ## Advanced Installation
 
@@ -89,19 +117,22 @@ mix phoenix_kit.install --repo MyApp.CustomRepo
 ### Custom URL Prefix
 
 ```elixir
-# In your router
+# In your router - NOT recommended to use /auth prefix
 phoenix_kit_auth_routes("/authentication")
+phoenix_kit_auth_routes("/users")
 ```
+
+**Note:** We don't recommend using `/auth` as the prefix.
 
 ### PostgreSQL Schema Prefix
 
 ```bash
-mix phoenix_kit.install --prefix "auth" --create-schema
+mix phoenix_kit.install --repo MyApp.Repo --prefix "auth" --create-schema
 ```
 
 ## Configuration
 
-PhoenixKit uses your application's repository automatically:
+PhoenixKit uses your application's repository:
 
 ```elixir
 # config/config.exs (automatically added by mix phoenix_kit.install)
@@ -119,32 +150,33 @@ config :phoenix_kit,
 
 ## Authentication Routes
 
-PhoenixKit provides these routes under your chosen prefix:
+PhoenixKit provides these LiveView routes under your chosen prefix:
 
-- `GET /register` - User registration form
-- `POST /register` - Create new user account  
-- `GET /log_in` - Login form
-- `POST /log_in` - User login
-- `DELETE /log_out` - User logout
-- `GET /reset_password` - Password reset request
-- `GET /reset_password/:token` - Password reset form
-- `GET /settings` - User settings (requires login)
-- `GET /confirm/:token` - Email confirmation
+- `GET /phoenix_kit/register` - User registration form (LiveView)
+- `GET /phoenix_kit/log_in` - Login form (LiveView)
+- `POST /phoenix_kit/log_in` - User login
+- `DELETE /phoenix_kit/log_out` - User logout
+- `GET /phoenix_kit/reset_password` - Password reset request (LiveView)
+- `GET /phoenix_kit/reset_password/:token` - Password reset form (LiveView)
+- `GET /phoenix_kit/settings` - User settings (LiveView, requires login)
+- `GET /phoenix_kit/settings/confirm_email/:token` - Email confirmation
+- `GET /phoenix_kit/confirm/:token` - Account confirmation (LiveView)
+- `GET /phoenix_kit/confirm` - Resend confirmation (LiveView)
 
 ## Database Schema
 
 PhoenixKit creates these tables:
 
-### `phoenix_kit` (Users)
+### `phoenix_kit_users` (Users)
 - `id` - Primary key (bigserial)
 - `email` - Email address (citext, unique)
 - `hashed_password` - Bcrypt hashed password
 - `confirmed_at` - Email confirmation timestamp
 - `inserted_at`, `updated_at` - Timestamps
 
-### `phoenix_kit_tokens` (Authentication Tokens)
+### `phoenix_kit_users_tokens` (Authentication Tokens)
 - `id` - Primary key (bigserial)
-- `user_id` - Foreign key to users
+- `user_id` - Foreign key to phoenix_kit_users
 - `token` - Secure token (bytea)
 - `context` - Token type (session, email, reset)
 - `sent_to` - Email address for email tokens
@@ -205,6 +237,7 @@ PhoenixKit follows Oban's architecture principles:
 - **Versioned Migrations**: Professional schema management with rollback support
 - **Zero Dependencies**: Works with any Phoenix application
 - **Production Ready**: Comprehensive error handling and logging
+- **LiveView Native**: All authentication pages use Phoenix LiveView
 
 ## Migration System
 
@@ -259,7 +292,13 @@ PhoenixKit uses semantic HTML classes for easy styling:
 ```
 ERROR: No repository configured for PhoenixKit
 ```
-Solution: Run `mix phoenix_kit.install` or manually add config.
+Solution: Run `mix phoenix_kit.install --repo MyApp.Repo` or manually add config.
+
+**--repo parameter required**
+```
+ERROR: --repo is required!
+```
+Solution: Always specify `--repo` parameter: `mix phoenix_kit.install --repo MyApp.Repo`
 
 **Migration errors**
 ```
@@ -269,9 +308,9 @@ Solution: Check database connection and permissions.
 
 **URL not found**
 ```
-ERROR: No route found for GET /auth/register
+ERROR: No route found for GET /phoenix_kit/register
 ```
-Solution: Import `PhoenixKitWeb.Integration` and add `phoenix_kit_auth_routes/1`.
+Solution: Import `PhoenixKitWeb.Integration` and add `phoenix_kit_auth_routes()`.
 
 ### Debug Logging
 
@@ -296,6 +335,8 @@ config :logger, level: :debug
 ### From 0.1.x to 0.2.x
 
 PhoenixKit will automatically detect and run schema migrations. No manual intervention required.
+
+**Important:** Table names have been updated from `phoenix_kit`/`phoenix_kit_tokens` to `phoenix_kit_users`/`phoenix_kit_users_tokens`. Fresh installations will use the new names automatically.
 
 ## License
 

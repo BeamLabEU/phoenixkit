@@ -5,69 +5,108 @@ defmodule PhoenixKitWeb.UserSettingsLive do
 
   def render(assigns) do
     ~H"""
-    <.header class="text-center">
-      Account Settings
-      <:subtitle>Manage your account email address and password settings</:subtitle>
-    </.header>
+    <div class="min-h-screen bg-base-200 py-8">
+      <div class="max-w-2xl mx-auto px-4">
+        <div class="text-center mb-8">
+          <h1 class="text-4xl font-bold mb-2">Account Settings</h1>
+          <p class="text-base-content/70">Manage your account email address and password settings</p>
+        </div>
 
-    <div class="space-y-12 divide-y">
-      <div>
-        <.simple_form
-          for={@email_form}
-          id="email_form"
-          phx-submit="update_email"
-          phx-change="validate_email"
-        >
-          <.input field={@email_form[:email]} type="email" label="Email" required />
-          <.input
-            field={@email_form[:current_password]}
-            name="current_password"
-            id="current_password_for_email"
-            type="password"
-            label="Current password"
-            value={@email_form_current_password}
-            required
-          />
-          <:actions>
-            <.button phx-disable-with="Changing...">Change Email</.button>
-          </:actions>
-        </.simple_form>
-      </div>
-      <div>
-        <.simple_form
-          for={@password_form}
-          id="password_form"
-          action={"/phoenix_kit/log_in?_action=password_updated"}
-          method="post"
-          phx-change="validate_password"
-          phx-submit="update_password"
-          phx-trigger-action={@trigger_submit}
-        >
-          <input
-            name={@password_form[:email].name}
-            type="hidden"
-            id="hidden_user_email"
-            value={@current_email}
-          />
-          <.input field={@password_form[:password]} type="password" label="New password" required />
-          <.input
-            field={@password_form[:password_confirmation]}
-            type="password"
-            label="Confirm new password"
-          />
-          <.input
-            field={@password_form[:current_password]}
-            name="current_password"
-            type="password"
-            label="Current password"
-            id="current_password_for_password"
-            value={@current_password}
-            required
-          />
-          <:actions>
-            <.button phx-disable-with="Changing...">Change Password</.button>
-          </:actions>
-        </.simple_form>
+        <div class="space-y-8">
+          <!-- Email Settings Card -->
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Email Address</h2>
+              <p class="text-sm text-base-content/70 mb-4">Change your account email address</p>
+              
+              <.simple_form
+                for={@email_form}
+                id="email_form"
+                phx-submit="update_email"
+                phx-change="validate_email"
+              >
+                <.input field={@email_form[:email]} type="email" label="Email" required />
+                <.input
+                  field={@email_form[:current_password]}
+                  name="current_password"
+                  id="current_password_for_email"
+                  type="password"
+                  label="Current password"
+                  value={@email_form_current_password}
+                  required
+                />
+                <:actions>
+                  <.button phx-disable-with="Changing..." class="btn-primary">Change Email</.button>
+                </:actions>
+              </.simple_form>
+            </div>
+          </div>
+
+          <!-- Password Settings Card -->
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Password</h2>
+              <p class="text-sm text-base-content/70 mb-4">Update your account password</p>
+              
+              <.simple_form
+                for={@password_form}
+                id="password_form"
+                action={"/phoenix_kit/log_in?_action=password_updated"}
+                method="post"
+                phx-change="validate_password"
+                phx-submit="update_password"
+                phx-trigger-action={@trigger_submit}
+              >
+                <input
+                  name={@password_form[:email].name}
+                  type="hidden"
+                  id="hidden_user_email"
+                  value={@current_email}
+                />
+                <.input field={@password_form[:password]} type="password" label="New password" required />
+                <.input
+                  field={@password_form[:password_confirmation]}
+                  type="password"
+                  label="Confirm new password"
+                />
+                <.input
+                  field={@password_form[:current_password]}
+                  name="current_password"
+                  type="password"
+                  label="Current password"
+                  id="current_password_for_password"
+                  value={@current_password}
+                  required
+                />
+                <:actions>
+                  <.button phx-disable-with="Changing..." class="btn-primary">Change Password</.button>
+                </:actions>
+              </.simple_form>
+            </div>
+          </div>
+
+          <!-- Development Mode Notice -->
+          <div :if={show_dev_notice?()} class="alert alert-info">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              >
+              </path>
+            </svg>
+            <span>
+              Development mode: Email confirmation links will be available in
+              <.link href="/dev/mailbox" class="font-semibold underline">mailbox</.link>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
     """
@@ -124,7 +163,7 @@ defmodule PhoenixKitWeb.UserSettingsLive do
         Accounts.deliver_user_update_email_instructions(
           applied_user,
           user.email,
-          &"/phoenix_kit/settings/confirm_email/#{&1}"
+          &url(~p"/phoenix_kit/settings/confirm_email/#{&1}")
         )
 
         info = "A link to confirm your email change has been sent to the new address."
@@ -162,6 +201,13 @@ defmodule PhoenixKitWeb.UserSettingsLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, password_form: to_form(changeset))}
+    end
+  end
+
+  defp show_dev_notice? do
+    case Application.get_env(:phoenix_kit, PhoenixKit.Mailer)[:adapter] do
+      Swoosh.Adapters.Local -> true
+      _ -> false
     end
   end
 end

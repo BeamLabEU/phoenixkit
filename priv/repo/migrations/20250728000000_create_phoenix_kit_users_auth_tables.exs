@@ -1,4 +1,4 @@
-defmodule PhoenixKit.Repo.Migrations.CreatePhoenixKitAuthTables do
+defmodule PhoenixKit.Repo.Migrations.CreatePhoenixKitUsersAuthTables do
   use Ecto.Migration
 
   def up, do: PhoenixKit.Migration.up()

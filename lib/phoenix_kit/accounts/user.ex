@@ -2,7 +2,7 @@ defmodule PhoenixKit.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "phoenix_kit" do
+  schema "phoenix_kit_users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true

@@ -15,7 +15,7 @@ defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
 
   ## Examples
 
-      # Generate with default phoenix_kit prefix
+      # Generate with default phoenix_kit_users prefix  
       mix phoenix_kit.gen.migration
       
       # Generate with custom prefix
@@ -59,8 +59,14 @@ defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
 
   defp generate_migration_content(table_prefix) do
     module_name = Macro.camelize("create_#{table_prefix}_auth_tables")
-    users_table = table_prefix
-    tokens_table = "#{table_prefix}_tokens"
+    # For default phoenix_kit prefix, use phoenix_kit_users/phoenix_kit_users_tokens
+    # For custom prefixes, use prefix/prefix_tokens
+    {users_table, tokens_table} = 
+      if table_prefix == "phoenix_kit" do
+        {"phoenix_kit_users", "phoenix_kit_users_tokens"}
+      else
+        {table_prefix, "#{table_prefix}_tokens"}
+      end
     
     """
 defmodule #{Mix.Phoenix.context_app()}.Repo.Migrations.#{module_name} do

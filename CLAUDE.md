@@ -103,14 +103,17 @@ This is **Phoenix Module Template** - a professional library-first template for 
 
 ### Integration Pattern
 ```elixir
-# In your Phoenix app's config.exs
-config :your_module_name, 
+# In your Phoenix app's config/config.exs
+config :phoenix_kit, 
   repo: MyApp.Repo
 
-# In your Phoenix app  
+# Configure PhoenixKit Mailer for email delivery
+config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
+
+# In your Phoenix app's mix.exs
 def deps do
   [
-    {:your_module_name, "~> 0.1.0"}
+    {:phoenix_kit, "~> 0.1.0"}
   ]
 end
 ```

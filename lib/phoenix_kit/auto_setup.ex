@@ -214,7 +214,7 @@ defmodule PhoenixKit.AutoSetup do
   #   query = """
   #   SELECT EXISTS (
   #     SELECT FROM information_schema.tables 
-  #     WHERE table_name = 'phoenix_kit'
+  #     WHERE table_name = 'phoenix_kit_users'
   #   );
   #   """
   #   

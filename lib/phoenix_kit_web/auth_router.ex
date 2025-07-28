@@ -23,18 +23,15 @@ defmodule PhoenixKitWeb.AuthRouter do
     plug :require_authenticated_user
   end
 
-
   scope "/" do
     pipe_through [:browser, :redirect_if_authenticated]
 
-    # Test routes with static HTML forms
-    get "/register", PhoenixKitWeb.TestController, :register
-    post "/register", PhoenixKitWeb.TestController, :create_user
-    get "/log_in", PhoenixKitWeb.TestController, :login
+    # Test LiveView 
+    live "/test", PhoenixKitWeb.TestLive, :index
     
-    # Original LiveView routes (commented out for testing)
-    # live "/register", PhoenixKitWeb.UserRegistrationLive, :new
-    # live "/log_in", PhoenixKitWeb.UserLoginLive, :new
+    # LiveView routes for authentication
+    live "/register", PhoenixKitWeb.UserRegistrationLive, :new
+    live "/log_in", PhoenixKitWeb.UserLoginLive, :new
 
     post "/log_in", PhoenixKitWeb.UserSessionController, :create
 

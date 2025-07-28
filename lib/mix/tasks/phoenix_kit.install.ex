@@ -4,10 +4,10 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   ## Example
 
-  Install using the default Ecto repo and matching engine:
+  Install with required repo parameter:
 
   ```bash
-  mix phoenix_kit.install
+  mix phoenix_kit.install --repo MyApp.Repo
   ```
 
   Specify a custom repo and prefix explicitly:
@@ -18,8 +18,8 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   ## Options
 
+  * `--repo` or `-r` — **REQUIRED** Specify an Ecto repo for PhoenixKit to use
   * `--prefix` or `-p` — Specify a PostgreSQL schema prefix, defaults to "public"
-  * `--repo` or `-r` — Specify an Ecto repo for PhoenixKit to use
   * `--create-schema` — Create schema if using custom prefix (default: true for non-public prefixes)
   """
 
@@ -33,6 +33,19 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   @impl Mix.Task
   def run(args) do
     {opts, _} = OptionParser.parse!(args, switches: @switches, aliases: @aliases)
+
+    # Make --repo required
+    unless opts[:repo] do
+      Mix.raise("""
+      --repo is required!
+      
+      Usage: mix phoenix_kit.install --repo MyApp.Repo
+      
+      Example:
+        mix phoenix_kit.install --repo MyApp.Repo
+        mix phoenix_kit.install --repo MyApp.Repo --prefix "auth"
+      """)
+    end
 
     app_name = Mix.Project.config()[:app]
     repo = find_repo(opts[:repo])
@@ -91,21 +104,13 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     ])
   end
 
-  defp find_repo(nil) do
-    case get_ecto_repos() do
-      [repo | _] -> repo
-      [] -> 
-        Mix.raise("No Ecto repos found. Please specify a repo with --repo option.")
-    end
-  end
-
   defp find_repo(repo_string) do
     Module.concat([repo_string])
   end
 
-  defp get_ecto_repos do
-    Mix.Project.config()[:ecto_repos] || []
-  end
+  # defp get_ecto_repos do
+  #   Mix.Project.config()[:ecto_repos] || []
+  # end
 
   defp migration_opts("public", false), do: ""
   defp migration_opts(prefix, create_schema) when is_binary(prefix) do
