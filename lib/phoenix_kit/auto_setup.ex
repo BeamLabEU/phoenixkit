@@ -295,21 +295,17 @@ defmodule PhoenixKit.AutoSetup do
   def setup_complete? do
     case Application.get_env(:phoenix_kit, :repo) do
       nil -> 
-        Logger.debug("[PhoenixKit] setup_complete? -> false (no repo configured)")
         false
       repo -> 
         try do
           # Check if schema is up to date
           result = not PhoenixKit.SchemaMigrations.migration_required?(repo)
-          Logger.debug("[PhoenixKit] setup_complete? -> #{result} (repo: #{repo})")
           result
         rescue
           error ->
-            Logger.debug("[PhoenixKit] setup_complete? -> false (error: #{inspect(error)})")
             false
         catch
           :error, reason ->
-            Logger.debug("[PhoenixKit] setup_complete? -> false (caught error: #{inspect(reason)})")
             false
         end
     end
