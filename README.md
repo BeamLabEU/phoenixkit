@@ -146,6 +146,22 @@ config :phoenix_kit,
   repo: YourApp.Repo,
   # Optional: Custom mailer for sending emails
   mailer: YourApp.Mailer
+
+# Layout Integration - Use your app's layouts instead of PhoenixKit's
+config :phoenix_kit,
+  layout: {YourAppWeb.Layouts, :app},        # Use your app's main layout
+  root_layout: {YourAppWeb.Layouts, :root},  # Optional: custom root layout
+  page_title_prefix: "Auth"                  # Optional: prefix for page titles
+
+# Layout examples:
+# Minimal - only app layout:
+# config :phoenix_kit, layout: {YourAppWeb.Layouts, :app}
+#
+# Complete integration with your app's design:
+# config :phoenix_kit,
+#   layout: {YourAppWeb.Layouts, :app},
+#   root_layout: {YourAppWeb.Layouts, :root},
+#   page_title_prefix: "Authentication"
 ```
 
 ## Authentication Routes

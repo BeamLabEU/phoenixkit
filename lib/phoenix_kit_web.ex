@@ -43,7 +43,7 @@ defmodule PhoenixKitWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {PhoenixKitWeb.Layouts, :app}
+        layout: PhoenixKit.LayoutConfig.get_layout()
 
       use Gettext, backend: PhoenixKitWeb.Gettext
       import PhoenixKitWeb.CoreComponents

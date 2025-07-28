@@ -110,6 +110,12 @@ config :phoenix_kit,
 # Configure PhoenixKit Mailer for email delivery
 config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
 
+# Configure Layout Integration (optional - defaults to PhoenixKit layouts)
+config :phoenix_kit,
+  layout: {MyAppWeb.Layouts, :app},        # Use your app's layout
+  root_layout: {MyAppWeb.Layouts, :root},  # Optional: custom root layout
+  page_title_prefix: "Auth"                # Optional: page title prefix
+
 # In your Phoenix app's mix.exs
 def deps do
   [

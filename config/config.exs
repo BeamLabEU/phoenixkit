@@ -59,4 +59,12 @@ import_config "#{config_env()}.exs"
 
 
 # PhoenixKit configuration
-config :phoenix_kit, repo: PhoenixKit.Repo
+config :phoenix_kit, 
+  repo: PhoenixKit.Repo
+
+# Layout configuration - defaults to PhoenixKit layouts
+# Uncomment and modify to use your app's layouts:
+# config :phoenix_kit,
+#   layout: {MyAppWeb.Layouts, :app},
+#   root_layout: {MyAppWeb.Layouts, :root},  # optional
+#   page_title_prefix: "Auth"  # optional
