@@ -25,6 +25,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - Nothing yet
 
+## [0.1.7] - 2025-07-28
+
+### Fixed
+- **CRITICAL**: Fixed "could not find migration runner process" error in auto-setup system
+- Migration system now correctly handles runtime context without requiring Ecto migration runner
+- Table versioning system properly assigns metadata to phoenix_kit_users table
+- Resolved all compilation warnings for unused variables
+- Updated troubleshooting documentation for migration errors
+
+### Changed
+- Improved migration system architecture with separate runtime and migration contexts
+- Enhanced error handling in auto-setup with better fallback mechanisms
+
+### Removed
+- Deprecated `schema_migrations.ex` file (replaced with metadata-based versioning)
+
 ## [0.1.0] - 2024-01-01
 
 ### Added

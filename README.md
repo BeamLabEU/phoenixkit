@@ -293,8 +293,9 @@ Solution: Always specify `--repo` parameter: `mix phoenix_kit.install --repo MyA
 **Migration errors**
 ```
 ERROR: Schema migration failed
+ERROR: could not find migration runner process
 ```
-Solution: Check database connection and permissions.
+Solution: Check database connection and permissions. Auto-setup migration system has been improved in v0.1.7+ to handle runtime migration contexts correctly.
 
 **URL not found**
 ```
