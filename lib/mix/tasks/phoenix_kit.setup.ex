@@ -109,7 +109,7 @@ defmodule Mix.Tasks.PhoenixKit.Setup do
     migration_sql = """
     CREATE EXTENSION IF NOT EXISTS citext;
 
-    CREATE TABLE IF NOT EXISTS phoenix_kit (
+    CREATE TABLE IF NOT EXISTS phoenix_kit_users (
       id bigserial PRIMARY KEY,
       email citext NOT NULL,
       hashed_password varchar(255) NOT NULL,
@@ -118,19 +118,19 @@ defmodule Mix.Tasks.PhoenixKit.Setup do
       updated_at timestamp NOT NULL DEFAULT NOW()
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_email_index ON phoenix_kit (email);
+    CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_users_email_index ON phoenix_kit_users (email);
 
-    CREATE TABLE IF NOT EXISTS phoenix_kit_tokens (
+    CREATE TABLE IF NOT EXISTS phoenix_kit_users_tokens (
       id bigserial PRIMARY KEY,
-      user_id bigint NOT NULL REFERENCES phoenix_kit(id) ON DELETE CASCADE,
+      user_id bigint NOT NULL REFERENCES phoenix_kit_users(id) ON DELETE CASCADE,
       token bytea NOT NULL,
       context varchar(255) NOT NULL,
       sent_to varchar(255),
       inserted_at timestamp NOT NULL DEFAULT NOW()
     );
 
-    CREATE INDEX IF NOT EXISTS phoenix_kit_tokens_user_id_index ON phoenix_kit_tokens (user_id);
-    CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_tokens_context_token_index ON phoenix_kit_tokens (context, token);
+    CREATE INDEX IF NOT EXISTS phoenix_kit_users_tokens_user_id_index ON phoenix_kit_users_tokens (user_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_users_tokens_context_token_index ON phoenix_kit_users_tokens (context, token);
     """
 
     case repo.query(migration_sql) do

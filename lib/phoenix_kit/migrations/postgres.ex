@@ -53,7 +53,7 @@ defmodule PhoenixKit.Migrations.Postgres do
     SELECT pg_catalog.obj_description(pg_class.oid, 'pg_class')
     FROM pg_class
     LEFT JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
-    WHERE pg_class.relname = 'phoenix_kit'
+    WHERE pg_class.relname = 'phoenix_kit_users'
     AND pg_namespace.nspname = '#{escaped_prefix}'
     """
 
@@ -81,7 +81,7 @@ defmodule PhoenixKit.Migrations.Postgres do
   defp record_version(_opts, 0), do: :ok
 
   defp record_version(%{prefix: prefix}, version) do
-    execute "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit IS '#{version}'"
+    execute "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit_users IS '#{version}'"
   end
 
   defp with_defaults(opts, version) do

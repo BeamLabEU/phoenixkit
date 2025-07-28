@@ -96,20 +96,21 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
     Logger.info("PhoenixKit Schema Status")
     Logger.info("=======================")
     
-    installed_version = PhoenixKit.SchemaMigrations.get_installed_version(repo)
-    target_version = PhoenixKit.SchemaMigrations.get_target_version()
-    migration_required = PhoenixKit.SchemaMigrations.migration_required?(repo)
+    opts = %{prefix: "public", escaped_prefix: "public", repo: repo}
+    installed_version = PhoenixKit.Migrations.Postgres.migrated_version(opts)
+    target_version = PhoenixKit.Migrations.Postgres.current_version()
+    migration_required = installed_version < target_version
     
     Logger.info("")
     Logger.info("Repository: #{inspect(repo)}")
-    Logger.info("Installed Version: #{installed_version || "None (fresh install)"}")
+    Logger.info("Installed Version: #{if installed_version > 0, do: installed_version, else: "None (fresh install)"}")
     Logger.info("Target Version: #{target_version}")
     Logger.info("Migration Required: #{if migration_required, do: "YES", else: "NO"}")
     Logger.info("")
     
     if migration_required do
       case installed_version do
-        nil ->
+        0 ->
           Logger.info("📋 Action Required: Fresh installation")
           Logger.info("   This will create PhoenixKit authentication tables")
           Logger.info("   Tables: phoenix_kit, phoenix_kit_tokens, phoenix_kit_schema_versions")
@@ -127,13 +128,14 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
     end
   end
   
-  defp run_migration(repo, opts) do
+  defp run_migration(repo, _opts) do
     # Verify repo exists
     unless verify_repo(repo), do: exit({:shutdown, 1})
     
-    installed_version = PhoenixKit.SchemaMigrations.get_installed_version(repo)
-    target_version = PhoenixKit.SchemaMigrations.get_target_version()
-    migration_required = PhoenixKit.SchemaMigrations.migration_required?(repo)
+    opts = %{prefix: "public", escaped_prefix: "public", repo: repo}
+    installed_version = PhoenixKit.Migrations.Postgres.migrated_version(opts)
+    target_version = PhoenixKit.Migrations.Postgres.current_version()
+    migration_required = installed_version < target_version
     
     if not migration_required do
       Logger.info("✅ Schema already up to date at version #{installed_version}")
@@ -141,7 +143,7 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
     end
     
     Logger.info("Starting PhoenixKit schema migration...")
-    Logger.info("From: #{installed_version || "fresh install"}")  
+    Logger.info("From: #{if installed_version > 0, do: installed_version, else: "fresh install"}")  
     Logger.info("To: #{target_version}")
     Logger.info("")
     
@@ -156,7 +158,7 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
     # Perform migration
     Logger.info("Applying migration...")
     
-    case PhoenixKit.SchemaMigrations.migrate_to_current(repo) do
+    case PhoenixKit.Migrations.Postgres.up(opts) do
       :ok ->
         Logger.info("✅ Migration completed successfully!")
         Logger.info("")
@@ -189,7 +191,7 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
     end
   end
   
-  defp confirm_migration(nil, target_version) do
+  defp confirm_migration(0, target_version) do
     Logger.warning("⚠️  This will create new PhoenixKit authentication tables")
     Logger.warning("   Target version: #{target_version}")
     Logger.warning("   Tables to create: phoenix_kit, phoenix_kit_tokens, phoenix_kit_schema_versions")

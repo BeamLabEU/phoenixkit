@@ -219,14 +219,14 @@ defmodule PhoenixKit.AutoSetup do
     Logger.debug("[PhoenixKit] Checking schema version and migrations...")
     
     try do
-      # Use the new schema migration system
-      if PhoenixKit.SchemaMigrations.migration_required?(repo) do
-        installed = PhoenixKit.SchemaMigrations.get_installed_version(repo)
-        target = PhoenixKit.SchemaMigrations.get_target_version()
+      # Use the new Postgres migration system
+      opts = %{prefix: "public", escaped_prefix: "public", version: 1, repo: repo}
+      current_version = PhoenixKit.Migrations.Postgres.migrated_version(opts)
+      
+      if current_version < 1 do
+        Logger.info("[PhoenixKit] Schema migration required: #{current_version} -> 1")
         
-        Logger.info("[PhoenixKit] Schema migration required: #{installed || "fresh"} -> #{target}")
-        
-        case PhoenixKit.SchemaMigrations.migrate_to_current(repo) do
+        case PhoenixKit.Migrations.Postgres.up(opts) do
           :ok -> 
             Logger.info("[PhoenixKit] Schema migration completed successfully")
             :ok
@@ -235,8 +235,7 @@ defmodule PhoenixKit.AutoSetup do
             {:error, reason}
         end
       else
-        installed = PhoenixKit.SchemaMigrations.get_installed_version(repo)
-        Logger.debug("[PhoenixKit] Schema up to date at version #{installed}")
+        Logger.debug("[PhoenixKit] Schema up to date at version #{current_version}")
         :ok
       end
     rescue
@@ -296,16 +295,14 @@ defmodule PhoenixKit.AutoSetup do
     case Application.get_env(:phoenix_kit, :repo) do
       nil -> 
         false
-      repo -> 
+      _repo -> 
         try do
-          # Check if schema is up to date
-          result = not PhoenixKit.SchemaMigrations.migration_required?(repo)
-          result
+          # Check if migration has been completed by looking for version comment
+          opts = %{prefix: "public", escaped_prefix: "public"}
+          version = PhoenixKit.Migrations.Postgres.migrated_version(opts)
+          version > 0
         rescue
-          error ->
-            false
-        catch
-          :error, reason ->
+          _error ->
             false
         end
     end

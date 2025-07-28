@@ -274,17 +274,6 @@ lib/your_app_web/templates/phoenix_kit_web/
     └── phoenix_kit.html.heex
 ```
 
-### Custom Styling
-
-PhoenixKit uses semantic HTML classes for easy styling:
-
-```css
-.phoenix-kit-form { /* Registration/login forms */ }
-.phoenix-kit-button { /* Submit buttons */ }
-.phoenix-kit-input { /* Form inputs */ }
-.phoenix-kit-error { /* Error messages */ }
-```
-
 ## Troubleshooting
 
 ### Common Issues
