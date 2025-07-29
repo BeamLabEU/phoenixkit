@@ -37,41 +37,116 @@ end
 
 ### 2. Install PhoenixKit
 
+PhoenixKit provides **three installation methods** for different use cases:
+
+#### 🔥 **Professional Igniter Installation** (Recommended)
+
+For the most seamless installation experience, use our Igniter-powered installer:
+
+```elixir
+# Add to your mix.exs dependencies
+def deps do
+  [
+    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"},
+    {:igniter, "~> 0.6.0", only: [:dev]}  # Required for professional installer
+  ]
+end
+```
+
+```bash
+mix deps.get
+mix phoenix_kit.install.pro
+```
+
+**✨ What the Professional Installer Does:**
+- 🤖 **Auto-detects your Ecto repository** - no manual repo specification needed
+- 📝 **Automatically modifies config/config.exs** - adds PhoenixKit configuration
+- 🧪 **Automatically configures config/test.exs** - sets up test-specific settings  
+- 📄 **Updates .formatter.exs** - adds PhoenixKit to import_deps for proper formatting
+- 🗄️ **Creates database migration** - using Ecto-native `Igniter.Libs.Ecto.gen_migration`
+- 📧 **Configures mailer** - sets up Swoosh adapter for emails
+- ⚙️ **Professional error handling** - actionable error messages with solution steps
+
+**Advanced Options:**
+```bash
+# Custom PostgreSQL schema prefix
+mix phoenix_kit.install.pro --prefix "auth"
+
+# Specific repository  
+mix phoenix_kit.install.pro --repo MyApp.CustomRepo
+
+# Custom layout integration
+mix phoenix_kit.install.pro --layout "MyAppWeb.Layouts.auth"
+
+# Add authentication routes automatically
+mix phoenix_kit.install.pro --add-routes
+```
+
+#### 🛠️ **Traditional Installation**
+
+If you prefer the traditional approach or don't want Igniter:
+
 ```bash
 mix deps.get
 mix phoenix_kit.install --repo MyApp.Repo
 ```
 
-**Important:** The `--repo` parameter is **REQUIRED**!
+**Note:** The `--repo` parameter is **required** for traditional installation.
 
-This automatically:
-- Generates migration files for authentication tables
-- Adds configuration to `config/config.exs` 
-- Provides next steps for integration
+#### 🎯 **Basic Igniter Installation**
 
-### 3. Configure Mailer (CRITICAL)
+For users already familiar with the basic Igniter approach:
 
-Add to your `config/config.exs`:
+```bash
+mix phoenix_kit.install.igniter --repo MyApp.Repo
+```
+
+### 📊 **Installation Comparison**
+
+| Feature | Traditional | Basic Igniter | **Professional Igniter** |
+|---------|-------------|---------------|--------------------------|
+| Repository Detection | Manual `--repo` required | Manual `--repo` required | ✅ **Automatic detection** |
+| Configuration | Manual setup required | Shows notices | ✅ **Automatic modification** |
+| Test Configuration | Manual setup | Not included | ✅ **Automatic test.exs setup** |
+| Formatter Integration | Manual | Not included | ✅ **Automatic .formatter.exs** |
+| Migration Creation | Manual file creation | Basic file creation | ✅ **Ecto-native generation** |
+| Error Handling | Basic Mix errors | Basic notices | ✅ **Professional guidance** |
+| User Experience | Multiple manual steps | Some automation | ✅ **Fully automated** |
+
+**🎯 Recommendation:** Use `mix phoenix_kit.install.pro` for the best experience!
+
+### 3. Run Migration & Final Setup
+
+```bash
+# Run database migration
+mix ecto.migrate
+```
+
+#### Manual Configuration (if not using Professional Installer)
+
+If you used traditional installation, add to your `config/config.exs`:
 
 ```elixir
 # Required: Configure PhoenixKit repository
 config :phoenix_kit,
   repo: MyApp.Repo
 
-# Required: Configure PhoenixKit Mailer for email delivery
+# Required: Configure PhoenixKit Mailer for email delivery  
 config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
 ```
 
-**⚠️ Without mailer configuration, user registration will fail!**
+**⚠️ Note:** The Professional Installer handles all configuration automatically!
 
-For production, use appropriate adapter:
+#### Production Mailer Configuration
+
+For production environments, configure a real email adapter:
 ```elixir
 # Production example with SMTP
 config :phoenix_kit, PhoenixKit.Mailer,
   adapter: Swoosh.Adapters.SMTP,
   relay: "smtp.gmail.com",
-  username: "your-email@gmail.com",
-  password: "your-password"
+  username: System.get_env("SMTP_USERNAME"),
+  password: System.get_env("SMTP_PASSWORD")
 ```
 
 ### 4. Add Routes
@@ -124,45 +199,67 @@ phoenix_kit_auth_routes("/users")
 
 **Note:** We don't recommend using `/auth` as the prefix.
 
-### PostgreSQL Schema Prefix
+## Advanced Configuration Options
+
+### 🗄️ **PostgreSQL Schema Prefix** 
+
+PhoenixKit supports database schema isolation for multi-tenant applications:
 
 ```bash
+# Professional Installer (Recommended)
+mix phoenix_kit.install.pro --prefix "auth" 
+
+# Traditional approach
 mix phoenix_kit.install --repo MyApp.Repo --prefix "auth" --create-schema
 ```
 
-## Configuration
+This creates authentication tables in a separate PostgreSQL schema:
+- Tables: `auth.users`, `auth.users_tokens` 
+- Benefits: Isolation, security, multi-tenant support
+- Automatic schema creation if it doesn't exist
 
-PhoenixKit uses your application's repository:
+### 🎨 **Layout Integration**
 
-```elixir
-# config/config.exs (automatically added by mix phoenix_kit.install)
-config :phoenix_kit, repo: YourApp.Repo
+Integrate PhoenixKit with your application's design:
+
+```bash
+# Professional Installer with custom layout
+mix phoenix_kit.install.pro --layout "MyAppWeb.Layouts.auth"
 ```
 
-### Advanced Configuration
-
+Or configure manually in `config/config.exs`:
 ```elixir
 config :phoenix_kit,
-  repo: YourApp.Repo,
-  # Optional: Custom mailer for sending emails
-  mailer: YourApp.Mailer
-
-# Layout Integration - Use your app's layouts instead of PhoenixKit's
-config :phoenix_kit,
-  layout: {YourAppWeb.Layouts, :app},        # Use your app's main layout
-  root_layout: {YourAppWeb.Layouts, :root},  # Optional: custom root layout
-  page_title_prefix: "Auth"                  # Optional: prefix for page titles
-
-# Layout examples:
-# Minimal - only app layout:
-# config :phoenix_kit, layout: {YourAppWeb.Layouts, :app}
-#
-# Complete integration with your app's design:
-# config :phoenix_kit,
-#   layout: {YourAppWeb.Layouts, :app},
-#   root_layout: {YourAppWeb.Layouts, :root},
-#   page_title_prefix: "Authentication"
+  layout: {MyAppWeb.Layouts, :app},        # Use your app's main layout
+  root_layout: {MyAppWeb.Layouts, :root},  # Optional: custom root layout  
+  page_title_prefix: "Auth"                # Optional: page title prefix
 ```
+
+### ⚙️ **Complete Configuration Reference**
+
+```elixir
+# config/config.exs - Professional Installer handles this automatically
+config :phoenix_kit,
+  repo: MyApp.Repo,                        # Ecto repository
+  prefix: "auth",                          # Optional: PostgreSQL schema
+  layout: {MyAppWeb.Layouts, :app},        # Optional: custom layout
+  root_layout: {MyAppWeb.Layouts, :root},  # Optional: root layout
+  page_title_prefix: "Authentication"     # Optional: title prefix
+
+# Mailer configuration - also handled automatically
+config :phoenix_kit, PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.Local           # Development
+  # adapter: Swoosh.Adapters.SMTP          # Production
+
+# Test-specific configuration (added automatically by Professional Installer)
+# config/test.exs
+config :phoenix_kit,
+  repo: MyApp.Repo,
+  prefix: "auth", 
+  async: true                              # Enable async testing
+```
+
+**💡 Pro Tip:** Use `mix phoenix_kit.install.pro` to handle all configuration automatically!
 
 ## Authentication Routes
 
@@ -297,7 +394,40 @@ lib/your_app_web/templates/phoenix_kit_web/
 
 ## Troubleshooting
 
-### Common Issues
+### 🔥 Igniter Installation Issues
+
+**Igniter not available**
+```bash
+ERROR: The task 'phoenix_kit.install.pro' requires Igniter
+```
+**Solution:** Add Igniter to your dependencies:
+```elixir
+# mix.exs
+{:igniter, "~> 0.6.0", only: [:dev]}
+```
+Then run `mix deps.get`
+
+**Repository auto-detection failed**
+```bash
+ERROR: No Ecto repos found for :my_app
+```
+**Solution:** Either:
+1. Ensure Ecto is configured: `config :my_app, ecto_repos: [MyApp.Repo]`  
+2. Use explicit repo: `mix phoenix_kit.install.pro --repo MyApp.Repo`
+
+**Configuration conflicts**
+```bash  
+NOTICE: Configuration already exists and was merged
+```
+**Solution:** This is normal! The Professional Installer safely merges configurations. Check your `config/config.exs` for the updated PhoenixKit section.
+
+**Migration generation failed**
+```bash
+ERROR: Could not generate migration  
+```
+**Solution:** Ensure you have write permissions to `priv/repo/migrations/` directory.
+
+### 🛠️ Traditional Installation Issues
 
 **No repository configured**
 ```
@@ -349,6 +479,83 @@ config :logger, level: :debug
 PhoenixKit will automatically detect and run schema migrations. No manual intervention required.
 
 **Important:** Table names have been updated from `phoenix_kit`/`phoenix_kit_tokens` to `phoenix_kit_users`/`phoenix_kit_users_tokens`. Fresh installations will use the new names automatically.
+
+## 🚀 Installation Examples & Best Practices
+
+### Quick Start for New Projects
+
+```bash
+# 1. Create new Phoenix project
+mix phx.new my_app --no-live
+cd my_app
+
+# 2. Add PhoenixKit with Igniter support
+# Add to mix.exs dependencies:
+{:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"}
+{:igniter, "~> 0.6.0", only: [:dev]}
+
+# 3. Install dependencies and run professional installer
+mix deps.get
+mix phoenix_kit.install.pro
+
+# 4. Run migration and start server
+mix ecto.migrate
+mix phx.server
+```
+
+### Enterprise Setup with Schema Isolation
+
+```bash
+# For multi-tenant or enterprise applications
+mix phoenix_kit.install.pro --prefix "auth" --layout "MyAppWeb.Layouts.enterprise"
+```
+
+This creates:
+- Tables: `auth.users`, `auth.users_tokens`
+- Custom layout integration
+- Automatic test configuration
+- Professional error handling
+
+### Migration Path from Traditional to Professional
+
+If you're using the traditional installer, you can upgrade:
+
+```bash
+# 1. Add Igniter to your dependencies
+# 2. Run the professional installer (safe - merges existing config)
+mix phoenix_kit.install.pro
+
+# 3. Review the updated configuration files
+# 4. Remove any duplicate manual configuration
+```
+
+### Recommended Production Configuration
+
+```elixir
+# config/prod.exs
+config :phoenix_kit, PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: System.get_env("SMTP_RELAY"),
+  username: System.get_env("SMTP_USERNAME"),
+  password: System.get_env("SMTP_PASSWORD"),
+  port: 587,
+  tls: :always,
+  auth: :always
+
+# Optional: Custom layout for branded experience
+config :phoenix_kit,
+  layout: {MyAppWeb.Layouts, :auth},
+  page_title_prefix: "Authentication"
+```
+
+## 🎯 Why Choose PhoenixKit?
+
+- **🏆 Professional Grade:** Built with Oban-style architecture and modern best practices
+- **⚡ Zero Config:** Professional Igniter installer handles everything automatically  
+- **🔒 Battle Tested:** Complete authentication flow with email confirmation
+- **🎨 Design Flexible:** Seamless integration with your existing Phoenix layouts
+- **📦 Production Ready:** Used in production Phoenix applications
+- **🛠️ Developer Friendly:** Best-in-class error messages and troubleshooting
 
 ## License
 
