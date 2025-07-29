@@ -28,7 +28,7 @@ defmodule PhoenixKitWeb.AuthRouter do
 
     # Test LiveView 
     live "/test", PhoenixKitWeb.TestLive, :index
-    
+
     # LiveView routes for authentication
     live "/register", PhoenixKitWeb.UserRegistrationLive, :new
     live "/log_in", PhoenixKitWeb.UserLoginLive, :new
@@ -41,7 +41,7 @@ defmodule PhoenixKitWeb.AuthRouter do
 
   scope "/" do
     pipe_through [:browser]
-    
+
     delete "/log_out", PhoenixKitWeb.UserSessionController, :delete
     get "/log_out", PhoenixKitWeb.UserSessionController, :get_logout
 
