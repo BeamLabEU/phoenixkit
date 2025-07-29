@@ -71,7 +71,7 @@ defmodule PhoenixKitWeb.Integration do
       end
 
       pipeline :phoenix_kit_require_authenticated do
-        plug PhoenixKitWeb.UserAuth, :require_authenticated_user
+        plug PhoenixKitWeb.UserAuth, :phoenix_kit_require_authenticated_user
       end
       
       scope unquote(prefix), PhoenixKitWeb do

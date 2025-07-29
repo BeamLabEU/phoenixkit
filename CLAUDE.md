@@ -29,6 +29,7 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix phoenix_kit.install` - Install PhoenixKit with auto-detected repo
 - `mix phoenix_kit.install --prefix "auth"` - Install with custom schema prefix
 - `mix phoenix_kit.install --repo MyApp.Repo` - Install with specific repo
+- `mix phoenix_kit.migrate --status` - Check migration status and version information
 - **Professional versioned migrations** - Oban-style migration system with version tracking
 - **Prefix support** - Isolate PhoenixKit tables using PostgreSQL schemas
 - **Idempotent operations** - Safe to run migrations multiple times

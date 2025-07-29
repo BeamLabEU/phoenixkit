@@ -239,7 +239,7 @@ user = PhoenixKit.Accounts.get_user_by_email("user@example.com")
 import PhoenixKitWeb.UserAuth
 
 # Require authentication
-plug :require_authenticated_user
+plug :phoenix_kit_require_authenticated_user
 
 # Redirect if already logged in  
 plug :phoenix_kit_redirect_if_user_is_authenticated
@@ -259,6 +259,11 @@ PhoenixKit follows Oban's architecture principles:
 ## Migration System
 
 PhoenixKit uses a professional versioned migration system:
+
+```bash
+# Check migration status and version information
+mix phoenix_kit.migrate --status
+```
 
 ```elixir
 # Automatic version tracking

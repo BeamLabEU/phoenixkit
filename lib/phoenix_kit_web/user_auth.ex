@@ -189,7 +189,7 @@ defmodule PhoenixKitWeb.UserAuth do
   def call(conn, :phoenix_kit_redirect_if_user_is_authenticated), do: redirect_if_user_is_authenticated(conn, [])
 
   @doc false
-  def call(conn, :require_authenticated_user), do: require_authenticated_user(conn, [])
+  def call(conn, :phoenix_kit_require_authenticated_user), do: require_authenticated_user(conn, [])
 
   @doc """
   Used for routes that require the user to not be authenticated.

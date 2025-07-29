@@ -20,7 +20,7 @@ defmodule PhoenixKitWeb.AuthRouter do
   end
 
   pipeline :require_authenticated do
-    plug :require_authenticated_user
+    plug PhoenixKitWeb.UserAuth, :phoenix_kit_require_authenticated_user
   end
 
   scope "/" do

@@ -176,7 +176,19 @@ defmodule PhoenixKit.LayoutConfig do
         # Only warn if we're in a running application context (not compilation)
         Process.whereis(:application_controller) != nil ->
           require Logger
-          Logger.warning("[PhoenixKit] Layout module #{inspect(module)} not found at runtime, using fallback #{inspect(fallback)}")
+          
+          # Use debug level for auto-generated test module names to reduce noise
+          module_string = to_string(module)
+          is_auto_generated_test = String.contains?(module_string, "Test") and 
+                                  Application.get_env(:phoenix_kit, :layout) == nil
+          
+          if is_auto_generated_test do
+            # Don't log anything for auto-generated test modules - they're expected to not exist
+            :ok
+          else
+            Logger.warning("[PhoenixKit] Layout module #{inspect(module)} not found at runtime, using fallback #{inspect(fallback)}")
+          end
+          
           fallback
         
         # During compilation, trust that external modules will be available
