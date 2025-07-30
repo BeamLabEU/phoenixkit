@@ -1,5 +1,19 @@
 import Config
 
+config :phoenix_kit, PhoenixKit,
+  layout_fallbacks: %{enabled: true, layouts: %{}, strategy: :use_phoenix_kit_fallbacks}
+
+config :phoenix_kit, PhoenixKit, %{
+  custom_css_classes: %{
+    button: "w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700",
+    container: "max-w-md mx-auto",
+    form: "space-y-4",
+    input: "w-full px-3 py-2 border rounded-md"
+  },
+  layout_fallbacks: true,
+  page_title_prefix: "Authentication"
+}
+
 # Configuration for PhoenixKit with web layer support
 
 # Configure the database repository
@@ -57,9 +71,8 @@ config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
 
-
 # PhoenixKit configuration
-config :phoenix_kit, 
+config :phoenix_kit,
   repo: PhoenixKit.Repo
 
 # Layout configuration - defaults to PhoenixKit layouts

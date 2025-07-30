@@ -1,9 +1,9 @@
-defmodule TestAutoSetup.MixProject do
+defmodule TestApp.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :test_auto_setup,
+      app: :test_app,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule TestAutoSetup.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {TestAutoSetup.Application, []},
+      mod: {TestApp.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -37,7 +37,6 @@ defmodule TestAutoSetup.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.0"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:heroicons,
@@ -47,18 +46,17 @@ defmodule TestAutoSetup.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:swoosh, "~> 1.5"},
-      {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:ecto_sql, "~> 3.12"},
-      {:postgrex, "~> 0.19"},
+      # PhoenixKit dependencies for testing
       {:phoenix_kit, path: "../.."},
-      {:igniter, "~> 0.6.0", only: [:dev]}
+      {:igniter, "~> 0.6.0"},
+      # Ecto for database support
+      {:ecto_sql, "~> 3.0"},
+      {:postgrex, ">= 0.0.0"}
     ]
   end
 
@@ -72,10 +70,10 @@ defmodule TestAutoSetup.MixProject do
     [
       setup: ["deps.get", "assets.setup", "assets.build"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind test_auto_setup", "esbuild test_auto_setup"],
+      "assets.build": ["tailwind test_app", "esbuild test_app"],
       "assets.deploy": [
-        "tailwind test_auto_setup --minify",
-        "esbuild test_auto_setup --minify",
+        "tailwind test_app --minify",
+        "esbuild test_app --minify",
         "phx.digest"
       ]
     ]

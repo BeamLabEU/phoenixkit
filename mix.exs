@@ -1,7 +1,7 @@
 defmodule PhoenixKit.MixProject do
   use Mix.Project
 
-  @version "0.1.10"
+  @version "0.2.0"
   @description "Professional authentication library for Phoenix applications with zero-config setup"
   @source_url "https://github.com/BeamLabEU/phoenixkit"
 
@@ -83,7 +83,7 @@ defmodule PhoenixKit.MixProject do
 
       # Utilities
       {:jason, "~> 1.4"},
-      
+
       # Code generation and project patching
       {:igniter, "~> 0.6.0", optional: true}
     ]
