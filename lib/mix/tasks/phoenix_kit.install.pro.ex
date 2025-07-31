@@ -114,6 +114,7 @@ if Code.ensure_loaded?(Igniter) do
     @moduledoc __MODULE__.Docs.long_doc()
 
     use Igniter.Mix.Task
+    require Logger
 
     @impl Igniter.Mix.Task
     def info(_argv, _composing_task) do
@@ -242,6 +243,7 @@ if Code.ensure_loaded?(Igniter) do
             on_exists: :skip
           )
           |> perform_router_integration(opts)
+          |> validate_and_fix_layout_files()
           |> perform_layout_integration(opts)
           |> add_completion_notice()
 
@@ -680,6 +682,45 @@ if Code.ensure_loaded?(Igniter) do
 
         _ ->
           layout_string
+      end
+    end
+
+    defp validate_and_fix_layout_files(igniter) do
+      Logger.info("🔍 Checking layout files for attribute order issues...")
+      
+      # Find layout files that might have been modified
+      layout_patterns = [
+        "lib/**/components/layouts.ex",
+        "lib/**/layouts.ex"
+      ]
+      
+      layout_files = 
+        layout_patterns
+        |> Enum.flat_map(fn pattern ->
+          Path.wildcard(pattern)
+        end)
+        |> Enum.uniq()
+        |> Enum.filter(&File.exists?/1)
+      
+      if length(layout_files) > 0 do
+        Logger.info("Found #{length(layout_files)} layout files to check")
+        
+        # Apply layout fixes using our existing LayoutEnhancer
+        case PhoenixKit.Install.LayoutIntegration.LayoutEnhancer.apply_specific_enhancement(
+          igniter, 
+          Enum.at(layout_files, 0), 
+          :fix_attribute_order
+        ) do
+          {:ok, updated_igniter} ->
+            Logger.info("✅ Layout files validated and fixed if needed")
+            updated_igniter
+          {:error, reason} ->
+            Logger.warning("⚠️  Could not validate layout files: #{inspect(reason)}")
+            igniter
+        end
+      else
+        Logger.debug("No layout files found to validate")
+        igniter
       end
     end
   end
