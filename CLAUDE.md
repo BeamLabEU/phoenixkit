@@ -50,7 +50,7 @@ This is **PhoenixKit** - a professional authentication library for Phoenix appli
 - `mix hex.publish` - Publish to Hex.pm (requires auth)
 
 ### Version Management
-- **Current Version**: 0.2.0 (in mix.exs)
+- **Current Version**: 0.2.6 (in mix.exs)
 - **Version Strategy**: Semantic versioning (MAJOR.MINOR.PATCH)
 - **Migration Version**: V01 (current auth tables)
 - **Database Versioning**: Professional system with version tracking
