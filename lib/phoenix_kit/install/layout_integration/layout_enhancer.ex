@@ -801,9 +801,23 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
     # Find all attributes and their positions
     attributes = Regex.scan(@compiled_attribute_regex, content, return: :index, capture: :all_but_first)
     
-    # Find first function definition
-    case Regex.run(@compiled_function_regex, content, return: :index) do
-      [{first_func_start, _}] ->
+    # Find first function definition or embed_templates
+    function_matches = Regex.scan(@compiled_function_regex, content, return: :index)
+    embed_matches = Regex.scan(~r/embed_templates/, content, return: :index)
+    
+    all_matches = function_matches ++ embed_matches
+    
+    case all_matches do
+      [] ->
+        # No functions found, content is probably fine
+        {:ok, content}
+      
+      matches ->
+        # Get the earliest function/embed_templates position
+        first_func_start = 
+          matches
+          |> Enum.map(fn [{start, _}] -> start end)
+          |> Enum.min()
         # Check if any attributes are after the first function
         misplaced_attributes = 
           attributes
@@ -817,9 +831,10 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
               String.slice(content, start, length)
             end)
           
-          # Remove misplaced attributes from their current locations
+          # Remove misplaced attributes from their current locations (reverse order to maintain indices)
           fixed_content = 
             misplaced_attributes
+            |> Enum.reverse()
             |> Enum.reduce(content, fn [{start, length}], acc ->
               before = String.slice(acc, 0, start)
               after_attr = String.slice(acc, start + length, String.length(acc))
@@ -847,10 +862,6 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
         else
           {:ok, content}
         end
-        
-      nil ->
-        # No functions found, content is probably fine
-        {:ok, content}
     end
   end
 
