@@ -19,79 +19,82 @@ defmodule PhoenixKit.Install.ConflictDetection.CodeAnalyzer do
 
   @file_extensions [".ex", ".exs"]
 
-  @auth_code_patterns %{
-    # User schema patterns
-    user_schemas: [
-      {~r/defmodule\s+\w*\.User\s+do/, :user_module_definition},
-      {~r/schema\s+"users"/, :users_table_schema},
-      {~r/field\s+:email/, :email_field},
-      {~r/field\s+:password_hash/, :password_hash_field},
-      {~r/field\s+:encrypted_password/, :encrypted_password_field},
-      {~r/field\s+:password/, :password_field},
-      {~r/has_secure_password/, :secure_password_macro},
-      {~r/unique_constraint.*email/, :email_unique_constraint}
-    ],
+  # Module patterns moved to private function to avoid compilation issues
+  defp get_auth_code_patterns do
+    %{
+      # User schema patterns
+      user_schemas: [
+        {~r/defmodule\s+\w*\.User\s+do/, :user_module_definition},
+        {~r/schema\s+"users"/, :users_table_schema},
+        {~r/field\s+:email/, :email_field},
+        {~r/field\s+:password_hash/, :password_hash_field},
+        {~r/field\s+:encrypted_password/, :encrypted_password_field},
+        {~r/field\s+:password/, :password_field},
+        {~r/has_secure_password/, :secure_password_macro},
+        {~r/unique_constraint.*email/, :email_unique_constraint}
+      ],
 
-    # Authentication plugs and functions
-    auth_plugs: [
-      {~r/plug\s+:authenticate/, :authenticate_plug},
-      {~r/plug\s+.*Auth/, :auth_plug_pattern},
-      {~r/plug\s+:ensure_authenticated/, :ensure_authenticated_plug},
-      {~r/plug\s+:require_user/, :require_user_plug},
-      {~r/def authenticate/, :authenticate_function},
-      {~r/def login/, :login_function},
-      {~r/def logout/, :logout_function},
-      {~r/def sign_in/, :sign_in_function}
-    ],
+      # Authentication plugs and functions
+      auth_plugs: [
+        {~r/plug\s+:authenticate/, :authenticate_plug},
+        {~r/plug\s+.*Auth/, :auth_plug_pattern},
+        {~r/plug\s+:ensure_authenticated/, :ensure_authenticated_plug},
+        {~r/plug\s+:require_user/, :require_user_plug},
+        {~r/def authenticate/, :authenticate_function},
+        {~r/def login/, :login_function},
+        {~r/def logout/, :logout_function},
+        {~r/def sign_in/, :sign_in_function}
+      ],
 
-    # Session management
-    session_management: [
-      {~r/put_session/, :put_session_call},
-      {~r/get_session/, :get_session_call},
-      {~r/delete_session/, :delete_session_call},
-      {~r/clear_session/, :clear_session_call},
-      {~r/assign.*current_user/, :current_user_assign},
-      {~r/@current_user/, :current_user_module_attribute}
-    ],
+      # Session management
+      session_management: [
+        {~r/put_session/, :put_session_call},
+        {~r/get_session/, :get_session_call},
+        {~r/delete_session/, :delete_session_call},
+        {~r/clear_session/, :clear_session_call},
+        {~r/assign.*current_user/, :current_user_assign},
+        {~r/@current_user/, :current_user_module_attribute}
+      ],
 
-    # Guardian-specific patterns
-    guardian_code: [
-      {~r/Guardian\.encode_and_sign/, :guardian_encode_sign},
-      {~r/Guardian\.decode_and_verify/, :guardian_decode_verify},
-      {~r/Guardian\.current_user/, :guardian_current_user},
-      {~r/Guardian\.Plug/, :guardian_plug_usage},
-      {~r/Guardian\.Phoenix/, :guardian_phoenix_usage}
-    ],
+      # Guardian-specific patterns
+      guardian_code: [
+        {~r/Guardian\.encode_and_sign/, :guardian_encode_sign},
+        {~r/Guardian\.decode_and_verify/, :guardian_decode_verify},
+        {~r/Guardian\.current_user/, :guardian_current_user},
+        {~r/Guardian\.Plug/, :guardian_plug_usage},
+        {~r/Guardian\.Phoenix/, :guardian_phoenix_usage}
+      ],
 
-    # Pow-specific patterns
-    pow_code: [
-      {~r/Pow\.Plug/, :pow_plug_usage},
-      {~r/PowEmailConfirmation/, :pow_email_confirmation},
-      {~r/PowPersistentSession/, :pow_persistent_session},
-      {~r/pow_routes/, :pow_routes_macro}
-    ],
+      # Pow-specific patterns
+      pow_code: [
+        {~r/Pow\.Plug/, :pow_plug_usage},
+        {~r/PowEmailConfirmation/, :pow_email_confirmation},
+        {~r/PowPersistentSession/, :pow_persistent_session},
+        {~r/pow_routes/, :pow_routes_macro}
+      ],
 
-    # Authentication routes
-    auth_routes: [
-      {~r/get.*login/, :login_route},
-      {~r/post.*login/, :login_post_route},
-      {~r/get.*logout/, :logout_route},
-      {~r/delete.*logout/, :logout_delete_route},
-      {~r/get.*register/, :register_route},
-      {~r/post.*register/, :register_post_route},
-      {~r/get.*password/, :password_route},
-      {~r/scope.*auth/, :auth_scope}
-    ],
+      # Authentication routes
+      auth_routes: [
+        {~r/get.*login/, :login_route},
+        {~r/post.*login/, :login_post_route},
+        {~r/get.*logout/, :logout_route},
+        {~r/delete.*logout/, :logout_delete_route},
+        {~r/get.*register/, :register_route},
+        {~r/post.*register/, :register_post_route},
+        {~r/get.*password/, :password_route},
+        {~r/scope.*auth/, :auth_scope}
+      ],
 
-    # Password hashing
-    password_hashing: [
-      {~r/Bcrypt\.hash_pwd_salt/, :bcrypt_hashing},
-      {~r/Pbkdf2\.hash_pwd_salt/, :pbkdf2_hashing},
-      {~r/Argon2\.hash_pwd_salt/, :argon2_hashing},
-      {~r/Comeonin\./, :comeonin_usage},
-      {~r/hash_password/, :generic_hash_password}
-    ]
-  }
+      # Password hashing
+      password_hashing: [
+        {~r/Bcrypt\.hash_pwd_salt/, :bcrypt_hashing},
+        {~r/Pbkdf2\.hash_pwd_salt/, :pbkdf2_hashing},
+        {~r/Argon2\.hash_pwd_salt/, :argon2_hashing},
+        {~r/Comeonin\./, :comeonin_usage},
+        {~r/hash_password/, :generic_hash_password}
+      ]
+    }
+  end
 
   @doc """
   Анализирует весь код проекта для поиска authentication patterns.
@@ -239,7 +242,7 @@ defmodule PhoenixKit.Install.ConflictDetection.CodeAnalyzer do
   end
 
   defp scan_content_for_auth_patterns(content, file_path) do
-    @auth_code_patterns
+    get_auth_code_patterns()
     |> Enum.flat_map(fn {category, patterns} ->
       Enum.flat_map(patterns, fn {regex, pattern_type} ->
         case Regex.scan(regex, content, return: :index) do

@@ -58,50 +58,53 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutDetector do
     email: ["email.html.heex", "email.html.eex"]
   }
 
-  @layout_features_patterns %{
-    # Phoenix LiveView patterns
-    liveview: [
-      {~r/<\.live_title/, :live_title_component},
-      {~r/<\.flash/, :flash_component},
-      {~r/<\.live_component/, :live_component_usage},
-      {~r/phx-/, :liveview_attributes},
-      {~r/@conn/, :conn_assigns}
-    ],
+  # Layout features patterns moved to private function to avoid compilation issues
+  defp get_layout_features_patterns do
+    %{
+      # Phoenix LiveView patterns
+      liveview: [
+        {~r/<\.live_title/, :live_title_component},
+        {~r/<\.flash/, :flash_component},
+        {~r/<\.live_component/, :live_component_usage},
+        {~r/phx-/, :liveview_attributes},
+        {~r/@conn/, :conn_assigns}
+      ],
 
-    # CSS Framework patterns
-    css_frameworks: [
-      {~r/tailwind|tw-/, :tailwind},
-      {~r/bootstrap|bs-/, :bootstrap},
-      {~r/bulma/, :bulma},
-      {~r/foundation/, :foundation}
-    ],
+      # CSS Framework patterns
+      css_frameworks: [
+        {~r/tailwind|tw-/, :tailwind},
+        {~r/bootstrap|bs-/, :bootstrap},
+        {~r/bulma/, :bulma},
+        {~r/foundation/, :foundation}
+      ],
 
-    # Component system patterns
-    components: [
-      {~r/<\.header/, :header_component},
-      {~r/<\.navbar/, :navbar_component},
-      {~r/<\.sidebar/, :sidebar_component},
-      {~r/<\.footer/, :footer_component},
-      {~r/Components\./, :component_module_usage}
-    ],
+      # Component system patterns
+      components: [
+        {~r/<\.header/, :header_component},
+        {~r/<\.navbar/, :navbar_component},
+        {~r/<\.sidebar/, :sidebar_component},
+        {~r/<\.footer/, :footer_component},
+        {~r/Components\./, :component_module_usage}
+      ],
 
-    # Authentication patterns
-    auth_integration: [
-      {~r/@current_user/, :current_user_usage},
-      {~r/user_signed_in/, :auth_helper_usage},
-      {~r/log_out/, :logout_links},
-      {~r/sign_in/, :signin_links},
-      {~r/register/, :register_links}
-    ],
+      # Authentication patterns
+      auth_integration: [
+        {~r/@current_user/, :current_user_usage},
+        {~r/user_signed_in/, :auth_helper_usage},
+        {~r/log_out/, :logout_links},
+        {~r/sign_in/, :signin_links},
+        {~r/register/, :register_links}
+      ],
 
-    # Flash message patterns
-    flash_messages: [
-      {~r/flash\[:info\]/, :flash_info_usage},
-      {~r/flash\[:error\]/, :flash_error_usage},
-      {~r/flash\[:notice\]/, :flash_notice_usage},
-      {~r/put_flash/, :flash_usage}
-    ]
-  }
+      # Flash message patterns
+      flash_messages: [
+        {~r/flash\[:info\]/, :flash_info_usage},
+        {~r/flash\[:error\]/, :flash_error_usage},
+        {~r/flash\[:notice\]/, :flash_notice_usage},
+        {~r/put_flash/, :flash_usage}
+      ]
+    }
+  end
 
   @doc """
   Обнаруживает и анализирует все существующие layout'ы в Phoenix приложении.
@@ -397,7 +400,7 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutDetector do
   end
 
   defp extract_layout_features(content) do
-    @layout_features_patterns
+    get_layout_features_patterns()
     |> Enum.map(fn {category, patterns} ->
       found_features =
         patterns
@@ -487,7 +490,7 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutDetector do
   end
 
   defp extract_all_features(content) do
-    @layout_features_patterns
+    get_layout_features_patterns()
     |> Enum.map(fn {category, patterns} ->
       features =
         patterns

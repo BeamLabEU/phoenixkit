@@ -24,42 +24,45 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
   @compiled_img_alt_regex Regex.compile!("<img(?![^>]*alt=)")
   @compiled_aria_label_regex Regex.compile!("<(button|input|textarea)(?![^>]*aria-label)")
 
-  @enhancement_patterns %{
-    # Flash message enhancements - используем предкомпилированные regex
-    flash_messages: [
-      {:missing_flash_component, @compiled_flash_regex, :add_phoenix_kit_flash_component, :high},
-      {:outdated_flash_syntax, @compiled_flash_syntax_regex, :modernize_flash_syntax, :medium}
-    ],
+  # Enhancement patterns moved to private function to avoid compilation issues
+  defp get_enhancement_patterns do
+    %{
+      # Flash message enhancements - используем предкомпилированные regex
+      flash_messages: [
+        {:missing_flash_component, @compiled_flash_regex, :add_phoenix_kit_flash_component, :high},
+        {:outdated_flash_syntax, @compiled_flash_syntax_regex, :modernize_flash_syntax, :medium}
+      ],
 
-    # Authentication integration enhancements
-    auth_integration: [
-      {:missing_current_user, @compiled_current_user_regex, :add_current_user_display, :medium},
-      {:missing_auth_navigation, @compiled_auth_nav_regex, :add_auth_navigation, :low}
-    ],
+      # Authentication integration enhancements
+      auth_integration: [
+        {:missing_current_user, @compiled_current_user_regex, :add_current_user_display, :medium},
+        {:missing_auth_navigation, @compiled_auth_nav_regex, :add_auth_navigation, :low}
+      ],
 
-    # LiveView compatibility enhancements
-    liveview_compatibility: [
-      {:missing_csrf_token, @compiled_csrf_regex, :ensure_csrf_token, :high},
-      {:missing_live_socket, @compiled_live_socket_regex, :add_live_socket_setup, :high}
-    ],
+      # LiveView compatibility enhancements
+      liveview_compatibility: [
+        {:missing_csrf_token, @compiled_csrf_regex, :ensure_csrf_token, :high},
+        {:missing_live_socket, @compiled_live_socket_regex, :add_live_socket_setup, :high}
+      ],
 
-    # Accessibility enhancements
-    accessibility: [
-      {:missing_alt_attributes, @compiled_img_alt_regex, :add_missing_alt_attributes, :medium},
-      {:missing_aria_labels, @compiled_aria_label_regex, :add_aria_labels, :low}
-    ],
+      # Accessibility enhancements
+      accessibility: [
+        {:missing_alt_attributes, @compiled_img_alt_regex, :add_missing_alt_attributes, :medium},
+        {:missing_aria_labels, @compiled_aria_label_regex, :add_aria_labels, :low}
+      ],
 
-    # Performance enhancements
-    performance: [
-      {:missing_preload_hints, ~r/<link.*?stylesheet/, :add_preload_hints, :low},
-      {:unoptimized_scripts, ~r/<script(?![^>]*defer|async)/, :optimize_script_loading, :low}
-    ],
+      # Performance enhancements
+      performance: [
+        {:missing_preload_hints, ~r/<link.*?stylesheet/, :add_preload_hints, :low},
+        {:unoptimized_scripts, ~r/<script(?![^>]*defer|async)/, :optimize_script_loading, :low}
+      ],
 
-    # Code structure fixes
-    code_structure: [
-      {:attributes_after_functions, @compiled_function_regex, :fix_attribute_order, :critical}
-    ]
-  }
+      # Code structure fixes
+      code_structure: [
+        {:attributes_after_functions, @compiled_function_regex, :fix_attribute_order, :critical}
+      ]
+    }
+  end
 
   @enhancement_templates %{
     # Template snippets for various enhancements
@@ -397,7 +400,7 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
   defp identify_enhancement_opportunities(content, file_path) do
     Logger.debug("Identifying enhancement opportunities in #{file_path}")
 
-    @enhancement_patterns
+    get_enhancement_patterns()
     |> Enum.flat_map(fn {category, patterns} ->
       patterns
       |> Enum.map(fn {pattern_name, pattern, enhancement, priority} ->
