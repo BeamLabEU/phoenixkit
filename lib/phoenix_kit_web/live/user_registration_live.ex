@@ -12,7 +12,7 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
         <div class="text-center lg:text-left">
           <h1 class="text-5xl font-bold">Join PhoenixKit!</h1>
           <p class="py-6">
-            Create your account to access authentication features. 
+            Create your account to access authentication features.
             Get started with our intelligent authentication platform designed for Phoenix applications.
           </p>
           <div class="text-sm opacity-75">
@@ -22,33 +22,43 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
             </.link>
           </div>
         </div>
-
-        <!-- Registration Form Card (Right side on desktop) -->
+        
+    <!-- Registration Form Card (Right side on desktop) -->
         <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
           <div class="card-body">
             <h2 class="card-title justify-center">Create account</h2>
-            
-            <.form 
+
+            <.form
               for={@form}
               id="registration_form"
               phx-submit="save"
               phx-change="validate"
               phx-trigger-action={@trigger_submit}
-              action={"/phoenix_kit/log_in?_action=registered"}
+              action="/phoenix_kit/log_in?_action=registered"
               method="post"
             >
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">Account Information</legend>
-                
+
                 <div :if={@check_errors} class="alert alert-error text-sm mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="stroke-current shrink-0 h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <span>Oops, something went wrong! Please check the errors below.</span>
                 </div>
 
                 <label class="label" for="user_email">Email</label>
-                <input 
+                <input
                   id="user_email"
                   name="user[email]"
                   type="email"
@@ -60,9 +70,9 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
                   required
                 />
                 <p class="validator-hint">Please enter a valid email address</p>
-                
+
                 <label class="label" for="user_password">Password</label>
-                <input 
+                <input
                   id="user_password"
                   name="user[password]"
                   type="password"
@@ -73,8 +83,8 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
                   required
                 />
                 <p class="validator-hint">Password must be at least 8 characters long</p>
-                
-                <button 
+
+                <button
                   type="submit"
                   phx-disable-with="Creating account..."
                   class="btn btn-primary w-full mt-4"
@@ -84,7 +94,7 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
               </fieldset>
             </.form>
             
-            <!-- Development Mode Notice -->
+    <!-- Development Mode Notice -->
             <div :if={show_dev_notice?()} class="alert alert-info text-sm mt-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

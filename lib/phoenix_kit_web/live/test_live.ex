@@ -8,7 +8,7 @@ defmodule PhoenixKitWeb.TestLive do
         <div class="max-w-md">
           <h1 class="text-5xl font-bold">LiveView Test</h1>
           <p class="py-6">If you see this styled page, LiveView is working with DaisyUI!</p>
-          
+
           <div class="card w-96 bg-base-100 shadow-xl">
             <div class="card-body">
               <h2 class="card-title">Simple Form Test</h2>
@@ -17,11 +17,11 @@ defmodule PhoenixKitWeb.TestLive do
                   <label class="label">
                     <span class="label-text">Test Field</span>
                   </label>
-                  <.input 
-                    field={@form[:test_field]} 
-                    type="text" 
-                    placeholder="Type something..." 
-                    class="input input-bordered" 
+                  <.input
+                    field={@form[:test_field]}
+                    type="text"
+                    placeholder="Type something..."
+                    class="input input-bordered"
                   />
                 </div>
                 <div class="card-actions justify-end mt-4">

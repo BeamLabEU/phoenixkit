@@ -18,7 +18,7 @@ defmodule PhoenixKitWeb.UserSettingsLive do
             <div class="card-body">
               <h2 class="card-title">Email Address</h2>
               <p class="text-sm text-base-content/70 mb-4">Change your account email address</p>
-              
+
               <.simple_form
                 for={@email_form}
                 id="email_form"
@@ -41,17 +41,17 @@ defmodule PhoenixKitWeb.UserSettingsLive do
               </.simple_form>
             </div>
           </div>
-
-          <!-- Password Settings Card -->
+          
+    <!-- Password Settings Card -->
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
               <h2 class="card-title">Password</h2>
               <p class="text-sm text-base-content/70 mb-4">Update your account password</p>
-              
+
               <.simple_form
                 for={@password_form}
                 id="password_form"
-                action={"/phoenix_kit/log_in?_action=password_updated"}
+                action="/phoenix_kit/log_in?_action=password_updated"
                 method="post"
                 phx-change="validate_password"
                 phx-submit="update_password"
@@ -63,7 +63,12 @@ defmodule PhoenixKitWeb.UserSettingsLive do
                   id="hidden_user_email"
                   value={@current_email}
                 />
-                <.input field={@password_form[:password]} type="password" label="New password" required />
+                <.input
+                  field={@password_form[:password]}
+                  type="password"
+                  label="New password"
+                  required
+                />
                 <.input
                   field={@password_form[:password_confirmation]}
                   type="password"
@@ -79,13 +84,15 @@ defmodule PhoenixKitWeb.UserSettingsLive do
                   required
                 />
                 <:actions>
-                  <.button phx-disable-with="Changing..." class="btn-primary">Change Password</.button>
+                  <.button phx-disable-with="Changing..." class="btn-primary">
+                    Change Password
+                  </.button>
                 </:actions>
               </.simple_form>
             </div>
           </div>
-
-          <!-- Development Mode Notice -->
+          
+    <!-- Development Mode Notice -->
           <div :if={show_dev_notice?()} class="alert alert-info">
             <svg
               xmlns="http://www.w3.org/2000/svg"

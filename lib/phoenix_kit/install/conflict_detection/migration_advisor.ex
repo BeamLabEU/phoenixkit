@@ -1,7 +1,7 @@
 defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
   @moduledoc """
   Предоставляет стратегии миграции для разрешения auth конфликтов.
-  
+
   Этот модуль:
   - Анализирует результаты dependency, config и code анализа
   - Генерирует персонализированные стратегии миграции
@@ -21,7 +21,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
       prerequisites: ["Separate API and web authentication scopes"],
       steps: [
         "Configure Guardian for API-only authentication",
-        "Set up PhoenixKit for web authentication", 
+        "Set up PhoenixKit for web authentication",
         "Update routing to separate API and web scopes",
         "Test both authentication systems independently",
         "Verify JWT tokens work for API calls",
@@ -30,7 +30,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
       rollback_plan: "Disable PhoenixKit, keep Guardian as primary",
       success_criteria: ["API auth via JWT tokens", "Web auth via sessions", "No route conflicts"]
     },
-    
+
     # Pow replacement strategy
     pow_replacement: %{
       complexity: :high,
@@ -52,11 +52,11 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
       rollback_plan: "Restore Pow configuration and user data from backup",
       success_criteria: ["All users can log in", "All auth features work", "No data loss"]
     },
-    
+
     # Coherence replacement strategy  
     coherence_replacement: %{
       complexity: :low,
-      timeline: "1-3 days", 
+      timeline: "1-3 days",
       risk_level: :low,
       description: "Replace deprecated Coherence with PhoenixKit",
       prerequisites: ["User data analysis"],
@@ -69,14 +69,18 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
         "Update any Coherence-specific code patterns"
       ],
       rollback_plan: "Restore Coherence configuration (not recommended)",
-      success_criteria: ["Existing users can log in", "All features migrated", "Improved security"]
+      success_criteria: [
+        "Existing users can log in",
+        "All features migrated",
+        "Improved security"
+      ]
     },
-    
+
     # Multiple auth systems resolution
     multiple_systems_resolution: %{
       complexity: :high,
       timeline: "2-4 weeks",
-      risk_level: :high, 
+      risk_level: :high,
       description: "Consolidate multiple authentication systems",
       prerequisites: ["Complete audit of all auth systems", "Stakeholder alignment"],
       steps: [
@@ -93,7 +97,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
       rollback_plan: "Phase-based rollback to previous stable state",
       success_criteria: ["Single auth system", "All users migrated", "No service disruption"]
     },
-    
+
     # Clean installation strategy
     clean_installation: %{
       complexity: :low,
@@ -115,9 +119,9 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
 
   @doc """
   Генерирует персонализированную стратегию миграции на основе анализа конфликтов.
-  
+
   ## Parameters
-  
+
   - `dependency_analysis` - Результат анализа зависимостей
   - `config_analysis` - Результат анализа конфигураций  
   - `code_analysis` - Результат анализа кода
@@ -125,24 +129,26 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
     - `:risk_tolerance` - Уровень толерантности к рискам (:low, :medium, :high)
     - `:timeline_preference` - Предпочтительные временные рамки (:fast, :balanced, :thorough)
     - `:migration_approach` - Подход к миграции (:replace, :coexist, :gradual)
-  
+
   ## Returns
-  
+
   - `{:ok, migration_strategy}` - рекомендованная стратегия миграции
   - `{:error, reason}` - ошибка при генерации стратегии
   """
   def generate_migration_strategy(dependency_analysis, config_analysis, code_analysis, opts \\ []) do
     Logger.info("🎯 Generating personalized migration strategy")
-    
+
     __risk_tolerance = Keyword.get(opts, :risk_tolerance, :medium)
     __timeline_preference = Keyword.get(opts, :timeline_preference, :balanced)
     migration_approach = Keyword.get(opts, :migration_approach, :auto)
-    
+
     try do
-      conflict_profile = build_conflict_profile(dependency_analysis, config_analysis, code_analysis)
+      conflict_profile =
+        build_conflict_profile(dependency_analysis, config_analysis, code_analysis)
+
       base_strategy = determine_base_strategy(conflict_profile, migration_approach)
       customized_strategy = customize_strategy(base_strategy, conflict_profile, opts)
-      
+
       migration_strategy = %{
         strategy_name: customized_strategy.name,
         conflict_profile: conflict_profile,
@@ -158,7 +164,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
         warnings: generate_warnings(conflict_profile, customized_strategy),
         next_steps: generate_immediate_next_steps(customized_strategy)
       }
-      
+
       log_migration_strategy_summary(migration_strategy)
       {:ok, migration_strategy}
     rescue
@@ -175,9 +181,10 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
     base_risks = get_base_strategy_risks(migration_strategy.base_strategy)
     conflict_risks = assess_conflict_specific_risks(migration_strategy.conflict_profile)
     implementation_risks = assess_implementation_risks(migration_strategy)
-    
+
     %{
-      overall_risk_level: calculate_overall_risk(base_risks, conflict_risks, implementation_risks),
+      overall_risk_level:
+        calculate_overall_risk(base_risks, conflict_risks, implementation_risks),
       base_strategy_risks: base_risks,
       conflict_specific_risks: conflict_risks,
       implementation_risks: implementation_risks,
@@ -191,7 +198,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
   """
   def generate_execution_plan(migration_strategy) do
     phases = break_down_into_phases(migration_strategy.customized_steps)
-    
+
     %{
       total_phases: length(phases),
       phases: phases,
@@ -218,8 +225,10 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
       user_schema_count: length(code_analysis.user_schemas),
       migration_complexity: code_analysis.migration_complexity,
       requires_data_migration: code_analysis.requires_data_migration,
-      total_high_conflicts: count_high_priority_conflicts(dependency_analysis, config_analysis, code_analysis),
-      conflict_categories: categorize_all_conflicts(dependency_analysis, config_analysis, code_analysis)
+      total_high_conflicts:
+        count_high_priority_conflicts(dependency_analysis, config_analysis, code_analysis),
+      conflict_categories:
+        categorize_all_conflicts(dependency_analysis, config_analysis, code_analysis)
     }
   end
 
@@ -227,27 +236,30 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
     cond do
       conflict_profile.total_high_conflicts == 0 and not conflict_profile.has_dependencies ->
         :clean_installation
-      
-      :guardian in conflict_profile.auth_libraries and can_coexist_with_guardian?(conflict_profile) ->
+
+      :guardian in conflict_profile.auth_libraries and
+          can_coexist_with_guardian?(conflict_profile) ->
         :guardian_coexistence
-      
+
       :pow in conflict_profile.auth_libraries ->
         :pow_replacement
-      
+
       :coherence in conflict_profile.auth_libraries ->
         :coherence_replacement
-      
+
       length(conflict_profile.auth_libraries) > 1 ->
         :multiple_systems_resolution
-      
+
       true ->
         :clean_installation
     end
   end
 
-  defp determine_base_strategy(_conflict_profile, strategy) when strategy in [:replace, :coexist, :gradual] do
+  defp determine_base_strategy(_conflict_profile, strategy)
+       when strategy in [:replace, :coexist, :gradual] do
     case strategy do
-      :replace -> :pow_replacement  # Default replacement strategy
+      # Default replacement strategy
+      :replace -> :pow_replacement
       :coexist -> :guardian_coexistence
       :gradual -> :multiple_systems_resolution
     end
@@ -255,12 +267,12 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
 
   defp customize_strategy(base_strategy, conflict_profile, opts) do
     base_strategy_config = Map.get(@migration_strategies, base_strategy)
-    
+
     # Кастомизируем стратегию на основе конкретного конфликт профиля
     customized_steps = customize_steps(base_strategy_config.steps, conflict_profile)
     adjusted_complexity = adjust_complexity(base_strategy_config.complexity, conflict_profile)
     adjusted_timeline = adjust_timeline(base_strategy_config.timeline, conflict_profile, opts)
-    
+
     %{
       name: base_strategy,
       steps: customized_steps,
@@ -276,19 +288,21 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
   defp customize_steps(base_steps, conflict_profile) do
     # Добавляем шаги, специфичные для найденных конфликтов
     additional_steps = []
-    
-    additional_steps = if conflict_profile.has_user_schemas do
-      additional_steps ++ ["Create user data backup before migration"]
-    else
-      additional_steps
-    end
-    
-    additional_steps = if :guardian in conflict_profile.auth_libraries do
-      additional_steps ++ ["Configure Guardian for API-only access"]
-    else
-      additional_steps
-    end
-    
+
+    additional_steps =
+      if conflict_profile.has_user_schemas do
+        additional_steps ++ ["Create user data backup before migration"]
+      else
+        additional_steps
+      end
+
+    additional_steps =
+      if :guardian in conflict_profile.auth_libraries do
+        additional_steps ++ ["Configure Guardian for API-only access"]
+      else
+        additional_steps
+      end
+
     additional_steps ++ base_steps
   end
 
@@ -303,7 +317,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
 
   defp adjust_timeline(base_timeline, _conflict_profile, opts) do
     timeline_preference = Keyword.get(opts, :timeline_preference, :balanced)
-    
+
     # Корректируем timeline на основе сложности конфликтов и предпочтений
     case timeline_preference do
       :fast -> reduce_timeline(base_timeline)
@@ -314,43 +328,49 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
 
   defp generate_specific_recommendations(conflict_profile) do
     recommendations = ["Migration strategy customized for your application"]
-    
-    recommendations = if conflict_profile.requires_data_migration do
-      recommendations ++ [
-        "⚠️  Data migration required - ensure comprehensive backups",
-        "Consider testing migration on database copy first"
-      ]
-    else
-      recommendations
-    end
-    
-    recommendations = if conflict_profile.total_high_conflicts > 0 do
-      recommendations ++ [
-        "🚨 High-priority conflicts detected - careful planning required",
-        "Consider staged migration approach to minimize risks"
-      ]
-    else
-      recommendations
-    end
-    
+
+    recommendations =
+      if conflict_profile.requires_data_migration do
+        recommendations ++
+          [
+            "⚠️  Data migration required - ensure comprehensive backups",
+            "Consider testing migration on database copy first"
+          ]
+      else
+        recommendations
+      end
+
+    recommendations =
+      if conflict_profile.total_high_conflicts > 0 do
+        recommendations ++
+          [
+            "🚨 High-priority conflicts detected - careful planning required",
+            "Consider staged migration approach to minimize risks"
+          ]
+      else
+        recommendations
+      end
+
     recommendations
   end
 
   defp generate_warnings(conflict_profile, strategy) do
     warnings = []
-    
-    warnings = if strategy.risk_level == :high do
-      warnings ++ ["🚨 High-risk migration - comprehensive testing essential"]
-    else
-      warnings
-    end
-    
-    warnings = if conflict_profile.user_schema_count > 1 do
-      warnings ++ ["⚠️  Multiple user schemas detected - data consolidation complex"]
-    else
-      warnings
-    end
-    
+
+    warnings =
+      if strategy.risk_level == :high do
+        warnings ++ ["🚨 High-risk migration - comprehensive testing essential"]
+      else
+        warnings
+      end
+
+    warnings =
+      if conflict_profile.user_schema_count > 1 do
+        warnings ++ ["⚠️  Multiple user schemas detected - data consolidation complex"]
+      else
+        warnings
+      end
+
     warnings
   end
 
@@ -362,21 +382,21 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
           "Test basic authentication flows",
           "Configure production settings"
         ]
-      
+
       :guardian_coexistence ->
         [
           "Review Guardian configuration for API-only usage",
           "Plan routing separation strategy",
           "Run PhoenixKit installer with custom prefix"
         ]
-      
+
       :pow_replacement ->
         [
           "Create comprehensive backup of user data",
           "Analyze Pow user schema structure",
           "Plan migration timeline with stakeholders"
         ]
-      
+
       _ ->
         [
           "Review detailed migration plan",
@@ -390,15 +410,16 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
     dep_high = Enum.count(dependency_analysis.conflicts, &(&1.conflict_level == :high))
     config_high = length(config_analysis.high_priority_conflicts)
     code_critical = length(code_analysis.critical_conflicts)
-    
+
     dep_high + config_high + code_critical
   end
 
   defp categorize_all_conflicts(dependency_analysis, config_analysis, code_analysis) do
     %{
-      dependency: Enum.map(dependency_analysis.conflicts, & %{type: &1.library, level: &1.conflict_level}),
-      configuration: Enum.map(config_analysis.conflicts, & %{type: &1.type, level: &1.priority}),
-      code: Enum.map(code_analysis.conflicts, & %{type: &1.type, level: &1.severity})
+      dependency:
+        Enum.map(dependency_analysis.conflicts, &%{type: &1.library, level: &1.conflict_level}),
+      configuration: Enum.map(config_analysis.conflicts, &%{type: &1.type, level: &1.priority}),
+      code: Enum.map(code_analysis.conflicts, &%{type: &1.type, level: &1.severity})
     }
   end
 
@@ -410,7 +431,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
 
   defp get_base_strategy_risks(strategy_name) do
     base_strategy = Map.get(@migration_strategies, strategy_name)
-    
+
     %{
       inherent_risk: base_strategy.risk_level,
       complexity_risk: base_strategy.complexity,
@@ -430,7 +451,8 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
     %{
       step_complexity_risk: assess_step_complexity_risk(migration_strategy.customized_steps),
       rollback_risk: assess_rollback_complexity(migration_strategy.rollback_plan),
-      testing_coverage_risk: :medium  # Default assumption
+      # Default assumption
+      testing_coverage_risk: :medium
     }
   end
 
@@ -442,7 +464,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
       conflict_risks.multiple_systems_risk,
       implementation_risks.rollback_risk
     ]
-    
+
     cond do
       :high in all_risks -> :high
       Enum.count(all_risks, &(&1 == :medium)) >= 2 -> :high
@@ -453,17 +475,19 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
 
   defp generate_risk_mitigation_strategies(_base_risks, conflict_risks) do
     strategies = ["Implement comprehensive backup strategy"]
-    
-    strategies = if conflict_risks.data_migration_risk == :high do
-      strategies ++ [
-        "Test migration on database copy first",
-        "Implement gradual user migration approach",
-        "Set up monitoring for authentication failures"
-      ]
-    else
-      strategies
-    end
-    
+
+    strategies =
+      if conflict_risks.data_migration_risk == :high do
+        strategies ++
+          [
+            "Test migration on database copy first",
+            "Implement gradual user migration approach",
+            "Set up monitoring for authentication failures"
+          ]
+      else
+        strategies
+      end
+
     strategies
   end
 
@@ -525,7 +549,11 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
       %{
         phase: phase.phase_number,
         checkpoint_name: "Phase #{phase.phase_number} Complete",
-        success_criteria: ["All phase steps completed", "No critical errors", "Functionality verified"],
+        success_criteria: [
+          "All phase steps completed",
+          "No critical errors",
+          "Functionality verified"
+        ],
         go_no_go_decision: "Proceed to next phase or rollback"
       }
     end)
@@ -545,7 +573,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
     %{
       testing_phases: [
         "Unit testing of migration components",
-        "Integration testing with existing systems", 
+        "Integration testing with existing systems",
         "User acceptance testing of auth flows",
         "Performance testing under load",
         "Rollback procedure testing"
@@ -585,11 +613,12 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
 
   defp assess_step_complexity_risk(steps) do
     complex_keywords = ["migrate", "backup", "consolidate", "replace"]
-    
-    complex_steps = Enum.count(steps, fn step ->
-      Enum.any?(complex_keywords, &String.contains?(String.downcase(step), &1))
-    end)
-    
+
+    complex_steps =
+      Enum.count(steps, fn step ->
+        Enum.any?(complex_keywords, &String.contains?(String.downcase(step), &1))
+      end)
+
     case complex_steps do
       count when count > 5 -> :high
       count when count > 2 -> :medium
@@ -605,8 +634,10 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
     end
   end
 
-  defp reduce_timeline(timeline), do: timeline  # TODO: Implement timeline reduction logic
-  defp extend_timeline(timeline), do: timeline  # TODO: Implement timeline extension logic
+  # TODO: Implement timeline reduction logic
+  defp reduce_timeline(timeline), do: timeline
+  # TODO: Implement timeline extension logic
+  defp extend_timeline(timeline), do: timeline
 
   defp estimate_phase_duration(steps) do
     # Простая оценка: 1 час на шаг
@@ -623,24 +654,30 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
 
   defp assess_required_skills(migration_strategy) do
     base_skills = ["Elixir/Phoenix", "Database migrations", "Authentication systems"]
-    
-    additional_skills = case migration_strategy.strategy_name do
-      :guardian_coexistence -> ["JWT tokens", "API design"]
-      :pow_replacement -> ["Data migration", "User management systems"]
-      :multiple_systems_resolution -> ["System architecture", "Data consolidation"]
-      _ -> []
-    end
-    
+
+    additional_skills =
+      case migration_strategy.strategy_name do
+        :guardian_coexistence -> ["JWT tokens", "API design"]
+        :pow_replacement -> ["Data migration", "User management systems"]
+        :multiple_systems_resolution -> ["System architecture", "Data consolidation"]
+        _ -> []
+      end
+
     base_skills ++ additional_skills
   end
 
   defp assess_infrastructure_needs(migration_strategy) do
     base_needs = ["Staging environment", "Database backup system"]
-    
+
     case migration_strategy.risk_assessment do
-      :high -> base_needs ++ ["Pre-production environment", "Monitoring systems", "Rollback automation"]
-      :medium -> base_needs ++ ["Enhanced monitoring"]
-      :low -> base_needs
+      :high ->
+        base_needs ++ ["Pre-production environment", "Monitoring systems", "Rollback automation"]
+
+      :medium ->
+        base_needs ++ ["Enhanced monitoring"]
+
+      :low ->
+        base_needs
     end
   end
 

@@ -186,10 +186,12 @@ defmodule PhoenixKitWeb.UserAuth do
   def init(opts), do: opts
 
   @doc false
-  def call(conn, :phoenix_kit_redirect_if_user_is_authenticated), do: redirect_if_user_is_authenticated(conn, [])
+  def call(conn, :phoenix_kit_redirect_if_user_is_authenticated),
+    do: redirect_if_user_is_authenticated(conn, [])
 
   @doc false
-  def call(conn, :phoenix_kit_require_authenticated_user), do: require_authenticated_user(conn, [])
+  def call(conn, :phoenix_kit_require_authenticated_user),
+    do: require_authenticated_user(conn, [])
 
   @doc """
   Used for routes that require the user to not be authenticated.
@@ -246,6 +248,7 @@ defmodule PhoenixKitWeb.UserAuth do
             require Logger
             Logger.warning("[PhoenixKit] Failed to broadcast disconnect: #{inspect(error)}")
         end
+
       {:error, reason} ->
         require Logger
         Logger.warning("[PhoenixKit] Could not find parent endpoint for broadcast: #{reason}")

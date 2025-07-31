@@ -26,8 +26,11 @@ defmodule PhoenixKit.Migrations.Postgres.V01 do
     # Create tokens table (phoenix_kit_users_tokens)
     create_if_not_exists table(:phoenix_kit_users_tokens, primary_key: false, prefix: prefix) do
       add :id, :bigserial, primary_key: true
-      add :user_id, references(:phoenix_kit_users, on_delete: :delete_all, prefix: prefix), null: false
-      add :token, :binary, null: false  
+
+      add :user_id, references(:phoenix_kit_users, on_delete: :delete_all, prefix: prefix),
+        null: false
+
+      add :token, :binary, null: false
       add :context, :string, null: false
       add :sent_to, :string
 
@@ -35,7 +38,10 @@ defmodule PhoenixKit.Migrations.Postgres.V01 do
     end
 
     create_if_not_exists index(:phoenix_kit_users_tokens, [:user_id], prefix: prefix)
-    create_if_not_exists unique_index(:phoenix_kit_users_tokens, [:context, :token], prefix: prefix)
+
+    create_if_not_exists unique_index(:phoenix_kit_users_tokens, [:context, :token],
+                           prefix: prefix
+                         )
   end
 
   def down(%{prefix: prefix}) do

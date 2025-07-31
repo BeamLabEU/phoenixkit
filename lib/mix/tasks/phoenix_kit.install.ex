@@ -38,9 +38,9 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     unless opts[:repo] do
       Mix.raise("""
       --repo is required!
-      
+
       Usage: mix phoenix_kit.install --repo MyApp.Repo
-      
+
       Example:
         mix phoenix_kit.install --repo MyApp.Repo
         mix phoenix_kit.install --repo MyApp.Repo --prefix "auth"
@@ -64,14 +64,15 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     timestamp = generate_timestamp()
     migration_name = "add_phoenix_kit_auth_tables"
     migration_file = "#{timestamp}_#{migration_name}.exs"
-    
+
     migrations_path = Path.join([File.cwd!(), "priv", "repo", "migrations"])
     File.mkdir_p!(migrations_path)
-    
+
     migration_path = Path.join(migrations_path, migration_file)
-    
-    module_name = "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.#{Macro.camelize(migration_name)}"
-    
+
+    module_name =
+      "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.#{Macro.camelize(migration_name)}"
+
     full_migration = """
     defmodule #{module_name} do
       #{migration_content}
@@ -81,14 +82,15 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     File.write!(migration_path, full_migration)
 
     Mix.shell().info([:green, "* creating ", :reset, migration_path])
-    
+
     # Add configuration if not exists
     config_path = "config/config.exs"
+
     if File.exists?(config_path) do
       config_content = File.read!(config_path)
-      
+
       config_line = "config :phoenix_kit, repo: #{inspect(repo)}"
-      
+
       unless String.contains?(config_content, config_line) do
         updated_config = config_content <> "\n\n# PhoenixKit configuration\n#{config_line}\n"
         File.write!(config_path, updated_config)
@@ -97,9 +99,15 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     end
 
     Mix.shell().info([
-      :green, "\nPhoenixKit installation complete!\n",
-      :reset, "\nNext steps:\n",
-      "  1. Run: ", :bright, "mix ecto.migrate", :reset, "\n",
+      :green,
+      "\nPhoenixKit installation complete!\n",
+      :reset,
+      "\nNext steps:\n",
+      "  1. Run: ",
+      :bright,
+      "mix ecto.migrate",
+      :reset,
+      "\n",
       "  2. Add PhoenixKit routes to your router.ex\n"
     ])
   end
@@ -113,10 +121,11 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   # end
 
   defp migration_opts("public", false), do: ""
+
   defp migration_opts(prefix, create_schema) when is_binary(prefix) do
     opts = [prefix: prefix]
     opts = if create_schema, do: Keyword.put(opts, :create_schema, true), else: opts
-    inspect(opts)  
+    inspect(opts)
   end
 
   defp generate_timestamp do
