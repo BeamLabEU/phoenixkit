@@ -19,6 +19,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Nothing yet
 
+## [0.2.7] - 2025-01-31
+
+### Added
+- Universal layout validation system to prevent attribute order issues
+- Automatic layout file fixing during PhoenixKit installation
+- Enhanced Professional Igniter installer with layout validation
+- Comprehensive attribute order detection and correction
+
+### Fixed
+- Module attribute compilation errors in pattern matching modules
+- Layout file attribute order issues that caused Phoenix LiveView compilation errors
+- Regex pattern references in module attributes converted to private functions
+- Missing Logger import in Professional installer
+
+### Changed
+- Converted module attributes with complex patterns to private functions
+- Improved error handling in layout enhancement system
+- Enhanced installation process with automatic layout validation
+
 ### Fixed
 - Nothing yet
 
