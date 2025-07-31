@@ -282,13 +282,24 @@ defmodule PhoenixKit.Install.ConflictDetection.DependencyAnalyzer do
       case File.read(lock_path) do
         {:ok, content} ->
           # mix.lock содержит данные в формате Elixir terms
-          case Code.eval_string(content) do
-            {lock_data, _} when is_map(lock_data) ->
+          # Используем Code.string_to_quoted для избежания quoted keywords warnings
+          case Code.string_to_quoted(content) do
+            {:ok, quoted_ast} ->
+              # Оцениваем AST чтобы получить данные
+              {lock_data, _} = Code.eval_quoted(quoted_ast)
               deps = extract_deps_from_lock_data(lock_data)
               {:ok, deps}
 
-            _ ->
-              {:error, :invalid_lock_format}
+            {:error, _reason} ->
+              # Fallback к старому методу если новый не работает
+              case Code.eval_string(content, [], warn: false) do
+                {lock_data, _} when is_map(lock_data) ->
+                  deps = extract_deps_from_lock_data(lock_data)
+                  {:ok, deps}
+
+                _ ->
+                  {:error, :invalid_lock_format}
+              end
           end
 
         {:error, reason} ->
