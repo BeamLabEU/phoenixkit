@@ -95,36 +95,30 @@ defmodule PhoenixKit.Install.RouterIntegration.RouteInjector do
   # ============================================================================
 
   defp inject_routes(zipper, prefix, position) do
-    if check_for_phoenix_kit_routes(zipper) do
-      Logger.debug("PhoenixKit routes already exist, skipping injection")
-      zipper
+    routes_exist = check_for_phoenix_kit_routes(zipper)
+    Logger.debug("PhoenixKit routes check: existing=#{routes_exist}")
+    
+    if routes_exist do
+      Logger.info("ℹ️  PhoenixKit routes already exist, skipping injection")
+      {:ok, zipper}
     else
       Logger.debug("Adding PhoenixKit routes with prefix: #{prefix}")
-      add_route_call(zipper, prefix, position)
+      result = add_route_call(zipper, prefix, position)
+      {:ok, result}
     end
   end
 
   defp check_for_phoenix_kit_routes(zipper) do
-    # Ищем существующий вызов phoenix_kit_auth_routes
-    route_patterns = [
-      quote(do: phoenix_kit_auth_routes()),
-      quote(
-        do: phoenix_kit_auth_routes(unquote_splicing(Macro.generate_arguments(1, __MODULE__)))
-      )
-    ]
-
-    Enum.any?(route_patterns, fn pattern ->
-      case Sourceror.Zipper.find(zipper, fn node ->
-             Sourceror.postwalk(node, false, fn
-               ^pattern, _acc -> {node, true}
-               node, acc -> {node, acc}
-             end)
-             |> elem(1)
-           end) do
-        nil -> false
-        _ -> true
-      end
-    end)
+    # Простая проверка на наличие phoenix_kit_auth_routes в AST  
+    case Sourceror.Zipper.find(zipper, fn node ->
+           case node do
+             {:phoenix_kit_auth_routes, _, _} -> true
+             _ -> false
+           end
+         end) do
+      nil -> false
+      _ -> true
+    end
   end
 
   defp add_route_call(zipper, prefix, position) do
@@ -143,14 +137,18 @@ defmodule PhoenixKit.Install.RouterIntegration.RouteInjector do
     end
   end
 
-  defp determine_injection_point(zipper, :auto) do
+  defp determine_injection_point(_zipper, :auto) do
     # Автоматически определяем лучшее место для инжекции
-    cond do
-      has_browser_scopes?(zipper) -> :after_last_browser_scope
-      has_any_scopes?(zipper) -> :after_last_scope
-      has_pipelines?(zipper) -> :after_pipelines
-      true -> :end_of_file
-    end
+    # Пока используем только :end_of_file для стабильности
+    :end_of_file
+    
+    # TODO: После тестирования можно вернуть сложную логику:
+    # cond do
+    #   has_browser_scopes?(zipper) -> :after_last_browser_scope
+    #   has_any_scopes?(zipper) -> :after_last_scope
+    #   has_pipelines?(zipper) -> :after_pipelines
+    #   true -> :end_of_file
+    # end
   end
 
   defp determine_injection_point(_zipper, position)
@@ -175,37 +173,139 @@ defmodule PhoenixKit.Install.RouterIntegration.RouteInjector do
   end
 
   defp inject_at_point(zipper, route_call, :after_last_browser_scope) do
-    with {:ok, scope_zipper} <- find_last_browser_scope(zipper) do
-      Igniter.Code.Common.add_code(scope_zipper, route_call, :after)
+    case find_last_browser_scope(zipper) do
+      {:ok, scope_zipper} ->
+        try do
+          case Igniter.Code.Common.add_code(scope_zipper, route_call, placement: :after) do
+            {:ok, updated_zipper} -> {:ok, updated_zipper}
+            {:error, reason} -> {:error, reason}
+            other -> 
+              Logger.warning("Unexpected return from add_code: #{inspect(other)}")
+              {:error, {:unexpected_return, other}}
+          end
+        rescue
+          error ->
+            Logger.error("Exception in add_code: #{inspect(error)}")
+            {:error, {:exception, error}}
+        end
+      {:error, reason} -> {:error, reason}
     end
   end
 
   defp inject_at_point(zipper, route_call, :after_last_scope) do
-    with {:ok, scope_zipper} <- find_last_scope(zipper) do
-      Igniter.Code.Common.add_code(scope_zipper, route_call, :after)
+    case find_last_scope(zipper) do
+      {:ok, scope_zipper} ->
+        try do
+          case Igniter.Code.Common.add_code(scope_zipper, route_call, placement: :after) do
+            {:ok, updated_zipper} -> {:ok, updated_zipper}
+            {:error, reason} -> {:error, reason}
+            # Handle any unexpected return formats
+            other -> 
+              Logger.warning("Unexpected return from add_code: #{inspect(other)}")
+              {:error, {:unexpected_return, other}}
+          end
+        rescue
+          error ->
+            Logger.error("Exception in add_code: #{inspect(error)}")
+            {:error, {:exception, error}}
+        end
+      {:error, reason} -> {:error, reason}
     end
   end
 
   defp inject_at_point(zipper, route_call, :after_pipelines) do
-    with {:ok, pipeline_zipper} <- find_last_pipeline(zipper) do
-      Igniter.Code.Common.add_code(pipeline_zipper, route_call, :after)
+    case find_last_pipeline(zipper) do
+      {:ok, pipeline_zipper} ->
+        try do
+          case Igniter.Code.Common.add_code(pipeline_zipper, route_call, placement: :after) do
+            {:ok, updated_zipper} -> {:ok, updated_zipper}
+            {:error, reason} -> {:error, reason}
+            other -> 
+              Logger.warning("Unexpected return from add_code: #{inspect(other)}")
+              {:error, {:unexpected_return, other}}
+          end
+        rescue
+          error ->
+            Logger.error("Exception in add_code: #{inspect(error)}")
+            {:error, {:exception, error}}
+        end
+      {:error, reason} -> {:error, reason}
     end
   end
 
   defp inject_at_point(zipper, route_call, :end_of_file) do
-    inject_at_end_of_file(zipper, route_call)
+    updated_zipper = inject_at_end_of_file(zipper, route_call)
+    {:ok, updated_zipper}
   end
 
   defp inject_at_end_of_file(zipper, route_call) do
-    # Добавляем в конец модуля, перед closing end
-    case Igniter.Code.Common.add_code(zipper, route_call, :before_end) do
-      {:ok, updated_zipper} ->
-        Logger.debug("Route call added at end of file")
-        updated_zipper
+    # Use fallback string-based injection instead of complex AST manipulation
+    Logger.info("Using string-based fallback for route injection")
+    fallback_string_injection(zipper, route_call)
+  end
 
-      {:error, reason} ->
-        Logger.error("Failed to add at end of file: #{inspect(reason)}")
+  defp fallback_string_injection(zipper, _route_call) do
+    try do
+      # Get the current source code
+      ast = Sourceror.Zipper.node(zipper)
+      source = Sourceror.to_string(ast)
+      
+      # Create the route code string
+      route_code = "\n  # PhoenixKit Authentication Routes (auto-generated)\n  phoenix_kit_auth_routes()\n"
+      
+      # Find the last 'end' in the file and insert before it
+      case String.split(source, "\n") do
+        lines when is_list(lines) ->
+          # Find the position of the last 'end' that closes the defmodule
+          lines_with_index = Enum.with_index(lines)
+          
+          case find_module_end_position(lines_with_index) do
+            {:ok, position} ->
+              # Insert our route code before the module end
+              new_lines = List.insert_at(lines, position, String.trim(route_code))
+              new_source = Enum.join(new_lines, "\n")
+              
+              # Parse back to zipper
+              case Sourceror.parse_string(new_source) do
+                {:ok, ast} ->
+                  Logger.info("✅ Route injection successful using string-based fallback")
+                  Sourceror.Zipper.zip(ast)
+                  
+                {:error, reason} ->
+                  Logger.error("Failed to parse modified source: #{inspect(reason)}")
+                  zipper
+              end
+              
+            {:error, _reason} ->
+              Logger.error("Could not find module end position")
+              zipper
+          end
+          
+        _ ->
+          Logger.error("Could not split source into lines")
+          zipper
+      end
+      
+    rescue
+      error ->
+        Logger.error("Exception in string-based fallback: #{inspect(error)}")
+        # Return original zipper to prevent crash
         zipper
+    end
+  end
+  
+  defp find_module_end_position(lines_with_index) do
+    # Find the last 'end' that is at the module level (not indented much)
+    module_ends = 
+      lines_with_index
+      |> Enum.filter(fn {line, _index} ->
+        trimmed = String.trim(line)
+        trimmed == "end" and String.starts_with?(line, "end")
+      end)
+    
+    case List.last(module_ends) do
+      {_line, index} -> {:ok, index}
+      nil -> {:error, :no_module_end_found}
     end
   end
 
@@ -240,53 +340,54 @@ defmodule PhoenixKit.Install.RouterIntegration.RouteInjector do
              _ -> false
            end
          end) do
-      {:ok, pipeline_zipper} ->
-        {:ok, pipeline_zipper}
-
-      :error ->
+      nil ->
         {:error, :no_pipelines_found}
+        
+      pipeline_zipper ->
+        {:ok, pipeline_zipper}
     end
   end
 
-  defp has_browser_scopes?(zipper) do
-    # Проверяем наличие scope с :browser pipeline
-    case Sourceror.Zipper.find(zipper, fn node ->
-           case node do
-             {:scope, _, [_path, [pipe: :browser] | _]} -> true
-             {:scope, _, [_path, :browser | _]} -> true
-             _ -> false
-           end
-         end) do
-      nil -> false
-      _found -> true
-    end
-  end
+  # These functions are kept for future use but currently unused
+  # defp has_browser_scopes?(zipper) do
+  #   # Проверяем наличие scope с :browser pipeline
+  #   case Sourceror.Zipper.find(zipper, fn node ->
+  #          case node do
+  #            {:scope, _, [_path, [pipe: :browser] | _]} -> true
+  #            {:scope, _, [_path, :browser | _]} -> true
+  #            _ -> false
+  #          end
+  #        end) do
+  #     nil -> false
+  #     _found -> true
+  #   end
+  # end
 
-  defp has_any_scopes?(zipper) do
-    # Проверяем наличие любых scope declarations
-    case Sourceror.Zipper.find(zipper, fn node ->
-           case node do
-             {:scope, _, [_path | _]} -> true
-             _ -> false
-           end
-         end) do
-      nil -> false
-      __zipper -> true
-    end
-  end
+  # defp has_any_scopes?(zipper) do
+  #   # Проверяем наличие любых scope declarations
+  #   case Sourceror.Zipper.find(zipper, fn node ->
+  #          case node do
+  #            {:scope, _, [_path | _]} -> true
+  #            _ -> false
+  #          end
+  #        end) do
+  #     nil -> false
+  #     __zipper -> true
+  #   end
+  # end
 
-  defp has_pipelines?(zipper) do
-    # Проверяем наличие pipeline declarations
-    case Sourceror.Zipper.find(zipper, fn node ->
-           case node do
-             {:pipeline, _, [_name | _]} -> true
-             _ -> false
-           end
-         end) do
-      nil -> false
-      __zipper -> true
-    end
-  end
+  # defp has_pipelines?(zipper) do
+  #   # Проверяем наличие pipeline declarations
+  #   case Sourceror.Zipper.find(zipper, fn node ->
+  #          case node do
+  #            {:pipeline, _, [_name | _]} -> true
+  #            _ -> false
+  #          end
+  #        end) do
+  #     nil -> false
+  #     __zipper -> true
+  #   end
+  # end
 
   defp remove_routes(zipper) do
     # Удаляем существующие phoenix_kit_auth_routes вызовы

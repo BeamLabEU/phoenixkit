@@ -200,11 +200,8 @@ defmodule PhoenixKit.Install.ConflictDetection do
   # ============================================================================
 
   defp run_dependency_analysis(igniter) do
-    Logger.debug("Running dependency analysis...")
-
     case DependencyAnalyzer.analyze_auth_dependencies(igniter) do
       {:ok, result} ->
-        Logger.debug("✅ Dependency analysis completed")
         {:ok, result}
 
       {:error, reason} = error ->
@@ -214,11 +211,8 @@ defmodule PhoenixKit.Install.ConflictDetection do
   end
 
   defp run_config_analysis(igniter) do
-    Logger.debug("Running configuration analysis...")
-
     case ConfigAnalyzer.analyze_auth_configurations(igniter) do
       {:ok, result} ->
-        Logger.debug("✅ Configuration analysis completed")
         {:ok, result}
 
       {:error, reason} = error ->
@@ -228,14 +222,11 @@ defmodule PhoenixKit.Install.ConflictDetection do
   end
 
   defp run_code_analysis(igniter, scan_test_files, max_files) do
-    Logger.debug("Running code analysis...")
-
     case CodeAnalyzer.analyze_authentication_code(igniter,
            scan_test_files: scan_test_files,
            max_files: max_files
          ) do
       {:ok, result} ->
-        Logger.debug("✅ Code analysis completed")
         {:ok, result}
 
       {:error, reason} = error ->
@@ -261,8 +252,6 @@ defmodule PhoenixKit.Install.ConflictDetection do
          true,
          opts
        ) do
-    Logger.debug("Generating migration strategy...")
-
     case MigrationAdvisor.generate_migration_strategy(
            dependency_analysis,
            config_analysis,
@@ -270,7 +259,6 @@ defmodule PhoenixKit.Install.ConflictDetection do
            opts
          ) do
       {:ok, strategy} ->
-        Logger.debug("✅ Migration strategy generated")
         {:ok, strategy}
 
       {:error, reason} = _error ->
@@ -573,6 +561,7 @@ defmodule PhoenixKit.Install.ConflictDetection do
     cond do
       critical_conflicts > 0 -> :high
       total_conflicts > 5 -> :medium
+      total_conflicts > 2 -> :medium  # Средний риск при более чем 2 конфликтах
       total_conflicts > 0 -> :low
       true -> :none
     end

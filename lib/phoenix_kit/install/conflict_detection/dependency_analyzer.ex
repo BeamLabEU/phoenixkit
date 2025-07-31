@@ -35,7 +35,7 @@ defmodule PhoenixKit.Install.ConflictDetection.DependencyAnalyzer do
       description: "Modular and extendable authentication system",
       migration_complexity: :high,
       can_coexist: false,
-      coexistence_strategy: nil
+      coexistence_strategy: "Complete replacement required - data migration needed"
     },
 
     # Legacy Phoenix authentication
@@ -140,7 +140,7 @@ defmodule PhoenixKit.Install.ConflictDetection.DependencyAnalyzer do
       }}
   """
   def analyze_auth_dependencies(igniter) do
-    Logger.info("🔍 Analyzing project dependencies for auth libraries")
+    Logger.debug("🔍 Analyzing project dependencies for auth libraries")
 
     with {:ok, mix_exs_deps} <- extract_mix_exs_dependencies(igniter),
          {:ok, mix_lock_deps} <- extract_mix_lock_dependencies(igniter) do
@@ -438,10 +438,19 @@ defmodule PhoenixKit.Install.ConflictDetection.DependencyAnalyzer do
         Enum.flat_map(conflicts_for_level, fn conflict ->
           case level do
             :high ->
-              [
-                "⚠️  HIGH CONFLICT: #{conflict.library} requires careful migration planning",
-                "Consider: #{conflict.coexistence_strategy || "Replace with PhoenixKit"}"
-              ]
+              case conflict.library do
+                :pow ->
+                  [
+                    "🚨 CRITICAL CONFLICT: Pow detected - complete replacement required",
+                    "Data migration planning essential - backup user data first",
+                    "Consider professional migration services for production systems"
+                  ]
+                _ ->
+                  [
+                    "⚠️  HIGH CONFLICT: #{conflict.library} requires careful migration planning",
+                    "Consider: #{conflict.coexistence_strategy || "Replace with PhoenixKit"}"
+                  ]
+              end
 
             :medium ->
               [
@@ -517,17 +526,19 @@ defmodule PhoenixKit.Install.ConflictDetection.DependencyAnalyzer do
   end
 
   defp log_analysis_summary(result) do
-    Logger.info("📊 Dependency Analysis Summary:")
-    Logger.info("   Total dependencies: #{result.total_dependencies}")
-    Logger.info("   Auth libraries found: #{length(result.found_auth_libraries)}")
-    Logger.info("   High conflicts: #{result.high_conflict_count}")
-    Logger.info("   Medium conflicts: #{result.medium_conflict_count}")
-    Logger.info("   Low conflicts: #{result.low_conflict_count}")
-    Logger.info("   Migration required: #{result.migration_required}")
-    Logger.info("   Auto-resolvable: #{result.can_auto_resolve}")
+    # Краткая сводка только для важной информации
+    if result.high_conflict_count > 0 or result.medium_conflict_count > 0 do
+      Logger.info("⚠️  Dependency conflicts detected:")
+      if result.high_conflict_count > 0, do: Logger.info("   High conflicts: #{result.high_conflict_count}")
+      if result.medium_conflict_count > 0, do: Logger.info("   Medium conflicts: #{result.medium_conflict_count}")
+      if result.migration_required, do: Logger.info("   Migration required: #{result.migration_required}")
+    else
+      Logger.info("✅ No dependency conflicts detected")
+    end
 
-    if length(result.found_auth_libraries) > 0 do
-      Logger.info("   Libraries: #{inspect(result.found_auth_libraries)}")
+    # Показываем найденные auth библиотеки только если есть конфликты или в debug режиме  
+    if length(result.found_auth_libraries) > 0 and (result.high_conflict_count > 0 or result.medium_conflict_count > 0) do
+      Logger.info("   Found libraries: #{inspect(result.found_auth_libraries)}")
     end
   end
 end

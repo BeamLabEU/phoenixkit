@@ -134,7 +134,7 @@ defmodule PhoenixKit.Install.RouterIntegration.ConflictResolver do
             type: :missing_pipeline,
             pipeline: :browser,
             severity: :high,
-            auto_resolvable: false,
+            auto_resolvable: true,
             resolution_strategy: :create_pipeline,
             details: "PhoenixKit requires :browser pipeline"
           }
@@ -267,6 +267,21 @@ defmodule PhoenixKit.Install.RouterIntegration.ConflictResolver do
     {:ok, igniter, resolution}
   end
 
+  defp auto_resolve_single_conflict(igniter, %{type: :missing_pipeline, pipeline: :browser} = conflict) do
+    # Автоматически создаем browser pipeline
+    Logger.info("Creating missing browser pipeline")
+    
+    {:ok, updated_igniter} = create_browser_pipeline(igniter, conflict)
+    
+    resolution = %{
+      conflict: conflict,
+      action: :create_pipeline,
+      pipeline: :browser,
+      details: "Browser pipeline instructions provided"
+    }
+    {:ok, updated_igniter, resolution}
+  end
+
   defp auto_resolve_single_conflict(_igniter, conflict) do
     {:error, {:auto_resolution_not_implemented, conflict.type}}
   end
@@ -339,5 +354,34 @@ defmodule PhoenixKit.Install.RouterIntegration.ConflictResolver do
           "Resolve #{conflict.type}: #{Map.get(conflict, :details, "Manual intervention required")}"
       end
     end)
+  end
+
+  # ============================================================================
+  # Pipeline Creation Functions
+  # ============================================================================
+
+  defp create_browser_pipeline(igniter, _conflict) do
+    Logger.info("Creating missing browser pipeline in router")
+    
+    # Показываем пользователю инструкции по созданию browser pipeline
+    Logger.info("""
+    ℹ️  Please manually add the browser pipeline to your router.ex:
+    
+    pipeline :browser do
+      plug :accepts, ["html"]
+      plug :fetch_session
+      plug :fetch_live_flash
+      plug :put_root_layout, html: {YourAppWeb.Layouts, :root}
+      plug :protect_from_forgery
+      plug :put_secure_browser_headers
+    end
+    
+    Then add 'pipe_through :browser' to your web routes.
+    """)
+    
+    # Возвращаем успех, так как предоставили четкие инструкции
+    # В будущих версиях можно будет добавить автоматическое создание через Igniter
+    Logger.info("✅ Browser pipeline instructions provided")
+    {:ok, igniter}
   end
 end

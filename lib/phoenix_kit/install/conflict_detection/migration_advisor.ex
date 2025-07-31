@@ -136,7 +136,7 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
   - `{:error, reason}` - ошибка при генерации стратегии
   """
   def generate_migration_strategy(dependency_analysis, config_analysis, code_analysis, opts \\ []) do
-    Logger.info("🎯 Generating personalized migration strategy")
+    Logger.debug("🎯 Generating personalized migration strategy")
 
     __risk_tolerance = Keyword.get(opts, :risk_tolerance, :medium)
     __timeline_preference = Keyword.get(opts, :timeline_preference, :balanced)
@@ -682,13 +682,14 @@ defmodule PhoenixKit.Install.ConflictDetection.MigrationAdvisor do
   end
 
   defp log_migration_strategy_summary(strategy) do
-    Logger.info("📊 Migration Strategy Summary:")
-    Logger.info("   Strategy: #{strategy.strategy_name}")
-    Logger.info("   Complexity: #{strategy.estimated_complexity}")
-    Logger.info("   Timeline: #{strategy.estimated_timeline}")
-    Logger.info("   Risk Level: #{strategy.risk_assessment}")
-    Logger.info("   Steps: #{length(strategy.customized_steps)}")
-    Logger.info("   Prerequisites: #{length(strategy.prerequisites)}")
-    Logger.info("   Warnings: #{length(strategy.warnings)}")
+    # Показываем только ключевую информацию о стратегии
+    if strategy.risk_assessment == :high or length(strategy.warnings) > 0 do
+      Logger.info("🎯 Migration strategy: #{strategy.strategy_name} (#{strategy.risk_assessment} risk)")
+      if length(strategy.warnings) > 0 do
+        Logger.info("   Warnings: #{length(strategy.warnings)}")
+      end
+    else
+      Logger.debug("🎯 Migration strategy: #{strategy.strategy_name} (#{strategy.estimated_complexity} complexity)")
+    end
   end
 end
