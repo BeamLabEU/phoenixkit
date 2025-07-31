@@ -251,39 +251,51 @@ defmodule PhoenixKit.Install.RouterIntegration.RouteInjector do
       source = Sourceror.to_string(ast)
       
       # Create the route code string
-      route_code = "\n  # PhoenixKit Authentication Routes (auto-generated)\n  phoenix_kit_auth_routes()\n"
+      route_code = "  # PhoenixKit Authentication Routes (auto-generated)\n  phoenix_kit_auth_routes()"
       
-      # Find the last 'end' in the file and insert before it
-      case String.split(source, "\n") do
-        lines when is_list(lines) ->
-          # Find the position of the last 'end' that closes the defmodule
-          lines_with_index = Enum.with_index(lines)
-          
-          case find_module_end_position(lines_with_index) do
-            {:ok, position} ->
-              # Insert our route code before the module end
-              new_lines = List.insert_at(lines, position, String.trim(route_code))
-              new_source = Enum.join(new_lines, "\n")
-              
-              # Parse back to zipper
-              case Sourceror.parse_string(new_source) do
-                {:ok, ast} ->
-                  Logger.info("✅ Route injection successful using string-based fallback")
-                  Sourceror.Zipper.zip(ast)
-                  
-                {:error, reason} ->
-                  Logger.error("Failed to parse modified source: #{inspect(reason)}")
-                  zipper
-              end
-              
-            {:error, _reason} ->
-              Logger.error("Could not find module end position")
-              zipper
-          end
-          
-        _ ->
-          Logger.error("Could not split source into lines")
-          zipper
+      # Validate that source has proper module structure
+      if String.contains?(source, "defmodule") and String.contains?(source, "end") do
+        # Find the last 'end' in the file and insert before it
+        case String.split(source, "\n") do
+          lines when is_list(lines) ->
+            # Find the position of the last 'end' that closes the defmodule
+            lines_with_index = Enum.with_index(lines)
+            
+            case find_safe_insertion_point(lines_with_index) do
+              {:ok, position} ->
+                # Insert our route code before the module end
+                new_lines = List.insert_at(lines, position, route_code)
+                new_source = Enum.join(new_lines, "\n")
+                
+                # Validate the result before applying
+                case Sourceror.parse_string(new_source) do
+                  {:ok, ast} ->
+                    # Double check that the parsed AST is valid
+                    if valid_module_ast?(ast) do
+                      Logger.info("✅ Route injection successful using string-based fallback")
+                      Sourceror.Zipper.zip(ast)
+                    else
+                      Logger.error("Parsed AST is invalid, reverting changes")
+                      zipper
+                    end
+                    
+                  {:error, reason} ->
+                    Logger.error("Failed to parse modified source: #{inspect(reason)}")
+                    zipper
+                end
+                
+              {:error, reason} ->
+                Logger.error("Could not find safe insertion point: #{inspect(reason)}")
+                zipper
+            end
+            
+          _ ->
+            Logger.error("Could not split source into lines")
+            zipper
+        end
+      else
+        Logger.error("Invalid module structure detected, skipping string injection")
+        zipper
       end
       
     rescue
@@ -294,20 +306,45 @@ defmodule PhoenixKit.Install.RouterIntegration.RouteInjector do
     end
   end
   
-  defp find_module_end_position(lines_with_index) do
-    # Find the last 'end' that is at the module level (not indented much)
+  defp find_safe_insertion_point(lines_with_index) do
+    # Find the last line that contains only 'end' (module closing end)
     module_ends = 
       lines_with_index
       |> Enum.filter(fn {line, _index} ->
-        trimmed = String.trim(line)
-        trimmed == "end" and String.starts_with?(line, "end")
+        # Look for lines that are just 'end' with possible whitespace
+        String.trim(line) == "end"
       end)
     
     case List.last(module_ends) do
-      {_line, index} -> {:ok, index}
-      nil -> {:error, :no_module_end_found}
+      {_line, index} -> 
+        {:ok, index}
+      nil -> 
+        # If no standalone 'end' found, try to find the last line and work backwards
+        case Enum.reverse(lines_with_index) do
+          [] -> {:error, :empty_file}
+          lines_reversed ->
+            # Find the first non-empty line from the end
+            case Enum.find(lines_reversed, fn {line, _} -> String.trim(line) != "" end) do
+              {line, index} -> 
+                if String.contains?(line, "end") do
+                  {:ok, index}
+                else
+                  {:error, :no_suitable_insertion_point}
+                end
+              _ -> {:error, :no_suitable_insertion_point}
+            end
+        end
     end
   end
+  
+  defp valid_module_ast?(ast) do
+    # Basic validation that AST represents a valid module
+    case ast do
+      {:defmodule, _, [_module_name, [do: _body]]} -> true
+      _ -> false
+    end
+  end
+  
 
   defp find_last_browser_scope(zipper) do
     # Ищем последний scope с :browser pipeline
