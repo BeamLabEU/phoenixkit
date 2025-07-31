@@ -307,33 +307,58 @@ defmodule PhoenixKit.Install.RouterIntegration.RouteInjector do
   end
   
   defp find_safe_insertion_point(lines_with_index) do
-    # Find the last line that contains only 'end' (module closing end)
-    module_ends = 
+    # Find the module-level 'end' by tracking nesting levels
+    case find_module_level_end(lines_with_index) do
+      {:ok, index} -> {:ok, index}
+      {:error, _} ->
+        # Fallback: find the last standalone 'end'
+        find_last_standalone_end(lines_with_index)
+    end
+  end
+  
+  defp find_module_level_end(lines_with_index) do
+    # Track nesting level to find the module's closing end
+    {_final_level, module_end_index} = 
+      Enum.reduce(lines_with_index, {0, nil}, fn {line, index}, {level, module_end} ->
+        trimmed = String.trim(line)
+        
+        cond do
+          # 'do' increases nesting level
+          String.contains?(trimmed, " do") or String.ends_with?(trimmed, " do") ->
+            {level + 1, module_end}
+          
+          # 'end' decreases nesting level
+          trimmed == "end" ->
+            new_level = level - 1
+            if new_level == 0 do
+              # This should be the module's closing end
+              {new_level, index}
+            else
+              {new_level, module_end}
+            end
+          
+          true ->
+            {level, module_end}
+        end
+      end)
+    
+    case module_end_index do
+      nil -> {:error, :no_module_end_found}
+      index -> {:ok, index}
+    end
+  end
+  
+  defp find_last_standalone_end(lines_with_index) do
+    # Find all lines that are just 'end'
+    standalone_ends = 
       lines_with_index
       |> Enum.filter(fn {line, _index} ->
-        # Look for lines that are just 'end' with possible whitespace
         String.trim(line) == "end"
       end)
     
-    case List.last(module_ends) do
-      {_line, index} -> 
-        {:ok, index}
-      nil -> 
-        # If no standalone 'end' found, try to find the last line and work backwards
-        case Enum.reverse(lines_with_index) do
-          [] -> {:error, :empty_file}
-          lines_reversed ->
-            # Find the first non-empty line from the end
-            case Enum.find(lines_reversed, fn {line, _} -> String.trim(line) != "" end) do
-              {line, index} -> 
-                if String.contains?(line, "end") do
-                  {:ok, index}
-                else
-                  {:error, :no_suitable_insertion_point}
-                end
-              _ -> {:error, :no_suitable_insertion_point}
-            end
-        end
+    case List.last(standalone_ends) do
+      {_line, index} -> {:ok, index}
+      nil -> {:error, :no_suitable_insertion_point}
     end
   end
   
