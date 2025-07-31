@@ -11,13 +11,6 @@ defmodule PhoenixKit.Install.ConflictDetection.ConfigAnalyzer do
 
   require Logger
 
-  @config_files [
-    "config/config.exs",
-    "config/dev.exs",
-    "config/test.exs",
-    "config/prod.exs",
-    "config/runtime.exs"
-  ]
 
   @auth_config_patterns %{
     # Guardian JWT configurations
@@ -167,8 +160,16 @@ defmodule PhoenixKit.Install.ConflictDetection.ConfigAnalyzer do
   # ============================================================================
 
   defp read_all_config_files do
+    config_files = [
+      "config/config.exs",
+      "config/dev.exs", 
+      "config/test.exs",
+      "config/prod.exs",
+      "config/runtime.exs"
+    ]
+    
     results =
-      Enum.map(@config_files, fn file_path ->
+      Enum.map(config_files, fn file_path ->
         case File.read(file_path) do
           {:ok, content} -> {file_path, content}
           # File doesn't exist, skip
@@ -195,7 +196,15 @@ defmodule PhoenixKit.Install.ConflictDetection.ConfigAnalyzer do
   end
 
   defp get_existing_config_files do
-    @config_files
+    config_files = [
+      "config/config.exs",
+      "config/dev.exs",
+      "config/test.exs", 
+      "config/prod.exs",
+      "config/runtime.exs"
+    ]
+    
+    config_files
     |> Enum.filter(&File.exists?/1)
   end
 

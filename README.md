@@ -30,7 +30,7 @@ def deps do
   [
     {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"}
     # Or when published to Hex:
-    # {:phoenix_kit, "~> 0.1.5"}
+    # {:phoenix_kit, "~> 0.2.6"}
   ]
 end
 ```
@@ -394,7 +394,7 @@ PhoenixKit creates these tables:
 ### `phoenix_kit_schema_versions` (Migration Tracking)
 - Professional versioning system tracks schema changes
 - Enables safe upgrades and rollbacks
-- Current version: 1.0.0
+- Current version: V01
 
 ## API Usage
 
@@ -458,16 +458,16 @@ mix phoenix_kit.migrate --status
 ```
 
 ```elixir
-# Automatic version tracking
-PhoenixKit.SchemaMigrations.get_installed_version(repo)
-# => "1.0.0"
+# Check current installed version
+PhoenixKit.Migration.migrated_version()
+# => 1
 
-# Check if migration needed
-PhoenixKit.SchemaMigrations.migration_required?(repo)
-# => false
+# Get target version
+PhoenixKit.Migrations.Postgres.current_version()
+# => 1
 
-# Migrate to current version
-PhoenixKit.SchemaMigrations.migrate_to_current(repo)
+# Run migration to current version
+PhoenixKit.Migration.up()
 # => :ok
 ```
 
@@ -541,7 +541,7 @@ Solution: Always specify `--repo` parameter: `mix phoenix_kit.install --repo MyA
 ERROR: Schema migration failed
 ERROR: could not find migration runner process
 ```
-Solution: Check database connection and permissions. Auto-setup migration system has been improved in v0.1.7+ to handle runtime migration contexts correctly.
+Solution: Check database connection and permissions. Auto-setup migration system has been improved in v0.2.0+ to handle runtime migration contexts correctly.
 
 **URL not found**
 ```

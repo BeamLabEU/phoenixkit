@@ -11,8 +11,6 @@ defmodule PhoenixKit.Install.RouterIntegration.Validator do
 
   require Logger
 
-  @required_imports ["PhoenixKitWeb.Integration"]
-  @required_route_calls ["phoenix_kit_auth_routes"]
 
   @doc """
   Валидирует интеграцию PhoenixKit в router.
@@ -232,7 +230,9 @@ defmodule PhoenixKit.Install.RouterIntegration.Validator do
   end
 
   defp has_required_import?(zipper) do
-    Enum.all?(@required_imports, fn import_module ->
+    required_imports = ["PhoenixKitWeb.Integration"]
+    
+    Enum.all?(required_imports, fn import_module ->
       case find_import(zipper, import_module) do
         {:ok, _} -> true
         :error -> false
@@ -241,7 +241,9 @@ defmodule PhoenixKit.Install.RouterIntegration.Validator do
   end
 
   defp has_required_routes?(zipper) do
-    Enum.all?(@required_route_calls, fn route_call ->
+    required_route_calls = ["phoenix_kit_auth_routes"]
+    
+    Enum.all?(required_route_calls, fn route_call ->
       case find_route_call(zipper, route_call) do
         {:ok, _} -> true
         :error -> false
@@ -250,7 +252,9 @@ defmodule PhoenixKit.Install.RouterIntegration.Validator do
   end
 
   defp check_required_imports(zipper) do
-    @required_imports
+    required_imports = ["PhoenixKitWeb.Integration"]
+    
+    required_imports
     |> Enum.filter(fn import_module ->
       case find_import(zipper, import_module) do
         # Found, so not missing
@@ -267,7 +271,9 @@ defmodule PhoenixKit.Install.RouterIntegration.Validator do
   end
 
   defp check_required_routes(zipper) do
-    @required_route_calls
+    required_route_calls = ["phoenix_kit_auth_routes"]
+    
+    required_route_calls
     |> Enum.filter(fn route_call ->
       case find_route_call(zipper, route_call) do
         # Found, so not missing
