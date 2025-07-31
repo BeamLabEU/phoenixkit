@@ -12,61 +12,64 @@ defmodule PhoenixKit.Install.ConflictDetection.ConfigAnalyzer do
   require Logger
 
 
-  @auth_config_patterns %{
-    # Guardian JWT configurations
-    guardian: [
-      {~r/config\s+:guardian/, :guardian_main_config},
-      {~r/config\s+:\w+,\s+\w*Guardian/, :guardian_app_config},
-      {~r/Guardian\.DB/, :guardian_db_config},
-      {~r/Guardian\.Phoenix/, :guardian_phoenix_config},
-      {~r/guardian_secret_key/, :guardian_secret}
-    ],
+  # Define auth config patterns as a private function instead of module attribute
+  defp get_auth_config_patterns do
+    %{
+      # Guardian JWT configurations
+      guardian: [
+        {~r/config\s+:guardian/, :guardian_main_config},
+        {~r/config\s+:\w+,\s+\w*Guardian/, :guardian_app_config},
+        {~r/Guardian\.DB/, :guardian_db_config},
+        {~r/Guardian\.Phoenix/, :guardian_phoenix_config},
+        {~r/guardian_secret_key/, :guardian_secret}
+      ],
 
-    # Pow configurations
-    pow: [
-      {~r/config\s+:pow/, :pow_main_config},
-      {~r/user:\s+\w+\.Users\.User/, :pow_user_schema},
-      {~r/repo:\s+\w+\.Repo/, :pow_repo_config},
-      {~r/Pow\.Store/, :pow_store_config},
-      {~r/PowEmailConfirmation/, :pow_email_confirmation},
-      {~r/PowPersistentSession/, :pow_persistent_session}
-    ],
+      # Pow configurations
+      pow: [
+        {~r/config\s+:pow/, :pow_main_config},
+        {~r/user:\s+\w+\.Users\.User/, :pow_user_schema},
+        {~r/repo:\s+\w+\.Repo/, :pow_repo_config},
+        {~r/Pow\.Store/, :pow_store_config},
+        {~r/PowEmailConfirmation/, :pow_email_confirmation},
+        {~r/PowPersistentSession/, :pow_persistent_session}
+      ],
 
-    # Coherence configurations (legacy)
-    coherence: [
-      {~r/config\s+:coherence/, :coherence_main_config},
-      {~r/Coherence\.Schema/, :coherence_schema},
-      {~r/Coherence\.Config/, :coherence_config_module}
-    ],
+      # Coherence configurations (legacy)
+      coherence: [
+        {~r/config\s+:coherence/, :coherence_main_config},
+        {~r/Coherence\.Schema/, :coherence_schema},
+        {~r/Coherence\.Config/, :coherence_config_module}
+      ],
 
-    # Ueberauth OAuth configurations
-    ueberauth: [
-      {~r/config\s+:ueberauth/, :ueberauth_main_config},
-      {~r/Ueberauth\.Strategy/, :ueberauth_strategy},
-      {~r/github_client_id/, :ueberauth_github},
-      {~r/google_client_id/, :ueberauth_google},
-      {~r/facebook_app_id/, :ueberauth_facebook}
-    ],
+      # Ueberauth OAuth configurations
+      ueberauth: [
+        {~r/config\s+:ueberauth/, :ueberauth_main_config},
+        {~r/Ueberauth\.Strategy/, :ueberauth_strategy},
+        {~r/github_client_id/, :ueberauth_github},
+        {~r/google_client_id/, :ueberauth_google},
+        {~r/facebook_app_id/, :ueberauth_facebook}
+      ],
 
-    # Generic authentication patterns
-    generic: [
-      {~r/password_hash/, :password_hashing},
-      {~r/session_signing_salt/, :session_config},
-      {~r/live_view_signing_salt/, :liveview_session},
-      {~r/secret_key_base/, :app_secret},
-      {~r/:fetch_session/, :session_plug},
-      {~r/:protect_from_forgery/, :csrf_protection}
-    ],
+      # Generic authentication patterns
+      generic: [
+        {~r/password_hash/, :password_hashing},
+        {~r/session_signing_salt/, :session_config},
+        {~r/live_view_signing_salt/, :liveview_session},
+        {~r/secret_key_base/, :app_secret},
+        {~r/:fetch_session/, :session_plug},
+        {~r/:protect_from_forgery/, :csrf_protection}
+      ],
 
-    # Database user schemas
-    user_schemas: [
-      {~r/schema\s+"users"/, :users_table_schema},
-      {~r/defmodule\s+\w+\.User\s+do/, :user_module},
-      {~r/field\s+:email/, :user_email_field},
-      {~r/field\s+:password/, :user_password_field},
-      {~r/has_secure_password/, :secure_password}
-    ]
-  }
+      # Database user schemas
+      user_schemas: [
+        {~r/schema\s+"users"/, :users_table_schema},
+        {~r/defmodule\s+\w+\.User\s+do/, :user_module},
+        {~r/field\s+:email/, :user_email_field},
+        {~r/field\s+:password/, :user_password_field},
+        {~r/has_secure_password/, :secure_password}
+      ]
+    }
+  end
 
   @doc """
   Анализирует все конфигурационные файлы для поиска auth настроек.
@@ -220,7 +223,7 @@ defmodule PhoenixKit.Install.ConflictDetection.ConfigAnalyzer do
   end
 
   defp scan_content_for_patterns(content, file_path) do
-    @auth_config_patterns
+    get_auth_config_patterns()
     |> Enum.flat_map(fn {library, patterns} ->
       Enum.flat_map(patterns, fn {regex, pattern_type} ->
         case Regex.scan(regex, content, return: :index) do

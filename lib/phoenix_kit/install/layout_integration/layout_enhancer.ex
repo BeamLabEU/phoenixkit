@@ -18,6 +18,8 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
   @compiled_csrf_regex Regex.compile!("csrf_token")
   @compiled_live_socket_regex Regex.compile!("phx\\.socket")
   @compiled_current_user_regex Regex.compile!("@current_user")
+  @compiled_attribute_regex Regex.compile!("^\\s*(@\\w+.*?)\\n", "m")
+  @compiled_function_regex Regex.compile!("^\\s*(def\\s+\\w+)", "m")
   @compiled_auth_nav_regex Regex.compile!("(nav|header|menu).*?(login|logout|sign)", "is")
   @compiled_img_alt_regex Regex.compile!("<img(?![^>]*alt=)")
   @compiled_aria_label_regex Regex.compile!("<(button|input|textarea)(?![^>]*aria-label)")
@@ -51,6 +53,11 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
     performance: [
       {:missing_preload_hints, ~r/<link.*?stylesheet/, :add_preload_hints, :low},
       {:unoptimized_scripts, ~r/<script(?![^>]*defer|async)/, :optimize_script_loading, :low}
+    ],
+
+    # Code structure fixes
+    code_structure: [
+      {:attributes_after_functions, @compiled_function_regex, :fix_attribute_order, :critical}
     ]
   }
 
@@ -543,6 +550,9 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
       :optimize_script_loading ->
         optimize_script_loading(content, opts)
 
+      :fix_attribute_order ->
+        fix_attribute_order(content, opts)
+
       _ ->
         Logger.warning("Unknown enhancement type: #{enhancement_type}")
         {:ok, content}
@@ -784,7 +794,64 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
     recommendations
   end
 
-  defp log_enhancement_summary(enhancement_result) do
+  defp fix_attribute_order(content, _opts) do
+    # Find all attributes and their positions
+    attributes = Regex.scan(@compiled_attribute_regex, content, return: :index, capture: :all_but_first)
+    
+    # Find first function definition
+    case Regex.run(@compiled_function_regex, content, return: :index) do
+      [{first_func_start, _}] ->
+        # Check if any attributes are after the first function
+        misplaced_attributes = 
+          attributes
+          |> Enum.filter(fn [{attr_start, _}] -> attr_start > first_func_start end)
+        
+        if length(misplaced_attributes) > 0 do
+          # Extract misplaced attributes
+          misplaced_attr_texts = 
+            misplaced_attributes
+            |> Enum.map(fn [{start, length}] -> 
+              String.slice(content, start, length)
+            end)
+          
+          # Remove misplaced attributes from their current locations
+          fixed_content = 
+            misplaced_attributes
+            |> Enum.reduce(content, fn [{start, length}], acc ->
+              before = String.slice(acc, 0, start)
+              after_attr = String.slice(acc, start + length, String.length(acc))
+              before <> after_attr
+            end)
+          
+          # Find the position after "use ModuleName, :html" line to insert attributes
+          case Regex.run(~r/use\s+\w+Web,\s*:html\n/i, fixed_content, return: :index) do
+            [{use_start, use_length}] ->
+              use_end = use_start + use_length
+              before_use = String.slice(fixed_content, 0, use_end)
+              after_use = String.slice(fixed_content, use_end, String.length(fixed_content))
+              
+              # Insert attributes after the use statement
+              attribute_block = Enum.join(misplaced_attr_texts, "\n") <> "\n"
+              corrected_content = before_use <> "\n" <> attribute_block <> after_use
+              
+              Logger.info("🔧 Fixed attribute order: moved #{length(misplaced_attributes)} attributes to correct position")
+              {:ok, corrected_content}
+              
+            nil ->
+              Logger.warning("Could not find 'use' statement to place attributes")
+              {:ok, content}
+          end
+        else
+          {:ok, content}
+        end
+        
+      nil ->
+        # No functions found, content is probably fine
+        {:ok, content}
+    end
+  end
+
+defp log_enhancement_summary(enhancement_result) do
     Logger.info("🎨 Layout Enhancement Complete!")
     Logger.info("   Duration: #{enhancement_result.enhancement_duration_ms}ms")
     Logger.info("   Enhanced files: #{length(enhancement_result.enhanced_files)}")
