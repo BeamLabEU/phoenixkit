@@ -89,10 +89,16 @@ defmodule PhoenixKit.Install.RouterIntegration.ImportInjector do
   end
 
   defp check_for_phoenix_kit_import(zipper) do
-    # Ищем существующий import PhoenixKitWeb.Integration
+    # Ищем существующий import PhoenixKitWeb.Integration несколькими способами
+    
+    # Способ 1: AST pattern matching
     case find_import_statement(zipper, @phoenix_kit_import) do
       {:ok, _} -> true
-      :error -> false
+      :error -> 
+        # Способ 2: String-based поиск как fallback
+        ast = Sourceror.Zipper.node(zipper)
+        source = Sourceror.to_string(ast)
+        String.contains?(source, "import PhoenixKitWeb.Integration")
     end
   end
 
@@ -234,20 +240,40 @@ defmodule PhoenixKit.Install.RouterIntegration.ImportInjector do
   end
 
   defp find_import_statement(zipper, module_name) do
-    # Ищем import для конкретного модуля
-    import_pattern =
-      quote do
-        import unquote(Module.concat([module_name]))
-      end
+    # Ищем import для конкретного модуля с несколькими паттернами
+    
+    # Пробуем несколько возможных представлений import statement
+    patterns = [
+      # import PhoenixKitWeb.Integration
+      quote(do: import(PhoenixKitWeb.Integration)),
+      # import unquote(module_name)
+      quote(do: import(unquote(Module.concat([module_name])))),
+      # Более общий подход - ищем любой import с нужным модулем
+      {:import, [], [Module.concat([module_name])]}
+    ]
 
-    case Sourceror.Zipper.find(zipper, fn node ->
-           case node do
-             ^import_pattern -> true
-             _ -> false
-           end
-         end) do
-      nil -> :error
-      zipper -> {:ok, zipper}
+    result = Enum.find_value(patterns, :error, fn pattern ->
+      case Sourceror.Zipper.find(zipper, fn node ->
+             case node do
+               ^pattern -> true
+               {:import, _, [module_ast]} ->
+                 # Проверяем различные представления модуля в AST
+                 case module_ast do
+                   {:__aliases__, _, [:PhoenixKitWeb, :Integration]} -> true
+                   ^module_name -> true
+                   _ -> false
+                 end
+               _ -> false
+             end
+           end) do
+        nil -> nil
+        found_zipper -> {:ok, found_zipper}
+      end
+    end)
+    
+    case result do
+      {:ok, zipper} -> {:ok, zipper}
+      _ -> :error
     end
   end
 
@@ -259,32 +285,38 @@ defmodule PhoenixKit.Install.RouterIntegration.ImportInjector do
       ast = Sourceror.Zipper.node(zipper)
       source = Sourceror.to_string(ast)
       
-      # Create the import statement
-      import_line = "  import PhoenixKitWeb.Integration"
-      
-      # Find the best position to insert the import
-      lines = String.split(source, "\n")
-      
-      case find_import_insertion_point(lines) do
-        {:ok, position} ->
-          # Insert the import at the found position
-          new_lines = List.insert_at(lines, position + 1, import_line)
-          new_source = Enum.join(new_lines, "\n")
-          
-          # Parse back to zipper
-          case Sourceror.parse_string(new_source) do
-            {:ok, ast} ->
-              Logger.info("✅ Import injection successful using string-based fallback")
-              Sourceror.Zipper.zip(ast)
-              
-            {:error, reason} ->
-              Logger.error("Failed to parse modified source: #{inspect(reason)}")
-              zipper
-          end
-          
-        {:error, _reason} ->
-          Logger.warning("Could not find good insertion point, import may need manual addition")
-          zipper
+      # Check if import already exists in the source
+      if String.contains?(source, "import PhoenixKitWeb.Integration") do
+        Logger.debug("PhoenixKit import already exists in source, skipping string fallback")
+        zipper
+      else
+        # Create the import statement
+        import_line = "  import PhoenixKitWeb.Integration"
+        
+        # Find the best position to insert the import
+        lines = String.split(source, "\n")
+        
+        case find_import_insertion_point(lines) do
+          {:ok, position} ->
+            # Insert the import at the found position
+            new_lines = List.insert_at(lines, position + 1, import_line)
+            new_source = Enum.join(new_lines, "\n")
+            
+            # Parse back to zipper
+            case Sourceror.parse_string(new_source) do
+              {:ok, ast} ->
+                Logger.info("✅ Import injection successful using string-based fallback")
+                Sourceror.Zipper.zip(ast)
+                
+              {:error, reason} ->
+                Logger.error("Failed to parse modified source: #{inspect(reason)}")
+                zipper
+            end
+            
+          {:error, _reason} ->
+            Logger.warning("Could not find good insertion point, import may need manual addition")
+            zipper
+        end
       end
       
     rescue
