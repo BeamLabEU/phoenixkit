@@ -236,12 +236,7 @@ if Code.ensure_loaded?(Igniter) do
           |> add_mailer_configuration(app_name)
           |> maybe_configure_layout(app_name, opts[:layout])
           |> Igniter.Project.Formatter.import_dep(:phoenix_kit)
-          |> Igniter.Libs.Ecto.gen_migration(
-            repo,
-            "add_phoenix_kit_auth_tables",
-            body: migration_body,
-            on_exists: :skip
-          )
+          |> maybe_create_migration(repo, migration_body)
           |> perform_router_integration(opts)
           |> validate_and_fix_layout_files()
           |> perform_layout_integration(opts)
@@ -714,6 +709,9 @@ if Code.ensure_loaded?(Igniter) do
           {:ok, updated_igniter} ->
             Logger.info("✅ Layout files validated and fixed if needed")
             updated_igniter
+          {:ok, updated_igniter, _enhancement_details} ->
+            Logger.info("✅ Layout files validated and fixed if needed")
+            updated_igniter
           {:error, reason} ->
             Logger.warning("⚠️  Could not validate layout files: #{inspect(reason)}")
             igniter
@@ -721,6 +719,25 @@ if Code.ensure_loaded?(Igniter) do
       else
         Logger.debug("No layout files found to validate")
         igniter
+      end
+    end
+
+    # Check for existing PhoenixKit migrations before creating new ones
+    defp maybe_create_migration(igniter, repo, migration_body) do
+      if PhoenixKit.Migration.migrations_exist?() do
+        existing_migrations = PhoenixKit.Migration.existing_migrations()
+        Logger.info("🔍 Found existing PhoenixKit migrations: #{inspect(existing_migrations)}")
+        Logger.info("⏭️  Skipping migration creation - PhoenixKit tables already exist")
+        igniter
+      else
+        Logger.info("📝 Creating PhoenixKit authentication migration")
+        Igniter.Libs.Ecto.gen_migration(
+          igniter,
+          repo,
+          "add_phoenix_kit_auth_tables",
+          body: migration_body,
+          on_exists: :skip
+        )
       end
     end
   end

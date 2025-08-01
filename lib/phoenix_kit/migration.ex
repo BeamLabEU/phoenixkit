@@ -185,6 +185,64 @@ defmodule PhoenixKit.Migration do
     migrator().migrated_version(opts)
   end
 
+  @doc """
+  Check if PhoenixKit migrations already exist in the project.
+  
+  This function scans the migrations directory for existing PhoenixKit migrations
+  to prevent duplicate migration creation.
+  
+  ## Example
+  
+      PhoenixKit.Migration.migrations_exist?()
+      # => true if PhoenixKit migrations are found, false otherwise
+  """
+  def migrations_exist?(migrations_path \\ nil) do
+    migrations_path = migrations_path || default_migrations_path()
+    
+    if File.exists?(migrations_path) do
+      migrations_path
+      |> File.ls!()
+      |> Enum.any?(fn filename ->
+        String.contains?(filename, "phoenix_kit") or
+        String.contains?(filename, "add_phoenix_kit_auth_tables") or
+        String.contains?(filename, "create_phoenix_kit_users") or
+        String.contains?(filename, "users_auth_tables")
+      end)
+    else
+      false
+    end
+  end
+
+  @doc """
+  Get a list of existing PhoenixKit migration files.
+  
+  ## Example
+  
+      PhoenixKit.Migration.existing_migrations()
+      # => ["20240101000000_add_phoenix_kit_auth_tables.exs", ...]
+  """
+  def existing_migrations(migrations_path \\ nil) do
+    migrations_path = migrations_path || default_migrations_path()
+    
+    if File.exists?(migrations_path) do
+      migrations_path
+      |> File.ls!()
+      |> Enum.filter(fn filename ->
+        String.contains?(filename, "phoenix_kit") or
+        String.contains?(filename, "add_phoenix_kit_auth_tables") or
+        String.contains?(filename, "create_phoenix_kit_users") or
+        String.contains?(filename, "users_auth_tables")
+      end)
+      |> Enum.sort()
+    else
+      []
+    end
+  end
+
+  defp default_migrations_path do
+    Path.join([File.cwd!(), "priv", "repo", "migrations"])
+  end
+
   defp migrator do
     case repo().__adapter__() do
       Ecto.Adapters.Postgres -> PhoenixKit.Migrations.Postgres

@@ -60,28 +60,38 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     def down, do: PhoenixKit.Migration.down(#{migration_opts(prefix, create_schema)})
     """
 
-    # Generate migration
-    timestamp = generate_timestamp()
-    migration_name = "add_phoenix_kit_auth_tables"
-    migration_file = "#{timestamp}_#{migration_name}.exs"
+    # Check for existing migrations first
+    if PhoenixKit.Migration.migrations_exist?() do
+      existing_migrations = PhoenixKit.Migration.existing_migrations()
+      Mix.shell().info([
+        :yellow, "🔍 Found existing PhoenixKit migrations: ", :reset, inspect(existing_migrations)
+      ])
+      Mix.shell().info([
+        :yellow, "⏭️  Skipping migration creation - PhoenixKit tables already exist", :reset
+      ])
+    else
+      # Generate migration
+      timestamp = generate_timestamp()
+      migration_name = "add_phoenix_kit_auth_tables"
+      migration_file = "#{timestamp}_#{migration_name}.exs"
 
-    migrations_path = Path.join([File.cwd!(), "priv", "repo", "migrations"])
-    File.mkdir_p!(migrations_path)
+      migrations_path = Path.join([File.cwd!(), "priv", "repo", "migrations"])
+      File.mkdir_p!(migrations_path)
 
-    migration_path = Path.join(migrations_path, migration_file)
+      migration_path = Path.join(migrations_path, migration_file)
 
-    module_name =
-      "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.#{Macro.camelize(migration_name)}"
+      module_name =
+        "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.#{Macro.camelize(migration_name)}"
 
-    full_migration = """
-    defmodule #{module_name} do
-      #{migration_content}
+      full_migration = """
+      defmodule #{module_name} do
+        #{migration_content}
+      end
+      """
+
+      File.write!(migration_path, full_migration)
+      Mix.shell().info([:green, "📝 Creating PhoenixKit migration: ", :reset, migration_path])
     end
-    """
-
-    File.write!(migration_path, full_migration)
-
-    Mix.shell().info([:green, "* creating ", :reset, migration_path])
 
     # Add configuration if not exists
     config_path = "config/config.exs"

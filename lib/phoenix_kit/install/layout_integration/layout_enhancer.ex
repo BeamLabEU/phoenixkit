@@ -18,8 +18,6 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
   @compiled_csrf_regex Regex.compile!("csrf_token")
   @compiled_live_socket_regex Regex.compile!("phx\\.socket")
   @compiled_current_user_regex Regex.compile!("@current_user")
-  @compiled_attribute_regex Regex.compile!("^\\s*(@\\w+.*?)\\n", "m")
-  @compiled_function_regex Regex.compile!("^\\s*(def\\s+\\w+)", "m")
   @compiled_auth_nav_regex Regex.compile!("(nav|header|menu).*?(login|logout|sign)", "is")
   @compiled_img_alt_regex Regex.compile!("<img(?![^>]*alt=)")
   @compiled_aria_label_regex Regex.compile!("<(button|input|textarea)(?![^>]*aria-label)")
@@ -57,9 +55,13 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
         {:unoptimized_scripts, ~r/<script(?![^>]*defer|async)/, :optimize_script_loading, :low}
       ],
 
-      # Code structure fixes
+      # Code structure fixes - DISABLED due to safety concerns
+      # These enhancements can corrupt layout files through aggressive string manipulation
       code_structure: [
-        {:attributes_after_functions, @compiled_function_regex, :fix_attribute_order, :critical}
+        # {:attributes_after_functions, @compiled_function_regex, :fix_attribute_order, :critical}
+        # DISABLED: This enhancement was causing file corruption by improperly manipulating
+        # @doc comments, embed_templates calls, and other code structures.
+        # Manual attribute fixing is recommended instead.
       ]
     }
   end
@@ -522,7 +524,13 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
   end
 
   defp apply_enhancement_to_content(content, enhancement_type, opts) do
-    case enhancement_type do
+    # Safety check: Skip potentially dangerous enhancements for .ex files
+    if is_elixir_file?(content, enhancement_type) and is_dangerous_enhancement?(enhancement_type) do
+      Logger.warning("⚠️  Skipping potentially dangerous enhancement #{enhancement_type} on Elixir file")
+      Logger.warning("   This enhancement could corrupt the file structure")
+      {:ok, content}
+    else
+      case enhancement_type do
       :add_phoenix_kit_flash_component ->
         add_flash_component(content, opts)
 
@@ -559,7 +567,31 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
       _ ->
         Logger.warning("Unknown enhancement type: #{enhancement_type}")
         {:ok, content}
+      end
     end
+  end
+
+  # Safety helper functions
+  defp is_elixir_file?(content, _enhancement_type) do
+    # Detect if this is an Elixir file by looking for common patterns
+    String.contains?(content, "defmodule") or
+    String.contains?(content, "use ") or
+    String.contains?(content, "@moduledoc") or
+    String.contains?(content, "embed_templates") or
+    String.contains?(content, "attr :")
+  end
+
+  defp is_dangerous_enhancement?(enhancement_type) do
+    # List of enhancements that are known to be dangerous for Elixir files
+    enhancement_type in [
+      :fix_attribute_order,
+      :add_phoenix_kit_flash_component,  # Can corrupt .ex files if applied incorrectly
+      :modernize_flash_syntax,           # Can break Elixir syntax
+      :add_current_user_display,        # Can corrupt function definitions
+      :add_auth_navigation,              # Can break module structure
+      :ensure_csrf_token,                # Can corrupt head sections in .ex files
+      :add_live_socket_setup             # Can break script placement in .ex files
+    ]
   end
 
   # Enhancement implementation functions
@@ -798,71 +830,22 @@ defmodule PhoenixKit.Install.LayoutIntegration.LayoutEnhancer do
   end
 
   defp fix_attribute_order(content, _opts) do
-    # Find all attributes and their positions
-    attributes = Regex.scan(@compiled_attribute_regex, content, return: :index, capture: :all_but_first)
+    # SAFE MODE: Disable dangerous string manipulation that corrupts files
+    # The original implementation was too aggressive and would corrupt @doc comments,
+    # embed_templates calls, and other important code structures.
+    # 
+    # Instead of attempting to fix attribute order through regex manipulation,
+    # we should either:
+    # 1. Use proper AST parsing (like Sourceror or Code.string_to_quoted)
+    # 2. Or simply skip this enhancement to avoid file corruption
+    #
+    # For now, we'll skip this enhancement to prevent file corruption.
     
-    # Find first function definition or embed_templates
-    function_matches = Regex.scan(@compiled_function_regex, content, return: :index)
-    embed_matches = Regex.scan(~r/embed_templates/, content, return: :index)
+    Logger.debug("⏭️ Skipping attribute order fix to prevent file corruption")
+    Logger.debug("   This enhancement has been disabled due to safety concerns")
+    Logger.debug("   Manual fixing of attribute order is recommended instead")
     
-    all_matches = function_matches ++ embed_matches
-    
-    case all_matches do
-      [] ->
-        # No functions found, content is probably fine
-        {:ok, content}
-      
-      matches ->
-        # Get the earliest function/embed_templates position
-        first_func_start = 
-          matches
-          |> Enum.map(fn [{start, _}] -> start end)
-          |> Enum.min()
-        # Check if any attributes are after the first function
-        misplaced_attributes = 
-          attributes
-          |> Enum.filter(fn [{attr_start, _}] -> attr_start > first_func_start end)
-        
-        if length(misplaced_attributes) > 0 do
-          # Extract misplaced attributes
-          misplaced_attr_texts = 
-            misplaced_attributes
-            |> Enum.map(fn [{start, length}] -> 
-              String.slice(content, start, length)
-            end)
-          
-          # Remove misplaced attributes from their current locations (reverse order to maintain indices)
-          fixed_content = 
-            misplaced_attributes
-            |> Enum.reverse()
-            |> Enum.reduce(content, fn [{start, length}], acc ->
-              before = String.slice(acc, 0, start)
-              after_attr = String.slice(acc, start + length, String.length(acc))
-              before <> after_attr
-            end)
-          
-          # Find the position after "use ModuleName, :html" line to insert attributes
-          case Regex.run(~r/use\s+\w+Web,\s*:html\n/i, fixed_content, return: :index) do
-            [{use_start, use_length}] ->
-              use_end = use_start + use_length
-              before_use = String.slice(fixed_content, 0, use_end)
-              after_use = String.slice(fixed_content, use_end, String.length(fixed_content))
-              
-              # Insert attributes after the use statement
-              attribute_block = Enum.join(misplaced_attr_texts, "\n") <> "\n"
-              corrected_content = before_use <> "\n" <> attribute_block <> after_use
-              
-              Logger.info("🔧 Fixed attribute order: moved #{length(misplaced_attributes)} attributes to correct position")
-              {:ok, corrected_content}
-              
-            nil ->
-              Logger.warning("Could not find 'use' statement to place attributes")
-              {:ok, content}
-          end
-        else
-          {:ok, content}
-        end
-    end
+    {:ok, content}
   end
 
 defp log_enhancement_summary(enhancement_result) do

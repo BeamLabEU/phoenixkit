@@ -40,6 +40,8 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
 
     use Igniter.Mix.Task
 
+    require Logger
+
     @impl Igniter.Mix.Task
     def info(_argv, _composing_task) do
       %Igniter.Mix.Task.Info{
@@ -208,25 +210,32 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
     end
 
     defp create_phoenix_kit_migration(igniter, options) do
-      timestamp = generate_timestamp()
-      migration_name = "add_phoenix_kit_auth_tables"
-      migration_file = "#{timestamp}_#{migration_name}.exs"
+      # Check for existing migrations first
+      if PhoenixKit.Migration.migrations_exist?() do
+        existing_migrations = PhoenixKit.Migration.existing_migrations()
+        Logger.info("🔍 Found existing PhoenixKit migrations: #{inspect(existing_migrations)}")
+        Logger.info("⏭️  Skipping migration creation - PhoenixKit tables already exist")
+        igniter
+      else
+        timestamp = generate_timestamp()
+        migration_name = "add_phoenix_kit_auth_tables"
+        migration_file = "#{timestamp}_#{migration_name}.exs"
 
-      # Try different ways to get app name
-      app_name =
-        case Igniter.Project.Application.app_name(igniter) do
-          {:ok, name} ->
-            name
+        # Try different ways to get app name
+        app_name =
+          case Igniter.Project.Application.app_name(igniter) do
+            {:ok, name} ->
+              name
 
-          name when is_atom(name) ->
-            name
+            name when is_atom(name) ->
+              name
 
-          _ ->
-            # Fallback: try to get from Mix.Project
-            Mix.Project.config()[:app]
-        end
+            _ ->
+              # Fallback: try to get from Mix.Project
+              Mix.Project.config()[:app]
+          end
 
-      if app_name do
+        if app_name do
         app_module = Macro.camelize(to_string(app_name))
         module_name = "#{app_module}.Repo.Migrations.#{Macro.camelize(migration_name)}"
 
@@ -244,13 +253,15 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
 
         migration_path = Path.join(["priv", "repo", "migrations", migration_file])
 
+        Logger.info("📝 Creating PhoenixKit migration: #{migration_path}")
         Igniter.create_new_file(igniter, migration_path, migration_content)
-      else
-        Igniter.add_issue(igniter, """
-        Could not determine application name for migration creation.
-        Please ensure you're running this from a Phoenix application root.
-        App name result: #{inspect(Igniter.Project.Application.app_name(igniter))}
-        """)
+        else
+          Igniter.add_issue(igniter, """
+          Could not determine application name for migration creation.
+          Please ensure you're running this from a Phoenix application root.
+          App name result: #{inspect(Igniter.Project.Application.app_name(igniter))}
+          """)
+        end
       end
     end
 
