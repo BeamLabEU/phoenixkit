@@ -307,12 +307,111 @@ defmodule PhoenixKit.Install.RouterIntegration.RouteInjector do
   end
   
   defp find_safe_insertion_point(lines_with_index) do
-    # Find the module-level 'end' by tracking nesting levels
-    case find_module_level_end(lines_with_index) do
+    # Try to find optimal position: after pipelines, before scopes
+    case find_optimal_route_position(lines_with_index) do
       {:ok, index} -> {:ok, index}
       {:error, _} ->
-        # Fallback: find the last standalone 'end'
-        find_last_standalone_end(lines_with_index)
+        # Fallback: find the module-level 'end'
+        case find_module_level_end(lines_with_index) do
+          {:ok, index} -> {:ok, index}
+          {:error, _} ->
+            # Last fallback: find the last standalone 'end'
+            find_last_standalone_end(lines_with_index)
+        end
+    end
+  end
+
+  defp find_optimal_route_position(lines_with_index) do
+    # Find the last pipeline block
+    last_pipeline_end = find_last_pipeline_end(lines_with_index)
+    
+    # Find the first scope block
+    first_scope_start = find_first_scope_start(lines_with_index)
+    
+    case {last_pipeline_end, first_scope_start} do
+      {{:ok, pipeline_end}, {:ok, scope_start}} when pipeline_end < scope_start ->
+        # Ideal case: insert between last pipeline and first scope
+        {:ok, scope_start}
+      
+      {{:ok, pipeline_end}, {:error, _}} ->
+        # No scopes found, insert after last pipeline
+        {:ok, pipeline_end + 1}
+      
+      {{:error, _}, {:ok, scope_start}} ->
+        # No pipelines found, insert before first scope
+        {:ok, scope_start}
+      
+      _ ->
+        # Neither found, use fallback
+        {:error, :no_optimal_position}
+    end
+  end
+
+  defp find_last_pipeline_end(lines_with_index) do
+    # Find the last 'end' that closes a pipeline block
+    pipeline_blocks = 
+      lines_with_index
+      |> Enum.with_index(0)
+      |> Enum.filter(fn {{line, _original_index}, _enum_index} ->
+        String.contains?(String.trim(line), "pipeline :")
+      end)
+    
+    case List.last(pipeline_blocks) do
+      {{_line, original_index}, _enum_index} ->
+        # Find the 'end' that closes this pipeline
+        find_closing_end_after(lines_with_index, original_index)
+      
+      nil ->
+        {:error, :no_pipelines}
+    end
+  end
+
+  defp find_first_scope_start(lines_with_index) do
+    # Find the first line that starts a scope block
+    case Enum.find(lines_with_index, fn {line, _index} ->
+      trimmed = String.trim(line)
+      String.starts_with?(trimmed, "scope ") and String.contains?(trimmed, " do")
+    end) do
+      {_line, index} -> {:ok, index}
+      nil -> {:error, :no_scopes}
+    end
+  end
+
+  defp find_closing_end_after(lines_with_index, start_index) do
+    # Find the 'end' that closes a block starting at start_index
+    nesting_level = 0
+    
+    lines_after_start = 
+      Enum.drop_while(lines_with_index, fn {_line, index} -> index <= start_index end)
+    
+    case find_matching_end(lines_after_start, nesting_level) do
+      {:ok, index} -> {:ok, index}
+      {:error, _} -> {:error, :no_matching_end}
+    end
+  end
+
+  defp find_matching_end(lines_with_index, initial_level) do
+    Enum.reduce_while(lines_with_index, initial_level, fn {line, index}, level ->
+      trimmed = String.trim(line)
+      
+      cond do
+        String.contains?(trimmed, " do") or String.ends_with?(trimmed, " do") ->
+          {:cont, level + 1}
+        
+        String.trim(trimmed) == "end" ->
+          if level == 0 do
+            {:halt, {:ok, index}}
+          else
+            {:cont, level - 1}
+          end
+        
+        true ->
+          {:cont, level}
+      end
+    end)
+    |> case do
+      {:ok, index} -> {:ok, index}
+      _level -> {:error, :no_matching_end}
     end
   end
   
