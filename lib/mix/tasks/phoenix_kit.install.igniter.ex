@@ -187,14 +187,37 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
     defp add_phoenix_kit_configuration(igniter, options) do
       repo = igniter.assigns[:detected_repo]
 
-      igniter
-      |> Igniter.Project.Config.configure(
-        "config.exs",
-        :phoenix_kit,
-        [:repo],
-        repo
-      )
-      |> maybe_configure_prefix(options[:prefix])
+      case check_existing_phoenix_kit_config() do
+        {:exists, existing_config} ->
+          Logger.info("🔍 Found existing PhoenixKit configuration")
+          Logger.info("   Existing config: #{inspect(existing_config, limit: :infinity)}")
+          
+          if Mix.shell().yes?("Replace existing PhoenixKit configuration?") do
+            Logger.info("✅ Updating existing PhoenixKit configuration")
+            igniter
+            |> Igniter.Project.Config.configure(
+              "config.exs",
+              :phoenix_kit,
+              [:repo],
+              repo
+            )
+            |> maybe_configure_prefix(options[:prefix])
+          else
+            Logger.info("⏭️  Keeping existing PhoenixKit configuration")
+            igniter
+          end
+
+        {:not_exists} ->
+          Logger.info("📝 Adding new PhoenixKit configuration")
+          igniter
+          |> Igniter.Project.Config.configure(
+            "config.exs",
+            :phoenix_kit,
+            [:repo],
+            repo
+          )
+          |> maybe_configure_prefix(options[:prefix])
+      end
     end
 
     defp maybe_configure_prefix(igniter, "public"), do: igniter
@@ -412,6 +435,28 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
 
     defp pad(i) when i < 10, do: <<?0, ?0 + i>>
     defp pad(i), do: to_string(i)
+
+    defp check_existing_phoenix_kit_config() do
+      # Read the current config.exs content to check for existing PhoenixKit config
+      config_path = Path.join([File.cwd!(), "config", "config.exs"])
+      
+      if File.exists?(config_path) do
+        content = File.read!(config_path)
+        
+        case Regex.run(~r/config\s+:phoenix_kit[^}]*}/s, content) do
+          [config_match] ->
+            Logger.debug("Found existing PhoenixKit config: #{config_match}")
+            {:exists, config_match}
+          
+          nil ->
+            {:not_exists}
+        end
+      else
+        {:not_exists}
+      end
+    rescue
+      _ -> {:not_exists}
+    end
   end
 else
   defmodule Mix.Tasks.PhoenixKit.Install.Igniter do

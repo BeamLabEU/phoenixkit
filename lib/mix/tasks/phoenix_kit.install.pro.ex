@@ -105,7 +105,6 @@ defmodule Mix.Tasks.PhoenixKit.Install.Pro.Docs do
     The installer now provides **intelligent conflict resolution and seamless layout integration** for 95% of Phoenix applications!
     """
   end
-end
 
 if Code.ensure_loaded?(Igniter) do
   defmodule Mix.Tasks.PhoenixKit.Install.Pro do
@@ -221,12 +220,7 @@ if Code.ensure_loaded?(Igniter) do
           """
 
           igniter
-          |> Igniter.Project.Config.configure(
-            "config.exs",
-            app_name,
-            [PhoenixKit],
-            {:code, conf_code}
-          )
+          |> maybe_configure_phoenix_kit(app_name, conf_code)
           |> Igniter.Project.Config.configure(
             "test.exs",
             app_name,
@@ -739,6 +733,94 @@ if Code.ensure_loaded?(Igniter) do
           on_exists: :skip
         )
       end
+    end
+  end
+else
+  defmodule Mix.Tasks.PhoenixKit.Install.Pro do
+    @shortdoc "Install Igniter to use PhoenixKit's advanced installer."
+
+    @moduledoc __MODULE__.Docs.long_doc()
+
+    use Mix.Task
+
+    def run(_argv) do
+      Mix.shell().error("""
+      The task 'phoenix_kit.install.pro' requires Igniter for intelligent project setup.
+
+      To use PhoenixKit's professional installer:
+
+      1. Add Igniter to your dependencies:
+         # In mix.exs
+         {:igniter, "~> 0.6.0", only: [:dev]}
+
+      2. Install dependencies:
+         mix deps.get
+
+      3. Run the professional installer:
+         mix phoenix_kit.install.pro
+
+      Alternatively, use the basic installer:
+         mix phoenix_kit.install --repo MyApp.Repo
+
+      For more information, see: https://hexdocs.pm/igniter/readme.html
+      """)
+
+      exit({:shutdown, 1})
+    end
+
+    # Check for existing PhoenixKit configuration before adding new one
+    defp maybe_configure_phoenix_kit(igniter, app_name, conf_code) do
+      case check_existing_phoenix_kit_config() do
+        {:exists, existing_config} ->
+          Logger.info("🔍 Found existing PhoenixKit configuration")
+          Logger.info("   Existing config: #{inspect(existing_config, limit: :infinity)}")
+          
+          if Mix.shell().yes?("Replace existing PhoenixKit configuration?") do
+            Logger.info("✅ Updating existing PhoenixKit configuration")
+            Igniter.Project.Config.configure(
+              igniter,
+              "config.exs",
+              app_name,
+              [PhoenixKit],
+              {:code, conf_code}
+            )
+          else
+            Logger.info("⏭️  Keeping existing PhoenixKit configuration")
+            igniter
+          end
+
+        {:not_exists} ->
+          Logger.info("📝 Adding new PhoenixKit configuration")
+          Igniter.Project.Config.configure(
+            igniter,
+            "config.exs",
+            app_name,
+            [PhoenixKit],
+            {:code, conf_code}
+          )
+      end
+    end
+
+    defp check_existing_phoenix_kit_config() do
+      # Read the current config.exs content to check for existing PhoenixKit config
+      config_path = Path.join([File.cwd!(), "config", "config.exs"])
+      
+      if File.exists?(config_path) do
+        content = File.read!(config_path)
+        
+        case Regex.run(~r/config\s+:phoenix_kit[^}]*}/s, content) do
+          [config_match] ->
+            Logger.debug("Found existing PhoenixKit config: #{config_match}")
+            {:exists, config_match}
+          
+          nil ->
+            {:not_exists}
+        end
+      else
+        {:not_exists}
+      end
+    rescue
+      _ -> {:not_exists}
     end
   end
 else

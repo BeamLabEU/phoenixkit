@@ -94,19 +94,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     end
 
     # Add configuration if not exists
-    config_path = "config/config.exs"
-
-    if File.exists?(config_path) do
-      config_content = File.read!(config_path)
-
-      config_line = "config :phoenix_kit, repo: #{inspect(repo)}"
-
-      unless String.contains?(config_content, config_line) do
-        updated_config = config_content <> "\n\n# PhoenixKit configuration\n#{config_line}\n"
-        File.write!(config_path, updated_config)
-        Mix.shell().info([:green, "* updating ", :reset, config_path])
-      end
-    end
+    maybe_add_phoenix_kit_config(repo)
 
     Mix.shell().info([
       :green,
@@ -145,4 +133,38 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   defp pad(i) when i < 10, do: <<?0, ?0 + i>>
   defp pad(i), do: to_string(i)
+
+  defp maybe_add_phoenix_kit_config(repo) do
+    config_path = "config/config.exs"
+
+    if File.exists?(config_path) do
+      config_content = File.read!(config_path)
+      config_line = "config :phoenix_kit, repo: #{inspect(repo)}"
+
+      case Regex.run(~r/config\s+:phoenix_kit[^}]*}/s, config_content) do
+        [existing_config] ->
+          Mix.shell().info([
+            :yellow, "🔍 Found existing PhoenixKit configuration: ", :reset, existing_config
+          ])
+          
+          if Mix.shell().yes?("Replace existing PhoenixKit configuration?") do
+            Mix.shell().info([:green, "✅ Updating PhoenixKit configuration", :reset])
+            # Simple replacement - remove old config and add new one
+            updated_content = String.replace(config_content, existing_config, config_line)
+            File.write!(config_path, updated_content)
+            Mix.shell().info([:green, "* updating ", :reset, config_path])
+          else
+            Mix.shell().info([:yellow, "⏭️  Keeping existing PhoenixKit configuration", :reset])
+          end
+
+        nil ->
+          unless String.contains?(config_content, config_line) do
+            Mix.shell().info([:green, "📝 Adding new PhoenixKit configuration", :reset])
+            updated_config = config_content <> "\n\n# PhoenixKit configuration\n#{config_line}\n"
+            File.write!(config_path, updated_config)
+            Mix.shell().info([:green, "* updating ", :reset, config_path])
+          end
+      end
+    end
+  end
 end
