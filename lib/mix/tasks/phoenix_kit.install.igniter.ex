@@ -3,7 +3,8 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
   Igniter installer for PhoenixKit authentication system.
 
   This task automatically installs PhoenixKit into a Phoenix application by:
-  1. Modifying the router to include PhoenixKit routes
+  1. Auto-detecting and configuring Ecto repo
+  2. Modifying the router to include PhoenixKit routes
 
   ## Usage
 
@@ -11,15 +12,22 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
   mix phoenix_kit.install.igniter
   ```
 
-  Or with custom router path:
+  With custom options:
 
   ```bash
-  mix phoenix_kit.install.igniter --router-path lib/my_app_web/router.ex
+  mix phoenix_kit.install.igniter --repo MyApp.Repo --router-path lib/my_app_web/router.ex
   ```
 
   ## Options
 
+  * `--repo` - Specify Ecto repo module (auto-detected if not provided)
   * `--router-path` - Specify custom path to router.ex file
+  
+  ## Auto-detection
+  
+  The installer will automatically detect:
+  - Ecto repo from `:ecto_repos` config or common naming patterns (MyApp.Repo)
+  - Main router using Phoenix conventions (MyAppWeb.Router)
   
   ## Note about warnings
   
@@ -36,13 +44,15 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
   def info(_argv, _composing_task) do
     %Igniter.Mix.Task.Info{
       group: :phoenix_kit,
-      example: "mix phoenix_kit.install.igniter",
+      example: "mix phoenix_kit.install.igniter --repo MyApp.Repo",
       positional: [],
       schema: [
-        router_path: :string
+        router_path: :string,
+        repo: :string
       ],
       aliases: [
-        r: :router_path
+        r: :router_path,
+        repo: :repo
       ]
     }
   end
@@ -52,7 +62,88 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     opts = igniter.args.options
     
     igniter
+    |> add_phoenix_kit_configuration(opts[:repo])
     |> add_router_integration(opts[:router_path])
+  end
+
+  # Add PhoenixKit configuration to config/config.exs
+  defp add_phoenix_kit_configuration(igniter, custom_repo) do
+    case find_or_detect_repo(igniter, custom_repo) do
+      {igniter, nil} ->
+        warning = """
+        Could not find or determine Ecto repo. Please manually add to config/config.exs:
+        
+          config :phoenix_kit, repo: YourApp.Repo
+        """
+        Igniter.add_warning(igniter, warning)
+        
+      {igniter, repo_module} ->
+        # Use configure_new to avoid duplicating existing config
+        Igniter.Project.Config.configure_new(
+          igniter,
+          "config.exs",
+          :phoenix_kit,
+          [:repo],
+          repo_module
+        )
+    end
+  end
+
+  # Find specified repo or auto-detect from project
+  defp find_or_detect_repo(igniter, nil) do
+    # Auto-detect repo from ecto_repos configuration
+    case Igniter.Libs.Ecto.list_repos(igniter) do
+      {igniter, []} ->
+        # Try common naming patterns if no ecto_repos found
+        auto_detect_repo_by_name(igniter)
+        
+      {igniter, [repo | _]} ->
+        # Use first repo found
+        {igniter, repo}
+    end
+  end
+  
+  defp find_or_detect_repo(igniter, repo_string) when is_binary(repo_string) do
+    repo_module = Module.concat([repo_string])
+    
+    case Igniter.Project.Module.module_exists(igniter, repo_module) do
+      {true, igniter} ->
+        {igniter, repo_module}
+        
+      {false, igniter} ->
+        Igniter.add_warning(igniter, "Specified repo #{repo_string} does not exist")
+        {igniter, nil}
+    end
+  end
+
+  # Try to auto-detect repo by common naming patterns
+  defp auto_detect_repo_by_name(igniter) do
+    app_name = Igniter.Project.Application.app_name(igniter)
+    
+    # Try common repo patterns
+    repo_patterns = [
+      Module.concat([Macro.camelize(to_string(app_name)), "Repo"]),
+      Module.concat([Macro.camelize(to_string(app_name)) <> "Web", "Repo"]),
+      Module.concat([Macro.camelize(to_string(app_name)), "Data", "Repo"])
+    ]
+    
+    case find_existing_repo(igniter, repo_patterns) do
+      {igniter, nil} ->
+        {igniter, nil}
+      {igniter, repo_module} ->
+        {igniter, repo_module}
+    end
+  end
+
+  # Helper to find existing repo from patterns
+  defp find_existing_repo(igniter, []), do: {igniter, nil}
+  defp find_existing_repo(igniter, [repo_module | rest]) do
+    case Igniter.Project.Module.module_exists(igniter, repo_module) do
+      {true, igniter} ->
+        {igniter, repo_module}
+      {false, igniter} ->
+        find_existing_repo(igniter, rest)
+    end
   end
 
   # Add PhoenixKit integration to router
