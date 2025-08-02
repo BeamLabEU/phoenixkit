@@ -1,4 +1,5 @@
 import Config
+config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
 
 # Database configuration for PhoenixKit development
 config :phoenix_kit, PhoenixKit.Repo,

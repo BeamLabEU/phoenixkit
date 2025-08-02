@@ -3,8 +3,7 @@ import Config
 # Configuration for PhoenixKit with web layer support
 
 # Configure the database repository
-config :phoenix_kit,
-  ecto_repos: [PhoenixKit.Repo]
+config :phoenix_kit, ecto_repos: [PhoenixKit.Repo], repo: PhoenixKit.Repo
 
 # Configure Ecto repository for development
 config :phoenix_kit, PhoenixKit.Repo, adapter: Ecto.Adapters.Postgres
@@ -57,9 +56,8 @@ config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
 
-
 # PhoenixKit configuration
-config :phoenix_kit, 
+config :phoenix_kit,
   repo: PhoenixKit.Repo
 
 # Layout configuration - defaults to PhoenixKit layouts

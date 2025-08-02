@@ -23,6 +23,8 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
 
   * `--repo` - Specify Ecto repo module (auto-detected if not provided)
   * `--router-path` - Specify custom path to router.ex file
+  * `--prefix` - Specify PostgreSQL schema prefix (defaults to "public")
+  * `--create-schema` - Create schema if using custom prefix (default: true for non-public prefixes)
   
   ## Auto-detection
   
@@ -47,15 +49,18 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
   def info(_argv, _composing_task) do
     %Igniter.Mix.Task.Info{
       group: :phoenix_kit,
-      example: "mix phoenix_kit.install.igniter --repo MyApp.Repo",
+      example: "mix phoenix_kit.install.igniter --repo MyApp.Repo --prefix auth",
       positional: [],
       schema: [
         router_path: :string,
-        repo: :string
+        repo: :string,
+        prefix: :string,
+        create_schema: :boolean
       ],
       aliases: [
         r: :router_path,
-        repo: :repo
+        repo: :repo,
+        p: :prefix
       ]
     }
   end
@@ -68,6 +73,8 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     |> add_phoenix_kit_configuration(opts[:repo])
     |> add_mailer_configuration()
     |> add_router_integration(opts[:router_path])
+    |> create_phoenix_kit_migration(opts)
+    |> add_completion_notice()
   end
 
   # Add PhoenixKit configuration to config/config.exs
@@ -371,6 +378,157 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     
     # Simply add the code at the end of the module
     {:ok, Igniter.Code.Common.add_code(zipper, routes_code, placement: :after)}
+  end
+
+  # Create PhoenixKit migration file
+  defp create_phoenix_kit_migration(igniter, opts) do
+    prefix = opts[:prefix] || "public"
+    create_schema = opts[:create_schema] != false && prefix != "public"
+    migration_name = "add_phoenix_kit_auth_tables"
+    
+    # Check if migration already exists by looking for any file with this name pattern
+    migrations_dir = Path.join(["priv", "repo", "migrations"])
+    existing_migration = find_existing_migration(migrations_dir, migration_name)
+    
+    case existing_migration do
+      {:exists, filename} ->
+        # Check if existing migration has compatible options
+        existing_path = Path.join([migrations_dir, filename])
+        expected_opts = migration_opts(prefix, create_schema)
+        
+        case check_migration_options_conflict(existing_path, expected_opts) do
+          :options_match ->
+            Igniter.add_notice(igniter, "Migration #{filename} already exists with matching options, skipping creation.")
+            igniter
+            
+          :options_conflict ->
+            warning = """
+            Migration #{filename} already exists but with different options.
+            
+            Expected: PhoenixKit.Migration.up(#{expected_opts})
+            
+            Please either:
+            1. Remove the existing migration and re-run the installer
+            2. Manually update the existing migration
+            3. Create a new migration with different options
+            """
+            Igniter.add_warning(igniter, warning)
+            igniter
+            
+          :cannot_read ->
+            Igniter.add_warning(igniter, "Cannot read existing migration #{filename}. Please check file permissions.")
+            igniter
+        end
+        
+      :not_found ->
+        # Generate migration content following the same pattern as phoenix_kit.install.ex
+        migration_content = """
+        use Ecto.Migration
+
+        def up, do: PhoenixKit.Migration.up(#{migration_opts(prefix, create_schema)})
+
+        def down, do: PhoenixKit.Migration.down(#{migration_opts(prefix, create_schema)})
+        """
+        
+        # Generate timestamp and file names
+        timestamp = generate_timestamp()
+        migration_file = "#{timestamp}_#{migration_name}.exs"
+        
+        # Get app name for module name generation
+        case Igniter.Project.Application.app_name(igniter) do
+          nil ->
+            Igniter.add_warning(igniter, "Could not determine app name for migration module. Please create migration manually.")
+            igniter
+            
+          app_name ->
+            module_name = "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.#{Macro.camelize(migration_name)}"
+            
+            full_migration = """
+            defmodule #{module_name} do
+              #{migration_content}
+            end
+            """
+            
+            # Use Igniter to create the migration file
+            migration_path = Path.join(["priv", "repo", "migrations", migration_file])
+            Igniter.create_new_file(igniter, migration_path, full_migration)
+        end
+    end
+  end
+
+  # Find existing migration file with the same name pattern and check if options match
+  defp find_existing_migration(migrations_dir, migration_name) do
+    if File.dir?(migrations_dir) do
+      migrations_dir
+      |> File.ls!()
+      |> Enum.find(fn filename ->
+        String.contains?(filename, migration_name)
+      end)
+      |> case do
+        nil -> :not_found
+        filename -> {:exists, filename}
+      end
+    else
+      :not_found
+    end
+  end
+
+  # Check if existing migration has different options
+  defp check_migration_options_conflict(existing_migration_path, expected_opts) do
+    case File.read(existing_migration_path) do
+      {:ok, content} ->
+        # Check if the migration contains expected options
+        expected_call = "PhoenixKit.Migration.up(#{expected_opts})"
+        
+        if String.contains?(content, expected_call) do
+          :options_match
+        else
+          :options_conflict
+        end
+        
+      {:error, _} ->
+        :cannot_read
+    end
+  end
+
+  # Generate migration options (same as phoenix_kit.install.ex)
+  defp migration_opts("public", false), do: ""
+  defp migration_opts(prefix, create_schema) when is_binary(prefix) do
+    opts = [prefix: prefix]
+    opts = if create_schema, do: Keyword.put(opts, :create_schema, true), else: opts
+    inspect(opts)  
+  end
+
+  # Generate timestamp (same as phoenix_kit.install.ex)
+  defp generate_timestamp do
+    {{y, m, d}, {hh, mm, ss}} = :calendar.universal_time()
+    "#{y}#{pad(m)}#{pad(d)}#{pad(hh)}#{pad(mm)}#{pad(ss)}"
+  end
+
+  defp pad(i) when i < 10, do: <<?0, ?0 + i>>
+  defp pad(i), do: to_string(i)
+
+  # Add completion notice with next steps
+  defp add_completion_notice(igniter) do
+    notice = """
+    
+    🎉 PhoenixKit installation complete!
+    
+    Next steps:
+      1. Run: mix ecto.migrate
+      2. Start your Phoenix server: mix phx.server
+      3. Visit /phoenix_kit/register to test user registration
+    
+    📚 Visit /phoenix_kit routes for complete authentication system:
+      - User registration and login
+      - Password reset and email confirmation  
+      - User settings and profile management
+    
+    ⚡ PhoenixKit routes work independently of your app's browser pipeline
+       and are automatically configured for LiveView forms.
+    """
+    
+    Igniter.add_notice(igniter, notice)
   end
 
 end
