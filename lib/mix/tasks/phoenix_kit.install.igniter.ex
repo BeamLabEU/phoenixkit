@@ -4,7 +4,8 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
 
   This task automatically installs PhoenixKit into a Phoenix application by:
   1. Auto-detecting and configuring Ecto repo
-  2. Modifying the router to include PhoenixKit routes
+  2. Setting up mailer configuration for development and production
+  3. Modifying the router to include PhoenixKit routes
 
   ## Usage
 
@@ -25,9 +26,11 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
   
   ## Auto-detection
   
-  The installer will automatically detect:
-  - Ecto repo from `:ecto_repos` config or common naming patterns (MyApp.Repo)
-  - Main router using Phoenix conventions (MyAppWeb.Router)
+  The installer will automatically:
+  - Detect Ecto repo from `:ecto_repos` config or common naming patterns (MyApp.Repo)
+  - Find main router using Phoenix conventions (MyAppWeb.Router)
+  - Configure Swoosh.Adapters.Local for development in config/dev.exs
+  - Provide production mailer setup instructions
   
   ## Note about warnings
   
@@ -63,6 +66,7 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     
     igniter
     |> add_phoenix_kit_configuration(opts[:repo])
+    |> add_mailer_configuration()
     |> add_router_integration(opts[:router_path])
   end
 
@@ -71,7 +75,17 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     case find_or_detect_repo(igniter, custom_repo) do
       {igniter, nil} ->
         warning = """
-        Could not find or determine Ecto repo. Please manually add to config/config.exs:
+        Could not determine application name or find Ecto repo automatically.
+        
+        Please specify with --repo option:
+        
+          mix phoenix_kit.install.igniter --repo YourApp.Repo
+          
+        Common repo names:
+          - ZenclockRepo, Zenclock.Repo
+          - MyAppRepo, MyApp.Repo
+          
+        Or manually add to config/config.exs:
         
           config :phoenix_kit, repo: YourApp.Repo
         """
@@ -89,13 +103,60 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     end
   end
 
+  # Add PhoenixKit mailer configuration 
+  defp add_mailer_configuration(igniter) do
+    igniter
+    |> add_dev_mailer_config()
+    |> add_mailer_production_notice()
+  end
+
+  # Add Local mailer adapter for development
+  defp add_dev_mailer_config(igniter) do
+    Igniter.Project.Config.configure_new(
+      igniter,
+      "dev.exs", 
+      :phoenix_kit,
+      [PhoenixKit.Mailer],
+      [adapter: Swoosh.Adapters.Local]
+    )
+  end
+
+  # Add notice about production mailer configuration
+  defp add_mailer_production_notice(igniter) do
+    notice = """
+    
+    📧 Mailer Configuration Added:
+    - Development: Swoosh.Adapters.Local (emails shown in browser)
+    
+    ⚠️  IMPORTANT: Without mailer configuration, user registration will fail!
+    
+    For production, configure appropriate adapter in config/prod.exs:
+    
+      # Example with SMTP
+      config :phoenix_kit, PhoenixKit.Mailer,
+        adapter: Swoosh.Adapters.SMTP,
+        relay: "smtp.gmail.com",
+        username: System.get_env("SMTP_USERNAME"),
+        password: System.get_env("SMTP_PASSWORD")
+    
+      # Or cloud services: SendGrid, Mailgun, Postmark, etc.
+    """
+    
+    Igniter.add_notice(igniter, notice)
+  end
+
   # Find specified repo or auto-detect from project
   defp find_or_detect_repo(igniter, nil) do
     # Auto-detect repo from ecto_repos configuration
     case Igniter.Libs.Ecto.list_repos(igniter) do
       {igniter, []} ->
-        # Try common naming patterns if no ecto_repos found
-        auto_detect_repo_by_name(igniter)
+        # Try multiple fallback methods to find repo
+        case auto_detect_repo_by_name(igniter) do
+          {igniter, nil} ->
+            auto_detect_repo_by_scanning(igniter)
+          {igniter, repo} ->
+            {igniter, repo}
+        end
         
       {igniter, [repo | _]} ->
         # Use first repo found
@@ -118,20 +179,38 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
 
   # Try to auto-detect repo by common naming patterns
   defp auto_detect_repo_by_name(igniter) do
-    app_name = Igniter.Project.Application.app_name(igniter)
-    
-    # Try common repo patterns
-    repo_patterns = [
-      Module.concat([Macro.camelize(to_string(app_name)), "Repo"]),
-      Module.concat([Macro.camelize(to_string(app_name)) <> "Web", "Repo"]),
-      Module.concat([Macro.camelize(to_string(app_name)), "Data", "Repo"])
-    ]
-    
-    case find_existing_repo(igniter, repo_patterns) do
-      {igniter, nil} ->
+    case Igniter.Project.Application.app_name(igniter) do
+      nil ->
+        # Can't determine app name, skip this method
         {igniter, nil}
-      {igniter, repo_module} ->
-        {igniter, repo_module}
+        
+      app_name ->
+        # Try common repo patterns
+        repo_patterns = [
+          Module.concat([Macro.camelize(to_string(app_name)), "Repo"]),
+          Module.concat([Macro.camelize(to_string(app_name)) <> "Web", "Repo"]),
+          Module.concat([Macro.camelize(to_string(app_name)), "Data", "Repo"])
+        ]
+        
+        find_existing_repo(igniter, repo_patterns)
+    end
+  end
+
+  # Try to auto-detect repo by scanning project files
+  defp auto_detect_repo_by_scanning(igniter) do
+    # Look for modules that use Ecto.Repo
+    {igniter, all_modules} = Igniter.Project.Module.find_all_matching_modules(igniter, fn _module, zipper ->
+      case Igniter.Code.Module.move_to_use(zipper, Ecto.Repo) do
+        {:ok, _} -> true
+        :error -> false
+      end
+    end)
+    
+    case all_modules do
+      [] ->
+        {igniter, nil}
+      [repo | _] ->
+        {igniter, repo}
     end
   end
 
