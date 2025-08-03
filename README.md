@@ -28,6 +28,7 @@ PhoenixKit is a production-ready authentication library for Phoenix applications
 # mix.exs
 def deps do
   [
+    {:igniter, "~> 0.6.0", only: [:dev]},
     {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"}
     # Or when published to Hex:
     # {:phoenix_kit, "~> 0.1.5"}
