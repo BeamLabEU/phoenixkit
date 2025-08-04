@@ -11,6 +11,15 @@ defmodule PhoenixKit.Migrations.Postgres.V01 do
     # Create citext extension if not exists
     execute "CREATE EXTENSION IF NOT EXISTS citext"
 
+    # Create version tracking table (phoenix_kit)
+    create_if_not_exists table(:phoenix_kit, primary_key: false, prefix: prefix) do
+      add :id, :serial, primary_key: true
+      add :version, :integer, null: false
+      add :migrated_at, :naive_datetime, null: false, default: fragment("NOW()")
+    end
+
+    create_if_not_exists unique_index(:phoenix_kit, [:version], prefix: prefix)
+
     # Create users table (phoenix_kit_users)
     create_if_not_exists table(:phoenix_kit_users, primary_key: false, prefix: prefix) do
       add :id, :bigserial, primary_key: true
@@ -41,5 +50,6 @@ defmodule PhoenixKit.Migrations.Postgres.V01 do
   def down(%{prefix: prefix}) do
     drop_if_exists table(:phoenix_kit_users_tokens, prefix: prefix)
     drop_if_exists table(:phoenix_kit_users, prefix: prefix)
+    drop_if_exists table(:phoenix_kit, prefix: prefix)
   end
 end

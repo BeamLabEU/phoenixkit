@@ -24,7 +24,7 @@ defmodule TempAppWeb.Router do
   end
 
   # Add PhoenixKit authentication routes  
-  phoenix_kit_auth_routes()
+  phoenix_kit_routes()
 
   # Other scopes may use custom stacks.
   # scope "/api", TempAppWeb do

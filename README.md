@@ -20,62 +20,108 @@ PhoenixKit is a production-ready authentication library for Phoenix applications
 - 🛠️ **Developer Friendly** - Single command installation with automatic setup
 - 🎨 **LiveView Ready** - All authentication pages use Phoenix LiveView
 
-## Quick Start
+## Installation
 
-### 1. Add Dependency
+PhoenixKit provides multiple installation methods to suit different project needs and developer preferences.
+
+### Semi-Automatic Installation
+
+**Recommended for most projects**
+
+Add both `phoenix_kit` and `igniter` to your project dependencies:
 
 ```elixir
 # mix.exs
 def deps do
   [
-    {:igniter, "~> 0.6.0", only: [:dev]},
-    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"}
-    # Or when published to Hex:
-    # {:phoenix_kit, "~> 0.1.5"}
+    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"},
+    {:igniter, "~> 0.6.0", only: [:dev]}
   ]
 end
 ```
 
-### 2. Install PhoenixKit
+Then run the PhoenixKit installer:
 
 ```bash
 mix deps.get
-mix phoenix_kit.install --repo MyApp.Repo
+mix phoenix_kit.install.igniter
 ```
 
-**Important:** The `--repo` parameter is **REQUIRED**!
+This will automatically:
+- ✅ Auto-detect your Ecto repository
+- ✅ Generate migration files for authentication tables  
+- ✅ Add PhoenixKit configuration to `config/config.exs`
+- ✅ Configure mailer settings for development
+- ✅ Add authentication routes to your router
+- ✅ Provide detailed setup instructions
 
-This automatically:
-- Generates migration files for authentication tables
-- Adds configuration to `config/config.exs` 
-- Provides next steps for integration
+**Optional parameters:**
+```bash
+# Specify custom repository
+mix phoenix_kit.install.igniter --repo MyApp.Repo
 
-### 3. Configure Mailer (CRITICAL)
+# Use PostgreSQL schema prefix for table isolation
+mix phoenix_kit.install.igniter --prefix "auth" --create-schema
 
-Add to your `config/config.exs`:
+# Specify custom router file path
+mix phoenix_kit.install.igniter --router-path lib/my_app_web/router.ex
+```
+
+### Igniter Installation
+
+**Single command installation**
+
+For the simplest possible setup, use Igniter's package installation:
+
+```bash
+mix igniter.install phoenix_kit
+```
+
+Optional repository specification:
+```bash
+mix igniter.install phoenix_kit --repo MyApp.Repo  
+```
+
+### Manual Installation
+
+**For maximum control**
+
+1. **Add dependency:**
 
 ```elixir
-# Required: Configure PhoenixKit repository
+# mix.exs
+def deps do
+  [
+    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"}
+  ]
+end
+```
+
+2. **Install dependency:**
+
+```bash
+mix deps.get
+```
+
+3. **Generate migration:**
+
+```bash
+mix phoenix_kit.gen.migration add_phoenix_kit_auth_tables
+```
+
+4. **Configure PhoenixKit:**
+
+```elixir
+# config/config.exs
 config :phoenix_kit,
   repo: MyApp.Repo
 
-# Required: Configure PhoenixKit Mailer for email delivery
-config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Local
-```
-
-**⚠️ Without mailer configuration, user registration will fail!**
-
-For production, use appropriate adapter:
-```elixir
-# Production example with SMTP
+# Required: Configure mailer for email delivery
 config :phoenix_kit, PhoenixKit.Mailer,
-  adapter: Swoosh.Adapters.SMTP,
-  relay: "smtp.gmail.com",
-  username: "your-email@gmail.com",
-  password: "your-password"
+  adapter: Swoosh.Adapters.Local  # Development
 ```
 
-### 4. Add Routes
+5. **Add routes to your router:**
 
 ```elixir
 # lib/your_app_web/router.ex
@@ -84,51 +130,96 @@ defmodule YourAppWeb.Router do
   import PhoenixKitWeb.Integration
 
   # Your existing pipelines...
-  pipeline :browser do
-    # ... your existing plugs ...
-  end
 
-  # Add PhoenixKit authentication routes - they work independently!
-  phoenix_kit_auth_routes()  # Default prefix: /phoenix_kit
+  # Add PhoenixKit authentication routes
+  phoenix_kit_routes()  # Available at /phoenix_kit/*
 end
 ```
 
-### 5. Run Migration
+6. **Run migration:**
 
 ```bash
 mix ecto.migrate
 ```
 
-### 6. Start Your App
+## Quick Verification
+
+After installation, start your Phoenix server:
 
 ```bash
 mix phx.server
 ```
 
-Visit `http://localhost:4000/phoenix_kit/register` to see PhoenixKit in action!
+Visit these URLs to verify PhoenixKit is working:
+- `http://localhost:4000/phoenix_kit/register` - User registration
+- `http://localhost:4000/phoenix_kit/login` - User login
 
-## Advanced Installation
+## Production Setup
 
-### Custom Repository
+For production environments, configure a proper email adapter:
 
-```bash
-mix phoenix_kit.install --repo MyApp.CustomRepo
+```elixir
+# config/prod.exs
+config :phoenix_kit, PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.your-provider.com",
+  username: System.get_env("SMTP_USERNAME"),
+  password: System.get_env("SMTP_PASSWORD"),
+  port: 587,
+  tls: :always,
+  auth: :always
 ```
+
+## Advanced Configuration
 
 ### Custom URL Prefix
 
+You can customize the URL prefix for PhoenixKit routes:
+
 ```elixir
-# In your router - NOT recommended to use /auth prefix
-phoenix_kit_auth_routes("/authentication")
-phoenix_kit_auth_routes("/users")
+# lib/your_app_web/router.ex
+defmodule YourAppWeb.Router do
+  use YourAppWeb, :router
+  import PhoenixKitWeb.Integration
+
+  # Custom prefix examples
+  phoenix_kit_routes("/authentication")  # Available at /authentication/*
+  phoenix_kit_routes("/users")          # Available at /users/*
+end
 ```
 
-**Note:** We don't recommend using `/auth` as the prefix.
+**⚠️ Note:** We don't recommend using `/auth` as the prefix to avoid conflicts with common authentication patterns.
 
-### PostgreSQL Schema Prefix
+### PostgreSQL Schema Isolation
+
+For better table organization, you can use PostgreSQL schemas:
 
 ```bash
-mix phoenix_kit.install --repo MyApp.Repo --prefix "auth" --create-schema
+# Install with schema prefix - creates tables in 'auth' schema
+mix phoenix_kit.install.igniter --prefix "auth" --create-schema
+```
+
+This creates tables as:
+- `auth.phoenix_kit_users` 
+- `auth.phoenix_kit_users_tokens`
+
+### Custom Repository
+
+Specify a different Ecto repository:
+
+```bash
+# Use custom repository
+mix phoenix_kit.install.igniter --repo MyApp.CustomRepo
+```
+
+### Multiple Ecto Repositories
+
+If you have multiple repos, PhoenixKit will auto-detect the first one, or specify explicitly:
+
+```elixir
+# config/config.exs
+config :phoenix_kit,
+  repo: MyApp.AuthRepo  # Use specific repo for auth
 ```
 
 ## Configuration
@@ -323,7 +414,7 @@ Solution: Check database connection and permissions. Auto-setup migration system
 ```
 ERROR: No route found for GET /phoenix_kit/register
 ```
-Solution: Import `PhoenixKitWeb.Integration` and add `phoenix_kit_auth_routes()`.
+Solution: Import `PhoenixKitWeb.Integration` and add `phoenix_kit_routes()`.
 
 ### Debug Logging
 

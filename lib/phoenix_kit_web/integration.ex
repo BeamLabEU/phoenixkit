@@ -22,10 +22,10 @@ defmodule PhoenixKitWeb.Integration do
         # ... your existing pipelines ...
         
         # Add PhoenixKit auth routes - they work independently of your :browser pipeline!
-        phoenix_kit_auth_routes()  # Uses /phoenix_kit prefix by default
+        phoenix_kit_routes()  # Uses /phoenix_kit prefix by default
         
         # Or with custom prefix if needed
-        phoenix_kit_auth_routes("/authentication")
+        phoenix_kit_routes("/authentication")
       end
 
   **Note:** PhoenixKit routes work completely independently and don't require 
@@ -59,7 +59,7 @@ defmodule PhoenixKitWeb.Integration do
       # Add to your deps in mix.exs  
       {:phoenix_kit, "~> 0.1.0"}
   """
-  defmacro phoenix_kit_auth_routes(prefix \\ "/phoenix_kit") do
+  defmacro phoenix_kit_routes(prefix \\ "/phoenix_kit") do
     quote do
       # Define the auto-setup pipeline  
       pipeline :phoenix_kit_auto_setup do

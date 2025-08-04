@@ -75,7 +75,7 @@ defmodule PhoenixKit.Migrations.Postgres do
     SELECT pg_catalog.obj_description(pg_class.oid, 'pg_class')
     FROM pg_class
     LEFT JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
-    WHERE pg_class.relname = 'phoenix_kit_users'
+    WHERE pg_class.relname = 'phoenix_kit'
     AND pg_namespace.nspname = '#{escaped_prefix}'
     """
 
@@ -103,7 +103,7 @@ defmodule PhoenixKit.Migrations.Postgres do
   defp record_version(_opts, 0), do: :ok
 
   defp record_version(%{prefix: prefix, repo: repo}, version) do
-    sql = "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit_users IS '#{version}'"
+    sql = "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit IS '#{version}'"
     case repo.query(sql) do
       {:ok, _} -> :ok
       error -> error
@@ -112,13 +112,21 @@ defmodule PhoenixKit.Migrations.Postgres do
 
   defp record_version(%{prefix: prefix}, version) do
     # Fallback for migration context - use execute
-    execute "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit_users IS '#{version}'"
+    execute "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit IS '#{version}'"
   end
 
   # Runtime migration for auto-setup context
   defp runtime_up(%{repo: repo, prefix: prefix} = opts) do
     migration_commands = [
       "CREATE EXTENSION IF NOT EXISTS citext",
+      """
+      CREATE TABLE IF NOT EXISTS #{prefix}.phoenix_kit (
+        id serial PRIMARY KEY,
+        version integer NOT NULL,
+        migrated_at timestamp NOT NULL DEFAULT NOW()
+      )
+      """,
+      "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_version_index ON #{prefix}.phoenix_kit (version)",
       """
       CREATE TABLE IF NOT EXISTS #{prefix}.phoenix_kit_users (
         id bigserial PRIMARY KEY,

@@ -87,7 +87,7 @@ defmodule Mix.Tasks.PhoenixKit.Setup do
         Logger.info("")
         Logger.info("# In your router.ex:")
         Logger.info("import PhoenixKitWeb.Integration")  
-        Logger.info("phoenix_kit_auth_routes()")
+        Logger.info("phoenix_kit_routes()")
         Logger.info("")
         Logger.info("Authentication will be available at /phoenix_kit/register and /phoenix_kit/log_in")
         
