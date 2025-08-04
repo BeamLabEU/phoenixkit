@@ -9,6 +9,7 @@
 
 # Where third-party dependencies like ExDoc output generated docs.
 /doc/
+/test/
 
 # Ignore .fetch files in case you like to edit your project deps locally.
 /.fetch
@@ -24,6 +25,7 @@ phoenix_module_template-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+# /temp/
 
 # OS-specific files
 .DS_Store
@@ -85,4 +87,3 @@ TODO.md
 
 # Claude Code memory
 memory.json
-
