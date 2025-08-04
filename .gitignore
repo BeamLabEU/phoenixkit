@@ -25,7 +25,7 @@ phoenix_module_template-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
-# /temp/
+/temp/
 
 # OS-specific files
 .DS_Store
