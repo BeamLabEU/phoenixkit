@@ -26,6 +26,7 @@ phoenix_module_template-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 /temp/
+*.temp
 
 # OS-specific files
 .DS_Store
@@ -52,6 +53,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+*.code-workspace
 
 # Log files
 *.log
@@ -66,6 +68,7 @@ Thumbs.db
 # Coverage reports
 coverage.xml
 lcov.info
+phoenix_kit.code-workspace
 
 # Test artifacts
 test_results.xml
@@ -87,3 +90,4 @@ TODO.md
 
 # Claude Code memory
 memory.json
+

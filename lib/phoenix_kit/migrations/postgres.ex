@@ -6,7 +6,7 @@ defmodule PhoenixKit.Migrations.Postgres do
   use Ecto.Migration
 
   @initial_version 1
-  @current_version 1
+  @current_version 2
   @default_prefix "public"
 
   @doc false
@@ -104,7 +104,11 @@ defmodule PhoenixKit.Migrations.Postgres do
     end
   end
 
-  defp record_version(_opts, 0), do: :ok
+  defp record_version(_opts, 0) do
+    # Handle rollback to version 0 - tables are dropped, so we can't update comment
+    # This is expected behavior for complete rollback
+    :ok
+  end
 
   defp record_version(%{prefix: prefix, repo: repo}, version) do
     sql = "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit IS '#{version}'"

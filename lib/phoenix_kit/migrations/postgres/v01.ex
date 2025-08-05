@@ -6,7 +6,8 @@ defmodule PhoenixKit.Migrations.Postgres.V01 do
   def up(%{create_schema: create?, prefix: prefix} = opts) do
     %{quoted_prefix: quoted} = opts
 
-    if create?, do: execute("CREATE SCHEMA IF NOT EXISTS #{quoted}")
+    # Only create schema if it's not 'public' and create_schema is true
+    if create? && prefix != "public", do: execute("CREATE SCHEMA IF NOT EXISTS #{quoted}")
 
     # Create citext extension if not exists
     execute "CREATE EXTENSION IF NOT EXISTS citext"
