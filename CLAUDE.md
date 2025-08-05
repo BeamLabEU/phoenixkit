@@ -44,6 +44,30 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix credo --strict` - Static code analysis
 - `mix dialyzer` - Type checking (requires PLT setup)
 
+### ⚠️ IMPORTANT: Pre-commit Checklist
+**ALWAYS run before git commit:**
+```bash
+mix format
+git add -A  # Add formatted files
+git commit -m "your message"
+```
+This ensures consistent code formatting across the project.
+
+### 📝 Commit Message Rules
+**ALWAYS start commit messages with action verbs:**
+- `Add` - for new features, files, or functionality
+- `Update` - for modifications to existing code or features  
+- `Merge` - for merge commits or combining changes
+- `Fix` - for bug fixes
+- `Remove` - for deletions
+
+**Examples:**
+- ✅ `Add phoenix_kit_ai table for configuration management`
+- ✅ `Update rollback logic to handle single version migrations`
+- ✅ `Fix merge conflict markers in installation file`
+- ❌ `Enhanced migration system` (no action verb)
+- ❌ `migration fixes` (not descriptive enough)
+
 ### Documentation
 - `mix docs` - Generate documentation with ExDoc
 

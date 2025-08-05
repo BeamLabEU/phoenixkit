@@ -449,15 +449,15 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
   defp create_or_upgrade_phoenix_kit_migration(igniter, opts) do
     prefix = opts[:prefix] || "public"
     create_schema = opts[:create_schema] != false && prefix != "public"
-    
+
     # Check if this is a new installation or upgrade
     case determine_migration_strategy(igniter, prefix) do
       {:new_install, igniter} ->
         create_initial_migration(igniter, prefix, create_schema)
-        
+
       {:upgrade_needed, igniter, current_version, target_version} ->
         create_upgrade_migration(igniter, prefix, create_schema, current_version, target_version)
-        
+
       {:up_to_date, igniter} ->
         Igniter.add_notice(igniter, "PhoenixKit is already up to date.")
         igniter
@@ -473,23 +473,24 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     case Igniter.Project.Application.app_name(igniter) do
       nil ->
         {:error, igniter, "Could not determine app name"}
-        
+
       _app_name ->
         migrations_dir = Path.join(["priv", "repo", "migrations"])
-        
+
         case find_phoenix_kit_migrations(migrations_dir) do
           [] ->
             # No existing PhoenixKit migrations
             {:new_install, igniter}
-            
+
           existing_migrations ->
             # Check current and target versions
             current_version = extract_highest_version_from_migrations(existing_migrations)
             target_version = get_phoenix_kit_current_version()
-            
+
             cond do
               current_version < target_version ->
                 {:upgrade_needed, igniter, current_version, target_version}
+
               current_version >= target_version ->
                 {:up_to_date, igniter}
             end
@@ -502,82 +503,89 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     case Igniter.Project.Application.app_name(igniter) do
       nil ->
         Igniter.add_warning(igniter, "Could not determine app name for migration")
-        
+
       app_name ->
         timestamp = generate_timestamp()
         migration_file = "#{timestamp}_add_phoenix_kit_auth_tables.exs"
         migration_path = Path.join(["priv", "repo", "migrations", migration_file])
-        
-        module_name = "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.AddPhoenixKitAuthTables"
+
+        module_name =
+          "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.AddPhoenixKitAuthTables"
+
         migration_opts = migration_opts(prefix, create_schema)
-        
+
         migration_content = """
-defmodule #{module_name} do
-  use Ecto.Migration
+        defmodule #{module_name} do
+          use Ecto.Migration
 
-  def up, do: PhoenixKit.Migrations.up(#{migration_opts})
+          def up, do: PhoenixKit.Migrations.up(#{migration_opts})
 
-  def down, do: PhoenixKit.Migrations.down(#{migration_opts})
-end
-"""
-        
+          def down, do: PhoenixKit.Migrations.down(#{migration_opts})
+        end
+        """
+
         igniter = Igniter.create_new_file(igniter, migration_path, migration_content)
-        
+
         notice = """
-        
+
         📦 PhoenixKit Initial Installation Created:
         - Migration: #{migration_file}
         - This will install PhoenixKit version #{get_phoenix_kit_current_version()} (latest)
-        
+
         Next steps:
           1. Run: mix ecto.migrate
           2. PhoenixKit will be ready to use!
         """
-        
+
         Igniter.add_notice(igniter, notice)
     end
   end
-  
+
   # Create upgrade migration for existing installation
   defp create_upgrade_migration(igniter, prefix, create_schema, current_version, target_version) do
     case Igniter.Project.Application.app_name(igniter) do
       nil ->
         Igniter.add_warning(igniter, "Could not determine app name for upgrade migration")
-        
+
       app_name ->
         timestamp = generate_timestamp()
-        migration_file = "#{timestamp}_upgrade_phoenix_kit_v#{pad_version(current_version)}_to_v#{pad_version(target_version)}.exs"
+
+        migration_file =
+          "#{timestamp}_upgrade_phoenix_kit_v#{pad_version(current_version)}_to_v#{pad_version(target_version)}.exs"
+
         migration_path = Path.join(["priv", "repo", "migrations", migration_file])
-        
-        module_name = "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.UpgradePhoenixKitV#{pad_version(current_version)}ToV#{pad_version(target_version)}"
+
+        module_name =
+          "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.UpgradePhoenixKitV#{pad_version(current_version)}ToV#{pad_version(target_version)}"
+
         migration_opts = migration_opts(prefix, create_schema)
-        
+
         migration_content = """
-defmodule #{module_name} do
-  use Ecto.Migration
+        defmodule #{module_name} do
+          use Ecto.Migration
 
-  def up, do: PhoenixKit.Migrations.up([version: #{target_version}] ++ #{migration_opts})
+          def up, do: PhoenixKit.Migrations.up([version: #{target_version}] ++ #{migration_opts})
 
-  def down, do: PhoenixKit.Migrations.down([version: #{current_version}] ++ #{migration_opts})
-end
-"""
-        
+          def down, do: PhoenixKit.Migrations.down([version: #{current_version}] ++ #{migration_opts})
+        end
+        """
+
         igniter = Igniter.create_new_file(igniter, migration_path, migration_content)
-        
+
         notice = """
-        
+
         🔄 PhoenixKit Upgrade Migration Created:
         - Migration: #{migration_file}
         - Upgrading from version #{current_version} to #{target_version}
-        
+
         New features in version #{target_version}:
         #{describe_version_changes(current_version, target_version)}
-        
+
         Next steps:
           1. Run: mix ecto.migrate
           2. New PhoenixKit features will be available!
         """
-        
+
         Igniter.add_notice(igniter, notice)
     end
   end
@@ -588,10 +596,10 @@ end
       migrations_dir
       |> File.ls!()
       |> Enum.filter(fn filename ->
-        (String.contains?(filename, "phoenix_kit") || 
-         String.contains?(filename, "add_phoenix_kit") ||
-         String.contains?(filename, "upgrade_phoenix_kit")) && 
-        String.ends_with?(filename, ".exs")
+        (String.contains?(filename, "phoenix_kit") ||
+           String.contains?(filename, "add_phoenix_kit") ||
+           String.contains?(filename, "upgrade_phoenix_kit")) &&
+          String.ends_with?(filename, ".exs")
       end)
       |> Enum.map(&Path.join([migrations_dir, &1]))
     else
@@ -600,26 +608,28 @@ end
   rescue
     _ -> []
   end
-  
+
   # Extract highest version from existing migrations
   defp extract_highest_version_from_migrations(migration_files) do
     migration_files
     |> Enum.map(&extract_version_from_migration_file/1)
-    |> Enum.filter(& &1 != nil)
+    |> Enum.filter(&(&1 != nil))
     |> case do
       [] -> 0
       versions -> Enum.max(versions)
     end
   end
-  
+
   # Extract version from migration file content
   defp extract_version_from_migration_file(file_path) do
     case File.read(file_path) do
       {:ok, content} ->
         # Look for version: X pattern
         case Regex.run(~r/version:\s*(\d+)/, content) do
-          [_, version_str] -> String.to_integer(version_str)
-          _ -> 
+          [_, version_str] ->
+            String.to_integer(version_str)
+
+          _ ->
             # Fallback: if no version specified, assume it's version 1
             if String.contains?(content, "PhoenixKit.Migrations.up") do
               1
@@ -627,33 +637,39 @@ end
               nil
             end
         end
-      _ -> nil
+
+      _ ->
+        nil
     end
   end
-  
+
   # Get current PhoenixKit version from source
   defp get_phoenix_kit_current_version do
     # This should match @current_version in postgres.ex
-    2  # Updated to current version we set earlier
+    # Updated to current version we set earlier
+    2
   end
-  
+
   # Describe what changed between versions
   defp describe_version_changes(from_version, to_version) do
-    changes = case {from_version, to_version} do
-      {1, 2} -> "- Added AI settings table for configuration management"
-      {_, _} -> "- Various improvements and new features"
-    end
-    
+    changes =
+      case {from_version, to_version} do
+        {1, 2} -> "- Added phoenix_kit_ai table for AI configuration management"
+        {_, _} -> "- Various improvements and new features"
+      end
+
     changes
   end
-  
+
   # Pad version number for consistent naming
   defp pad_version(version) when version < 10, do: "0#{version}"
   defp pad_version(version), do: to_string(version)
 
   # Generate migration options (same as phoenix_kit.install.ex)
   defp migration_opts("public", false), do: "[]"
-  defp migration_opts("public", true), do: "[]"  # public schema doesn't need create_schema
+  # public schema doesn't need create_schema
+  defp migration_opts("public", true), do: "[]"
+
   defp migration_opts(prefix, create_schema) when is_binary(prefix) do
     opts = [prefix: prefix]
     opts = if create_schema, do: Keyword.put(opts, :create_schema, true), else: opts

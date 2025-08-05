@@ -10,7 +10,7 @@ defmodule PhoenixKit.Migrations.Postgres.V02 do
     if create? && prefix != "public", do: execute("CREATE SCHEMA IF NOT EXISTS #{quoted}")
 
     # Create AI settings table
-    create_if_not_exists table(:ai, primary_key: false, prefix: prefix) do
+    create_if_not_exists table(:phoenix_kit_ai, primary_key: false, prefix: prefix) do
       add :id, :bigserial, primary_key: true
       add :setting_key, :string, null: false
       add :setting_value, :text
@@ -23,13 +23,13 @@ defmodule PhoenixKit.Migrations.Postgres.V02 do
       timestamps(type: :naive_datetime)
     end
 
-    create_if_not_exists unique_index(:ai, [:setting_key], prefix: prefix)
-    create_if_not_exists index(:ai, [:setting_type], prefix: prefix)
-    create_if_not_exists index(:ai, [:is_active], prefix: prefix)
-    create_if_not_exists index(:ai, [:updated_by], prefix: prefix)
+    create_if_not_exists unique_index(:phoenix_kit_ai, [:setting_key], prefix: prefix)
+    create_if_not_exists index(:phoenix_kit_ai, [:setting_type], prefix: prefix)
+    create_if_not_exists index(:phoenix_kit_ai, [:is_active], prefix: prefix)
+    create_if_not_exists index(:phoenix_kit_ai, [:updated_by], prefix: prefix)
   end
 
   def down(%{prefix: prefix}) do
-    drop_if_exists table(:ai, prefix: prefix)
+    drop_if_exists table(:phoenix_kit_ai, prefix: prefix)
   end
 end
