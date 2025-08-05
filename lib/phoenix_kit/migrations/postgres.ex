@@ -55,20 +55,24 @@ defmodule PhoenixKit.Migrations.Postgres do
   def migrated_version(opts) do
     opts = with_defaults(opts, @initial_version)
 
-    repo = case Map.get(opts, :repo) do
-      nil -> 
-        try do
-          repo()
-        rescue
-          _ -> 
-            # Fallback for auto-setup context
-            case Application.get_env(:phoenix_kit, :repo) do
-              nil -> raise "No repo configured"
-              configured_repo -> configured_repo
-            end
-        end
-      configured_repo -> configured_repo
-    end
+    repo =
+      case Map.get(opts, :repo) do
+        nil ->
+          try do
+            repo()
+          rescue
+            _ ->
+              # Fallback for auto-setup context
+              case Application.get_env(:phoenix_kit, :repo) do
+                nil -> raise "No repo configured"
+                configured_repo -> configured_repo
+              end
+          end
+
+        configured_repo ->
+          configured_repo
+      end
+
     escaped_prefix = Map.fetch!(opts, :escaped_prefix)
 
     query = """
@@ -104,6 +108,7 @@ defmodule PhoenixKit.Migrations.Postgres do
 
   defp record_version(%{prefix: prefix, repo: repo}, version) do
     sql = "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit IS '#{version}'"
+
     case repo.query(sql) do
       {:ok, _} -> :ok
       error -> error
@@ -151,7 +156,7 @@ defmodule PhoenixKit.Migrations.Postgres do
       "CREATE INDEX IF NOT EXISTS phoenix_kit_users_tokens_user_id_index ON #{prefix}.phoenix_kit_users_tokens (user_id)",
       "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_users_tokens_context_token_index ON #{prefix}.phoenix_kit_users_tokens (context, token)"
     ]
-    
+
     # Execute each command
     Enum.reduce_while(migration_commands, :ok, fn sql, _acc ->
       case repo.query(sql) do
@@ -160,9 +165,10 @@ defmodule PhoenixKit.Migrations.Postgres do
       end
     end)
     |> case do
-      :ok -> 
+      :ok ->
         record_version(opts, @current_version)
-      error -> 
+
+      error ->
         error
     end
   end

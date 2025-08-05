@@ -40,7 +40,7 @@ defmodule PhoenixKitWeb.Router do
 
   scope "/phoenix_kit", PhoenixKitWeb do
     pipe_through :browser
-    
+
     delete "/log_out", UserSessionController, :delete
     get "/log_out", UserSessionController, :get_logout
   end

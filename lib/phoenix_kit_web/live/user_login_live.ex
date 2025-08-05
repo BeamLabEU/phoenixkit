@@ -9,7 +9,7 @@ defmodule PhoenixKitWeb.UserLoginLive do
         <div class="text-center lg:text-left">
           <h1 class="text-5xl font-bold">Welcome back!</h1>
           <p class="py-6">
-            Access your PhoenixKit account to continue using authentication features. 
+            Access your PhoenixKit account to continue using authentication features.
             Sign in securely with your email and password.
           </p>
           <div class="text-sm opacity-75">
@@ -19,19 +19,19 @@ defmodule PhoenixKitWeb.UserLoginLive do
             </.link>
           </div>
         </div>
-
-        <!-- Login Form Card (Right side on desktop) -->
+        
+    <!-- Login Form Card (Right side on desktop) -->
         <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
           <div class="card-body">
             <h2 class="card-title justify-center">Log in to account</h2>
             
-            <!-- Traditional Password Login -->
-            <.form for={@form} id="login_form" action={"/phoenix_kit/log_in"} phx-update="ignore">
+    <!-- Traditional Password Login -->
+            <.form for={@form} id="login_form" action="/phoenix_kit/log_in" phx-update="ignore">
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">Login with Password</legend>
-                
+
                 <label class="label" for="user_email">Email</label>
-                <input 
+                <input
                   id="user_email"
                   name="user[email]"
                   type="email"
@@ -43,9 +43,9 @@ defmodule PhoenixKitWeb.UserLoginLive do
                   required
                 />
                 <p class="validator-hint">Please enter a valid email address</p>
-                
+
                 <label class="label" for="user_password">Password</label>
-                <input 
+                <input
                   id="user_password"
                   name="user[password]"
                   type="password"
@@ -56,11 +56,11 @@ defmodule PhoenixKitWeb.UserLoginLive do
                   required
                 />
                 <p class="validator-hint">Password must be at least 8 characters long</p>
-                
+
                 <div class="form-control mt-4">
                   <label class="label cursor-pointer">
                     <span class="label-text">Keep me logged in</span>
-                    <input 
+                    <input
                       id="user_remember_me"
                       name="user[remember_me]"
                       type="checkbox"
@@ -68,14 +68,17 @@ defmodule PhoenixKitWeb.UserLoginLive do
                     />
                   </label>
                 </div>
-                
+
                 <div class="text-center mt-2">
-                  <.link href="/phoenix_kit/reset_password" class="text-sm font-semibold text-primary hover:underline">
+                  <.link
+                    href="/phoenix_kit/reset_password"
+                    class="text-sm font-semibold text-primary hover:underline"
+                  >
                     Forgot your password?
                   </.link>
                 </div>
-                
-                <button 
+
+                <button
                   type="submit"
                   phx-disable-with="Logging in..."
                   class="btn btn-primary w-full mt-4"
@@ -85,7 +88,7 @@ defmodule PhoenixKitWeb.UserLoginLive do
               </fieldset>
             </.form>
             
-            <!-- Development Mode Notice -->
+    <!-- Development Mode Notice -->
             <div :if={show_dev_notice?()} class="alert alert-info text-sm mt-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

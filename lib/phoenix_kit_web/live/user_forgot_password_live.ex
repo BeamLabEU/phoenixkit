@@ -20,8 +20,8 @@ defmodule PhoenixKitWeb.UserForgotPasswordLive do
         </:actions>
       </.simple_form>
       <p class="text-center text-sm mt-4">
-        <.link href={"/phoenix_kit/register"}>Register</.link>
-        | <.link href={"/phoenix_kit/log_in"}>Log in</.link>
+        <.link href="/phoenix_kit/register">Register</.link>
+        | <.link href="/phoenix_kit/log_in">Log in</.link>
       </p>
     </div>
     """

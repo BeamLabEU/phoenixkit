@@ -73,7 +73,7 @@ defmodule PhoenixKitWeb.Integration do
       pipeline :phoenix_kit_require_authenticated do
         plug PhoenixKitWeb.UserAuth, :phoenix_kit_require_authenticated_user
       end
-      
+
       scope unquote(prefix), PhoenixKitWeb do
         pipe_through [:browser, :phoenix_kit_auto_setup, :phoenix_kit_redirect_if_authenticated]
 
@@ -82,7 +82,7 @@ defmodule PhoenixKitWeb.Integration do
 
       scope unquote(prefix), PhoenixKitWeb do
         pipe_through [:browser, :phoenix_kit_auto_setup]
-        
+
         delete "/log_out", UserSessionController, :delete
         get "/log_out", UserSessionController, :get_logout
       end
@@ -117,17 +117,18 @@ defmodule PhoenixKitWeb.Integration do
 
   @doc """
   Pipeline plug for automatic PhoenixKit setup.
-  
+
   This plug ensures PhoenixKit is configured and database tables exist
   before handling any authentication requests.
   """
   def init(opts), do: opts
-  
+
   def call(conn, :phoenix_kit_auto_setup) do
     unless PhoenixKit.AutoSetup.setup_complete?() do
       case PhoenixKit.AutoSetup.ensure_setup!() do
-        :ok -> 
+        :ok ->
           conn
+
         {:error, reason} ->
           conn
           |> Plug.Conn.put_resp_content_type("text/html")

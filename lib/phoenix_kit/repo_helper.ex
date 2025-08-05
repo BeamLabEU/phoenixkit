@@ -1,7 +1,7 @@
 defmodule PhoenixKit.RepoHelper do
   @moduledoc """
   Helper for dynamically resolving the repository to use.
-  
+
   This module provides functions to get the appropriate repository
   based on configuration. It will use the configured repo from
   the parent application if available, otherwise fall back to
@@ -10,21 +10,22 @@ defmodule PhoenixKit.RepoHelper do
 
   @doc """
   Gets the repository module to use.
-  
+
   Expects repo to be configured via Application.get_env(:phoenix_kit, :repo).
   Raises an error if no repo is configured.
   """
   def repo do
     case Application.get_env(:phoenix_kit, :repo) do
-      nil -> 
+      nil ->
         raise """
         No repository configured for PhoenixKit.
-        
+
         Please configure a repository in your application:
-        
+
             config :phoenix_kit, repo: MyApp.Repo
         """
-      repo when is_atom(repo) -> 
+
+      repo when is_atom(repo) ->
         repo
     end
   end
