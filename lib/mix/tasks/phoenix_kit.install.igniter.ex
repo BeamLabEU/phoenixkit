@@ -580,13 +580,6 @@ end
         
         Igniter.add_notice(igniter, notice)
     end
-<<<<<<< HEAD
-    """
-
-    igniter = Igniter.create_new_file(igniter, migration_path, migration_content)
-    {:ok, igniter}
-=======
->>>>>>> 67309f0 (Enhanced migration system with versioning support)
   end
 
   # Find all existing PhoenixKit migrations
