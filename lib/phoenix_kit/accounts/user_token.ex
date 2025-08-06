@@ -1,4 +1,23 @@
 defmodule PhoenixKit.Accounts.UserToken do
+  @moduledoc """
+  User token schema for PhoenixKit authentication system.
+
+  This schema handles various types of tokens used for user authentication and verification:
+
+  ## Token Types
+
+  - **Session tokens**: For maintaining user sessions (60 days validity)
+  - **Email confirmation tokens**: For account verification (7 days validity)  
+  - **Password reset tokens**: For secure password recovery (1 day validity)
+  - **Email change tokens**: For confirming new email addresses (7 days validity)
+
+  ## Security Features
+
+  - Tokens are hashed using SHA256 before storage
+  - Different expiry policies for different token types
+  - Secure random token generation (32 bytes)
+  - Context-based token management for isolation
+  """
   use Ecto.Schema
   import Ecto.Query
   alias PhoenixKit.Accounts.UserToken

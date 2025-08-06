@@ -1,4 +1,25 @@
 defmodule PhoenixKit.Accounts.User do
+  @moduledoc """
+  User schema for PhoenixKit authentication system.
+
+  This schema defines the core user entity with email-based authentication and account management features.
+
+  ## Fields
+
+  - `email`: User's email address (unique, required for authentication)
+  - `password`: Virtual field for password input (redacted in logs)
+  - `hashed_password`: Bcrypt-hashed password stored in database (redacted)
+  - `current_password`: Virtual field for password confirmation (redacted)
+  - `confirmed_at`: Timestamp when email was confirmed (nil for unconfirmed accounts)
+
+  ## Security Features
+
+  - Password hashing with bcrypt
+  - Email uniqueness enforcement
+  - Password strength validation
+  - Sensitive field redaction in logs
+  - Email confirmation workflow support
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

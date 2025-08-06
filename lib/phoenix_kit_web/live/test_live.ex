@@ -42,7 +42,8 @@ defmodule PhoenixKitWeb.TestLive do
   end
 
   def handle_event("test", %{"test" => test_params}, socket) do
-    IO.inspect(test_params, label: "Received test form data")
+    require Logger
+    Logger.debug("Received test form data: #{inspect(test_params)}")
     {:noreply, socket}
   end
 end

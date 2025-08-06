@@ -2,6 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## MCP Memory Knowledge Base
+
+⚠️ **ВАЖНО**: Всегда начинайте работу с проектом с изучения данных в MCP memory хранилище. Используйте команду:
+```
+mcp__memory__read_graph
+```
+Это позволит понять текущее состояние проекта, реализованные и запланированные компоненты, архитектурные решения.
+
+Обновляйте данные в memory при обнаружении новых компонентов или изменениях в архитектуре проекта. Используйте:
+- `mcp__memory__create_entities` - для добавления новых модулей/компонентов
+- `mcp__memory__create_relations` - для связей между компонентами  
+- `mcp__memory__add_observations` - для дополнения информации о существующих компонентах
+
 ## Project Overview
 
 This is **Phoenix Module Template** - a professional library-first template for creating Phoenix modules with PostgreSQL support. It's designed as a reusable foundation that avoids circular dependencies and follows Phoenix best practices.
@@ -29,10 +42,12 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix phoenix_kit.install` - Install PhoenixKit with auto-detected repo
 - `mix phoenix_kit.install --prefix "auth"` - Install with custom schema prefix
 - `mix phoenix_kit.install --repo MyApp.Repo` - Install with specific repo
-- `mix phoenix_kit.migrate --status` - Check migration status and version information
+- `mix phoenix_kit.migrate --status` - ⚠️ Check migration status (requires configured repo)
 - **Professional versioned migrations** - Oban-style migration system with version tracking
 - **Prefix support** - Isolate PhoenixKit tables using PostgreSQL schemas
 - **Idempotent operations** - Safe to run migrations multiple times
+
+**Note:** `phoenix_kit.migrate --status` требует настроенного репозитория для работы.
 
 ### Testing
 - `mix test` - Run all tests with database sandbox
@@ -61,12 +76,18 @@ This ensures consistent code formatting across the project.
 - `Fix` - for bug fixes
 - `Remove` - for deletions
 
+**Important commit message restrictions:**
+- ❌ **NEVER mention Claude or AI assistance** in commit messages
+- ❌ Avoid phrases like "Generated with Claude", "AI-assisted", etc.
+- ✅ Focus on **what** was changed and **why**
+
 **Examples:**
 - ✅ `Add phoenix_kit_ai table for configuration management`
 - ✅ `Update rollback logic to handle single version migrations`
 - ✅ `Fix merge conflict markers in installation file`
 - ❌ `Enhanced migration system` (no action verb)
 - ❌ `migration fixes` (not descriptive enough)
+- ❌ `Add new feature with Claude assistance` (mentions AI)
 
 ### Documentation
 - `mix docs` - Generate documentation with ExDoc
@@ -80,8 +101,31 @@ This ensures consistent code formatting across the project.
 - **Version Strategy**: Semantic versioning (MAJOR.MINOR.PATCH)
 - **Migration Version**: V01 (current auth tables)
 - **Database Versioning**: Professional system with version tracking in table comments
-- **Before Publishing**: Always increment version number and update CHANGELOG.md
-- **Critical**: Update version in mix.exs before any release or significant changes
+
+### 🚀 Pre-Release Checklist
+**MANDATORY steps before any release or version bump:**
+
+1. **Code Quality Checks:**
+   ```bash
+   mix format              # Format all code
+   mix compile             # Ensure clean compilation (no warnings/errors)
+   mix quality             # Run all quality checks (credo + dialyzer)
+   ```
+
+2. **Version Updates:**
+   - Update version number in `mix.exs`
+   - Update `CHANGELOG.md` with changes
+
+3. **Final Verification:**
+   - All tests pass: `mix test`
+   - No compilation warnings
+   - No critical Credo issues
+   - Dialyzer analysis complete
+
+**❌ Never release if:**
+- Compilation produces warnings or errors  
+- Quality checks fail
+- Tests are failing
 
 ## Architecture
 

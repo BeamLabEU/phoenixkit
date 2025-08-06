@@ -1,4 +1,23 @@
 defmodule PhoenixKitWeb.UserAuth do
+  @moduledoc """
+  Authentication and authorization plugs for PhoenixKit user management.
+
+  This module provides plugs and functions for handling user authentication,
+  session management, and access control in Phoenix applications using PhoenixKit.
+
+  ## Key Features
+
+  - User authentication with email and password
+  - Remember me functionality with secure cookies
+  - Session-based authentication
+  - Route protection and access control
+  - Integration with Phoenix LiveView on_mount callbacks
+
+  ## Usage
+
+  The plugs in this module are automatically configured when using
+  `PhoenixKitWeb.Integration.phoenix_kit_routes/1` macro in your router.
+  """
   use PhoenixKitWeb, :verified_routes
 
   import Plug.Conn

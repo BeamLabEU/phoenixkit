@@ -1,4 +1,29 @@
 defmodule PhoenixKit.Accounts.UserNotifier do
+  @moduledoc """
+  User notification system for PhoenixKit authentication workflows.
+
+  This module handles email delivery for user authentication and account management workflows,
+  including account confirmation, password reset, and email change notifications.
+
+  ## Email Types
+
+  - **Confirmation instructions**: Sent during user registration
+  - **Password reset instructions**: Sent when user requests password reset
+  - **Email update instructions**: Sent when user changes their email address
+
+  ## Configuration
+
+  Configure your mailer in your application config:
+
+      config :phoenix_kit, PhoenixKit.Mailer,
+        adapter: Swoosh.Adapters.SMTP,
+        # ... other adapter configuration
+
+  ## Customization
+
+  Override this module in your application to customize email templates
+  and delivery behavior while maintaining the same function signatures.
+  """
   import Swoosh.Email
 
   alias PhoenixKit.Mailer

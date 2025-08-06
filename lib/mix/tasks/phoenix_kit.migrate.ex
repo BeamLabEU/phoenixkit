@@ -184,16 +184,16 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
   end
 
   defp verify_repo(repo) do
-    unless Code.ensure_loaded?(repo) do
-      Logger.error("Repository module #{repo} not found or not loaded")
-      false
-    else
-      unless function_exported?(repo, :__adapter__, 0) do
+    if Code.ensure_loaded?(repo) do
+      if function_exported?(repo, :__adapter__, 0) do
+        true
+      else
         Logger.error("#{repo} is not an Ecto repository")
         false
-      else
-        true
       end
+    else
+      Logger.error("Repository module #{repo} not found or not loaded")
+      false
     end
   end
 

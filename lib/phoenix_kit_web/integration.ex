@@ -124,7 +124,9 @@ defmodule PhoenixKitWeb.Integration do
   def init(opts), do: opts
 
   def call(conn, :phoenix_kit_auto_setup) do
-    unless PhoenixKit.AutoSetup.setup_complete?() do
+    if PhoenixKit.AutoSetup.setup_complete?() do
+      conn
+    else
       case PhoenixKit.AutoSetup.ensure_setup!() do
         :ok ->
           conn
@@ -135,8 +137,6 @@ defmodule PhoenixKitWeb.Integration do
           |> Plug.Conn.send_resp(500, setup_error_page(reason))
           |> Plug.Conn.halt()
       end
-    else
-      conn
     end
   end
 

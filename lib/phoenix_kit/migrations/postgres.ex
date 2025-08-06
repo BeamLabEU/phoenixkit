@@ -43,26 +43,23 @@ defmodule PhoenixKit.Migrations.Postgres do
 
   @impl PhoenixKit.Migration
   def down(opts) do
-    # Get current migrated version first
-    current_version = migrated_version(with_defaults(opts, @initial_version))
+    opts = with_defaults(opts, @initial_version)
+    current_version = migrated_version(opts)
 
     # Determine target version:
-    # - If version not specified, rollback one version (current - 1)
+    # - If version not specified, rollback to complete removal (0)
     # - If version specified, rollback to that version
     target_version =
       case Keyword.get(opts, :version) do
-        # Don't go below 0
-        nil -> max(current_version - 1, 0)
+        # Complete removal (state before installation)
+        nil -> 0
         specified_version -> specified_version
       end
 
-    # Apply defaults with target version
-    opts = with_defaults(opts, target_version)
-
-    if current_version > opts.version do
+    if current_version > target_version do
       # For rollback from version N to version M, execute down for versions N, N-1, ..., M+1
       # This means we don't execute down for the target version itself
-      change(current_version..(opts.version + 1)//-1, :down, opts)
+      change(current_version..(target_version + 1)//-1, :down, opts)
     end
   end
 
@@ -76,10 +73,10 @@ defmodule PhoenixKit.Migrations.Postgres do
           try do
             repo()
           rescue
-            _ ->
+            _error ->
               # Fallback for auto-setup context
               case Application.get_env(:phoenix_kit, :repo) do
-                nil -> raise "No repo configured"
+                nil -> reraise "No repo configured", __STACKTRACE__
                 configured_repo -> configured_repo
               end
           end

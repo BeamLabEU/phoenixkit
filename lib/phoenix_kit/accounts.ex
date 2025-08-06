@@ -8,7 +8,7 @@ defmodule PhoenixKit.Accounts do
 
   # This module will be populated by mix phx.gen.auth
 
-  alias PhoenixKit.Accounts.{User, UserToken, UserNotifier}
+  alias PhoenixKit.Accounts.{User, UserNotifier, UserToken}
 
   ## Database getters
 
