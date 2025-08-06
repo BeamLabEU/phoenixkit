@@ -9,15 +9,15 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
 
   Check current schema version:
 
-      mix phoenix_kit.migrate --status
+      mix phx.kit.migrate --status
 
   Migrate to latest version:
 
-      mix phoenix_kit.migrate
+      mix phx.kit.migrate
 
   Migrate with specific repo:
 
-      mix phoenix_kit.migrate --repo MyApp.Repo
+      mix phx.kit.migrate --repo MyApp.Repo
 
   ## Commands
 
@@ -30,7 +30,7 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
   PhoenixKit follows these principles for safe migrations:
 
   1. **Versioned Schema** - Each version is tracked in phoenix_kit_schema_versions
-  2. **Idempotent Operations** - Migrations can be run multiple times safely  
+  2. **Idempotent Operations** - Migrations can be run multiple times safely
   3. **No Data Loss** - Migrations preserve existing data
   4. **Rollback Support** - Future versions will support schema rollback
 
@@ -80,7 +80,7 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
 
       {:error, reason} ->
         Logger.error("Could not detect repository: #{reason}")
-        Logger.error("Please specify repo with: mix phoenix_kit.migrate --repo YourApp.Repo")
+        Logger.error("Please specify repo with: mix phx.kit.migrate --repo YourApp.Repo")
         exit({:shutdown, 1})
     end
   end
@@ -129,7 +129,7 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
       end
 
       Logger.info("")
-      Logger.info("To apply migration: mix phoenix_kit.migrate")
+      Logger.info("To apply migration: mix phx.kit.migrate")
     else
       Logger.info("✅ Schema is up to date - no migration needed")
     end

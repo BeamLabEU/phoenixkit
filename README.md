@@ -13,7 +13,7 @@ PhoenixKit is a production-ready authentication library for Phoenix applications
 ### Key Features
 
 - 🚀 **Zero-Config Setup** - Automatic repository detection and configuration
-- 🗄️ **Professional Database Management** - Versioned migrations with Oban-style architecture  
+- 🗄️ **Professional Database Management** - Versioned migrations with Oban-style architecture
 - 🔐 **Complete Authentication** - Registration, login, logout, email confirmation, password reset
 - 🎯 **Library-First Design** - No OTP application, integrates into any Phoenix app
 - 📦 **Production Ready** - Comprehensive error handling and logging
@@ -44,27 +44,29 @@ Then run the PhoenixKit installer:
 
 ```bash
 mix deps.get
-mix phoenix_kit.install.igniter
+mix phx.kit.install.igniter
 ```
 
 This will automatically:
+
 - ✅ Auto-detect your Ecto repository
-- ✅ Generate migration files for authentication tables  
+- ✅ Generate migration files for authentication tables
 - ✅ Add PhoenixKit configuration to `config/config.exs`
 - ✅ Configure mailer settings for development
 - ✅ Add authentication routes to your router
 - ✅ Provide detailed setup instructions
 
 **Optional parameters:**
+
 ```bash
 # Specify custom repository
-mix phoenix_kit.install.igniter --repo MyApp.Repo
+mix phx.kit.install.igniter --repo MyApp.Repo
 
 # Use PostgreSQL schema prefix for table isolation
-mix phoenix_kit.install.igniter --prefix "auth" --create-schema
+mix phx.kit.install.igniter --prefix "auth" --create-schema
 
 # Specify custom router file path
-mix phoenix_kit.install.igniter --router-path lib/my_app_web/router.ex
+mix phx.kit.install.igniter --router-path lib/my_app_web/router.ex
 ```
 
 ### Igniter Installation
@@ -78,8 +80,9 @@ mix igniter.install phoenix_kit
 ```
 
 Optional repository specification:
+
 ```bash
-mix igniter.install phoenix_kit --repo MyApp.Repo  
+mix igniter.install phoenix_kit --repo MyApp.Repo
 ```
 
 ### Manual Installation
@@ -106,7 +109,7 @@ mix deps.get
 3. **Generate migration:**
 
 ```bash
-mix phoenix_kit.gen.migration add_phoenix_kit_auth_tables
+mix phx.kit.gen.migration add_phoenix_kit_auth_tables
 ```
 
 4. **Configure PhoenixKit:**
@@ -151,6 +154,7 @@ mix phx.server
 ```
 
 Visit these URLs to verify PhoenixKit is working:
+
 - `http://localhost:4000/phoenix_kit/register` - User registration
 - `http://localhost:4000/phoenix_kit/login` - User login
 
@@ -196,11 +200,12 @@ For better table organization, you can use PostgreSQL schemas:
 
 ```bash
 # Install with schema prefix - creates tables in 'auth' schema
-mix phoenix_kit.install.igniter --prefix "auth" --create-schema
+mix phx.kit.install.igniter --prefix "auth" --create-schema
 ```
 
 This creates tables as:
-- `auth.phoenix_kit_users` 
+
+- `auth.phoenix_kit_users`
 - `auth.phoenix_kit_users_tokens`
 
 ### Custom Repository
@@ -209,7 +214,7 @@ Specify a different Ecto repository:
 
 ```bash
 # Use custom repository
-mix phoenix_kit.install.igniter --repo MyApp.CustomRepo
+mix phx.kit.install.igniter --repo MyApp.CustomRepo
 ```
 
 ### Multiple Ecto Repositories
@@ -277,6 +282,7 @@ PhoenixKit provides these LiveView routes under your chosen prefix:
 PhoenixKit creates these tables:
 
 ### `phoenix_kit_users` (Users)
+
 - `id` - Primary key (bigserial)
 - `email` - Email address (citext, unique)
 - `hashed_password` - Bcrypt hashed password
@@ -284,6 +290,7 @@ PhoenixKit creates these tables:
 - `inserted_at`, `updated_at` - Timestamps
 
 ### `phoenix_kit_users_tokens` (Authentication Tokens)
+
 - `id` - Primary key (bigserial)
 - `user_id` - Foreign key to phoenix_kit_users
 - `token` - Secure token (bytea)
@@ -292,6 +299,7 @@ PhoenixKit creates these tables:
 - `inserted_at` - Creation timestamp
 
 ### `phoenix_kit_schema_versions` (Migration Tracking)
+
 - Professional versioning system tracks schema changes
 - Enables safe upgrades and rollbacks
 - Current version: 1.0.0
@@ -319,7 +327,7 @@ user = PhoenixKit.Accounts.get_user_by_email("user@example.com")
 
 # Authenticate user
 {:ok, user} = PhoenixKit.Accounts.get_user_by_email_and_password(
-  "user@example.com", 
+  "user@example.com",
   "password"
 )
 ```
@@ -333,7 +341,7 @@ import PhoenixKitWeb.UserAuth
 # Require authentication
 plug :phoenix_kit_require_authenticated_user
 
-# Redirect if already logged in  
+# Redirect if already logged in
 plug :phoenix_kit_redirect_if_user_is_authenticated
 ```
 
@@ -354,7 +362,7 @@ PhoenixKit uses a professional versioned migration system:
 
 ```bash
 # Check migration status and version information
-mix phoenix_kit.migrate --status
+mix phx.kit.migrate --status
 ```
 
 ```elixir
@@ -392,28 +400,36 @@ lib/your_app_web/templates/phoenix_kit_web/
 ### Common Issues
 
 **No repository configured**
+
 ```
 ERROR: No repository configured for PhoenixKit
 ```
-Solution: Run `mix phoenix_kit.install --repo MyApp.Repo` or manually add config.
+
+Solution: Run `mix phx.kit.install --repo MyApp.Repo` or manually add config.
 
 **--repo parameter required**
+
 ```
 ERROR: --repo is required!
 ```
-Solution: Always specify `--repo` parameter: `mix phoenix_kit.install --repo MyApp.Repo`
+
+Solution: Always specify `--repo` parameter: `mix phx.kit.install --repo MyApp.Repo`
 
 **Migration errors**
+
 ```
 ERROR: Schema migration failed
 ERROR: could not find migration runner process
 ```
+
 Solution: Check database connection and permissions. Auto-setup migration system has been improved in v0.1.7+ to handle runtime migration contexts correctly.
 
 **URL not found**
+
 ```
 ERROR: No route found for GET /phoenix_kit/register
 ```
+
 Solution: Import `PhoenixKitWeb.Integration` and add `phoenix_kit_routes()`.
 
 ### Debug Logging

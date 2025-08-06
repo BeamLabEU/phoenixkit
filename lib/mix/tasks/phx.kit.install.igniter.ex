@@ -10,13 +10,13 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
   ## Usage
 
   ```bash
-  mix phoenix_kit.install.igniter
+  mix phx.kit.install.igniter
   ```
 
   With custom options:
 
   ```bash
-  mix phoenix_kit.install.igniter --repo MyApp.Repo --router-path lib/my_app_web/router.ex
+  mix phx.kit.install.igniter --repo MyApp.Repo --router-path lib/my_app_web/router.ex
   ```
 
   ## Options
@@ -49,7 +49,7 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
   def info(_argv, _composing_task) do
     %Igniter.Mix.Task.Info{
       group: :phoenix_kit,
-      example: "mix phoenix_kit.install.igniter --repo MyApp.Repo --prefix auth",
+      example: "mix phx.kit.install.igniter --repo MyApp.Repo --prefix auth",
       positional: [],
       schema: [
         router_path: :string,
@@ -86,12 +86,11 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
 
         Please specify with --repo option:
 
-          mix phoenix_kit.install.igniter --repo YourApp.Repo
-          
+          mix phx.kit.install.igniter --repo YourApp.Repo
+
         Common repo names:
-          - ZenclockRepo, Zenclock.Repo
           - MyAppRepo, MyApp.Repo
-          
+
         Or manually add to config/config.exs:
 
           config :phoenix_kit, repo: YourApp.Repo
@@ -316,19 +315,19 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
 
        defmodule YourAppWeb.Router do
          use YourAppWeb, :router
-         
+
          # Add this import
          import PhoenixKitWeb.Integration
-         
+
          # Your existing pipelines and scopes...
-         
+
          # Add this line at the end, before the final 'end'
          phoenix_kit_routes()
        end
 
     3. The routes will be available at:
        • /phoenix_kit/register - User registration
-       • /phoenix_kit/login - User login  
+       • /phoenix_kit/login - User login
        • /phoenix_kit/reset_password - Password reset
        • And other authentication routes
 
@@ -368,14 +367,14 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
 
        # Add after 'use YourAppWeb, :router'
        import PhoenixKitWeb.Integration
-       
+
        # Add before the final 'end'
        phoenix_kit_routes()
 
     🔄 ALTERNATIVE: Let PhoenixKit auto-detect your router:
 
     Run the installer without --router-path option:
-       mix phoenix_kit.install.igniter
+       mix phx_kit.install.igniter
 
     ⚠️  Note: You may see a compiler warning about "unused import PhoenixKitWeb.Integration".
        This is normal for macros and can be safely ignored.
@@ -698,7 +697,7 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
 
     📚 Visit /phoenix_kit routes for complete authentication system:
       - User registration and login
-      - Password reset and email confirmation  
+      - Password reset and email confirmation
       - User settings and profile management
 
     ⚡ PhoenixKit routes work independently of your app's browser pipeline

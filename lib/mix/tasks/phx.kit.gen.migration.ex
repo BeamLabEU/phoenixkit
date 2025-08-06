@@ -7,7 +7,7 @@ defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
 
   ## Usage
 
-      mix phoenix_kit.gen.migration
+      mix phx.kit.gen.migration
 
   ## Options
 
@@ -15,11 +15,11 @@ defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
 
   ## Examples
 
-      # Generate with default phoenix_kit_users prefix  
-      mix phoenix_kit.gen.migration
-      
+      # Generate with default phoenix_kit_users prefix
+      mix phx.kit.gen.migration
+
       # Generate with custom prefix
-      mix phoenix_kit.gen.migration --table-prefix users
+      mix phx.kit.gen.migration --table-prefix users
 
   """
   @shortdoc "Generate PhoenixKit authentication migration"
