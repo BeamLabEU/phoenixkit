@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
+defmodule Mix.Tasks.Phx.Kit.Gen.Migration do
   @moduledoc """
   Generate PhoenixKit authentication migration in parent application.
 

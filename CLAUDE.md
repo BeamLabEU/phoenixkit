@@ -162,7 +162,7 @@ This ensures consistent code formatting across the project.
 - **PhoenixKit.Migration** - Main migration interface with behaviour
 - **PhoenixKit.Migrations.Postgres** - PostgreSQL-specific migrator
 - **PhoenixKit.Migrations.Postgres.V01** - Version 1 auth tables migration
-- **Mix.Tasks.PhoenixKit.Install.Igniter** - Igniter-based installation task
+- **Mix.Tasks.Phx.Kit.Install.Igniter** - Igniter-based installation task
 - **Versioned system** - Oban-style architecture for professional database management
 
 ### Key Design Principles

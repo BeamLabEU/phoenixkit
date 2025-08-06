@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.PhoenixKit.Migrate do
+defmodule Mix.Tasks.Phx.Kit.Migrate do
   @moduledoc """
   Manages PhoenixKit schema migrations.
 

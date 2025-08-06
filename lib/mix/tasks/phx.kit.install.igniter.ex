@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
+defmodule Mix.Tasks.Phx.Kit.Install.Igniter do
   @moduledoc """
   Igniter installer for PhoenixKit authentication system.
 
