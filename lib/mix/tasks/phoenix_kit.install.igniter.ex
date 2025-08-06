@@ -111,7 +111,7 @@ defmodule Mix.Tasks.PhoenixKit.Install.Igniter do
     end
   end
 
-  # Add PhoenixKit mailer configuration 
+  # Add PhoenixKit mailer configuration
   defp add_mailer_configuration(igniter) do
     igniter
     |> add_dev_mailer_config()

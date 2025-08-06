@@ -61,7 +61,7 @@ defmodule PhoenixKitWeb.Integration do
   """
   defmacro phoenix_kit_routes(prefix \\ "/phoenix_kit") do
     quote do
-      # Define the auto-setup pipeline  
+      # Define the auto-setup pipeline
       pipeline :phoenix_kit_auto_setup do
         plug PhoenixKitWeb.Integration, :phoenix_kit_auto_setup
       end
@@ -116,60 +116,16 @@ defmodule PhoenixKitWeb.Integration do
   end
 
   @doc """
-  Pipeline plug for automatic PhoenixKit setup.
+  Pipeline plug for PhoenixKit setup verification.
 
-  This plug ensures PhoenixKit is configured and database tables exist
-  before handling any authentication requests.
+  Setup is now handled during installation via igniter.
+  This plug is maintained for compatibility but no longer performs setup.
   """
   def init(opts), do: opts
 
   def call(conn, :phoenix_kit_auto_setup) do
-    if PhoenixKit.AutoSetup.setup_complete?() do
-      conn
-    else
-      case PhoenixKit.AutoSetup.ensure_setup!() do
-        :ok ->
-          conn
-
-        {:error, reason} ->
-          conn
-          |> Plug.Conn.put_resp_content_type("text/html")
-          |> Plug.Conn.send_resp(500, setup_error_page(reason))
-          |> Plug.Conn.halt()
-      end
-    end
-  end
-
-  defp setup_error_page(reason) do
-    """
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>PhoenixKit Setup Error</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .error { background: #fee; padding: 20px; border: 1px solid #fcc; border-radius: 5px; }
-        .code { background: #f5f5f5; padding: 10px; font-family: monospace; }
-      </style>
-    </head>
-    <body>
-      <h1>PhoenixKit Auto-Setup Failed</h1>
-      <div class="error">
-        <p><strong>Error:</strong> #{inspect(reason)}</p>
-        
-        <p>Please ensure your Phoenix application has:</p>
-        <ul>
-          <li>A properly configured Ecto.Repo</li>
-          <li>PostgreSQL database connection</li>
-          <li>Database create/modify permissions</li>
-        </ul>
-        
-        <p>For manual setup instructions, see: 
-        <a href="https://github.com/BeamLabEU/phoenixkit">PhoenixKit Documentation</a></p>
-      </div>
-    </body>
-    </html>
-    """
+    # Setup is handled by igniter installation - just pass through
+    conn
   end
 
   @doc """

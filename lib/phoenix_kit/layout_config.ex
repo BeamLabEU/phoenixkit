@@ -159,6 +159,23 @@ defmodule PhoenixKit.LayoutConfig do
 
   # Private functions
 
+  # Helper to log warnings for missing layout modules
+  defp log_missing_module_warning(module, fallback) do
+    require Logger
+    module_string = to_string(module)
+
+    # Skip logging for auto-generated test module names to reduce noise
+    is_auto_generated_test =
+      String.contains?(module_string, "Test") and
+        Application.get_env(:phoenix_kit, :layout) == nil
+
+    unless is_auto_generated_test do
+      Logger.warning(
+        "[PhoenixKit] Layout module #{inspect(module)} not found at runtime, using fallback #{inspect(fallback)}"
+      )
+    end
+  end
+
   @spec validate_layout_module(module(), atom(), {module(), atom()}) :: {module(), atom()}
   defp validate_layout_module(module, template, fallback) do
     # For PhoenixKitWeb.Layouts, always allow (it's our own module)
@@ -178,24 +195,7 @@ defmodule PhoenixKit.LayoutConfig do
         # Third check: assume external modules will be available at runtime
         # Only warn if we're in a running application context (not compilation)
         Process.whereis(:application_controller) != nil ->
-          require Logger
-
-          # Use debug level for auto-generated test module names to reduce noise
-          module_string = to_string(module)
-
-          is_auto_generated_test =
-            String.contains?(module_string, "Test") and
-              Application.get_env(:phoenix_kit, :layout) == nil
-
-          if is_auto_generated_test do
-            # Don't log anything for auto-generated test modules - they're expected to not exist
-            :ok
-          else
-            Logger.warning(
-              "[PhoenixKit] Layout module #{inspect(module)} not found at runtime, using fallback #{inspect(fallback)}"
-            )
-          end
-
+          log_missing_module_warning(module, fallback)
           fallback
 
         # During compilation, trust that external modules will be available

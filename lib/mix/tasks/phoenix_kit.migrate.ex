@@ -61,9 +61,10 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
 
     repo = get_repo(opts[:repo])
 
-    cond do
-      opts[:status] -> show_status(repo)
-      true -> run_migration(repo, opts)
+    if opts[:status] do
+      show_status(repo)
+    else
+      run_migration(repo, opts)
     end
   end
 
@@ -72,7 +73,7 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
     Logger.info("===============================")
     Logger.info("Detecting repository automatically...")
 
-    case PhoenixKit.AutoSetup.detect_parent_repo() do
+    case detect_repo() do
       {:ok, detected_repo} ->
         Logger.info("Detected repo: #{inspect(detected_repo)}")
         detected_repo
@@ -224,5 +225,36 @@ defmodule Mix.Tasks.PhoenixKit.Migrate do
       true -> true
       false -> false
     end
+  end
+
+  # Simple repo detection without external dependencies
+  defp detect_repo do
+    # Try PhoenixKit configuration first
+    case Application.get_env(:phoenix_kit, :repo) do
+      nil ->
+        # Try common repo patterns
+        detect_common_repo_patterns()
+
+      repo ->
+        {:ok, repo}
+    end
+  end
+
+  defp detect_common_repo_patterns do
+    app_name = Mix.Project.config()[:app]
+    base_module = app_name |> to_string() |> Macro.camelize()
+
+    potential_repos = [
+      Module.concat([base_module, "Repo"]),
+      Module.concat([base_module, "Repository"])
+    ]
+
+    Enum.reduce_while(potential_repos, {:error, "No repo found"}, fn repo, _acc ->
+      if Code.ensure_loaded?(repo) and function_exported?(repo, :__adapter__, 0) do
+        {:halt, {:ok, repo}}
+      else
+        {:cont, {:error, "No repo found"}}
+      end
+    end)
   end
 end

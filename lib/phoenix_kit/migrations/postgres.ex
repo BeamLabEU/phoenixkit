@@ -50,7 +50,7 @@ defmodule PhoenixKit.Migrations.Postgres do
     # - If version not specified, rollback to complete removal (0)
     # - If version specified, rollback to that version
     target_version =
-      case Keyword.get(opts, :version) do
+      case Map.get(opts, :version) do
         # Complete removal (state before installation)
         nil -> 0
         specified_version -> specified_version

@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## MCP Memory Knowledge Base
 
-⚠️ **ВАЖНО**: Всегда начинайте работу с проектом с изучения данных в MCP memory хранилище. Используйте команду:
+⚠️ **IMPORTANT**: Always start working with the project by studying data in the MCP memory storage. Use the command:
 ```
 mcp__memory__read_graph
 ```
-Это позволит понять текущее состояние проекта, реализованные и запланированные компоненты, архитектурные решения.
+This will help understand the current state of the project, implemented and planned components, architectural decisions.
 
-Обновляйте данные в memory при обнаружении новых компонентов или изменениях в архитектуре проекта. Используйте:
-- `mcp__memory__create_entities` - для добавления новых модулей/компонентов
-- `mcp__memory__create_relations` - для связей между компонентами  
-- `mcp__memory__add_observations` - для дополнения информации о существующих компонентах
+Update data in memory when discovering new components or changes in project architecture. Use:
+- `mcp__memory__create_entities` - for adding new modules/components
+- `mcp__memory__create_relations` - for relationships between components  
+- `mcp__memory__add_observations` - for supplementing information about existing components
 
 ## Project Overview
 
@@ -39,15 +39,13 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix ecto.setup` - Create database, run migrations, and seed data
 
 ### PhoenixKit Migration System
-- `mix phoenix_kit.install` - Install PhoenixKit with auto-detected repo
-- `mix phoenix_kit.install --prefix "auth"` - Install with custom schema prefix
-- `mix phoenix_kit.install --repo MyApp.Repo` - Install with specific repo
+- `mix phoenix_kit.install.igniter` - Install PhoenixKit using igniter (recommended)
 - `mix phoenix_kit.migrate --status` - ⚠️ Check migration status (requires configured repo)
 - **Professional versioned migrations** - Oban-style migration system with version tracking
 - **Prefix support** - Isolate PhoenixKit tables using PostgreSQL schemas
 - **Idempotent operations** - Safe to run migrations multiple times
 
-**Note:** `phoenix_kit.migrate --status` требует настроенного репозитория для работы.
+**Note:** `phoenix_kit.migrate --status` requires a configured repository to work.
 
 ### Testing
 - `mix test` - Run all tests with database sandbox
@@ -139,7 +137,7 @@ This ensures consistent code formatting across the project.
 - **PhoenixKit.Migration** - Main migration interface with behaviour
 - **PhoenixKit.Migrations.Postgres** - PostgreSQL-specific migrator
 - **PhoenixKit.Migrations.Postgres.V01** - Version 1 auth tables migration
-- **Mix.Tasks.PhoenixKit.Install** - Automated installation task
+- **Mix.Tasks.PhoenixKit.Install.Igniter** - Igniter-based installation task
 - **Versioned system** - Oban-style architecture for professional database management
 
 ### Key Design Principles

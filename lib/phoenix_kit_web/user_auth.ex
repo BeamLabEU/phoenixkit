@@ -275,9 +275,21 @@ defmodule PhoenixKitWeb.UserAuth do
   end
 
   defp get_parent_endpoint do
-    case PhoenixKit.AutoSetup.detect_parent_endpoint() do
-      {:ok, endpoint} -> {:ok, endpoint}
-      {:error, reason} -> {:error, reason}
-    end
+    # Simple endpoint detection without external dependencies
+    app_name = Mix.Project.config()[:app]
+    base_module = app_name |> to_string() |> Macro.camelize()
+
+    potential_endpoints = [
+      Module.concat([base_module <> "Web", "Endpoint"]),
+      Module.concat([base_module, "Endpoint"])
+    ]
+
+    Enum.reduce_while(potential_endpoints, {:error, "No endpoint found"}, fn endpoint, _acc ->
+      if Code.ensure_loaded?(endpoint) and function_exported?(endpoint, :broadcast, 3) do
+        {:halt, {:ok, endpoint}}
+      else
+        {:cont, {:error, "No endpoint found"}}
+      end
+    end)
   end
 end

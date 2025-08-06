@@ -227,7 +227,7 @@ config :phoenix_kit,
 PhoenixKit uses your application's repository:
 
 ```elixir
-# config/config.exs (automatically added by mix phoenix_kit.install)
+# config/config.exs (automatically added by igniter installation)
 config :phoenix_kit, repo: YourApp.Repo
 ```
 
