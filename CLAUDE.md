@@ -46,7 +46,7 @@ This is **Phoenix Module Template** - a professional library-first template for 
 
 ### PhoenixKit Migration System
 
-- `mix phx.kit.install.igniter` - Install PhoenixKit using igniter (recommended)
+- `mix phx.kit.install` - Install PhoenixKit using igniter (recommended)
 - `mix phx.kit.migrate --status` - ⚠️ Check migration status (requires configured repo)
 - **Professional versioned migrations** - Oban-style migration system with version tracking
 - **Prefix support** - Isolate PhoenixKit tables using PostgreSQL schemas

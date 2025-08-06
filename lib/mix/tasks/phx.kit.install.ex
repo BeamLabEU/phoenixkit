@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Phx.Kit.Install.Igniter do
+defmodule Mix.Tasks.Phx.Kit.Install do
   @moduledoc """
   Igniter installer for PhoenixKit authentication system.
 
@@ -10,13 +10,13 @@ defmodule Mix.Tasks.Phx.Kit.Install.Igniter do
   ## Usage
 
   ```bash
-  mix phx.kit.install.igniter
+  mix phx.kit.install
   ```
 
   With custom options:
 
   ```bash
-  mix phx.kit.install.igniter --repo MyApp.Repo --router-path lib/my_app_web/router.ex
+  mix phx.kit.install --repo MyApp.Repo --router-path lib/my_app_web/router.ex
   ```
 
   ## Options
@@ -49,7 +49,7 @@ defmodule Mix.Tasks.Phx.Kit.Install.Igniter do
   def info(_argv, _composing_task) do
     %Igniter.Mix.Task.Info{
       group: :phoenix_kit,
-      example: "mix phx.kit.install.igniter --repo MyApp.Repo --prefix auth",
+      example: "mix phx.kit.install --repo MyApp.Repo --prefix auth",
       positional: [],
       schema: [
         router_path: :string,
@@ -86,7 +86,7 @@ defmodule Mix.Tasks.Phx.Kit.Install.Igniter do
 
         Please specify with --repo option:
 
-          mix phx.kit.install.igniter --repo YourApp.Repo
+          mix phx.kit.install --repo YourApp.Repo
 
         Common repo names:
           - MyAppRepo, MyApp.Repo
@@ -374,7 +374,7 @@ defmodule Mix.Tasks.Phx.Kit.Install.Igniter do
     🔄 ALTERNATIVE: Let PhoenixKit auto-detect your router:
 
     Run the installer without --router-path option:
-       mix phx_kit.install.igniter
+       mix phx.kit.install
 
     ⚠️  Note: You may see a compiler warning about "unused import PhoenixKitWeb.Integration".
        This is normal for macros and can be safely ignored.

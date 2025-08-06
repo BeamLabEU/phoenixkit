@@ -44,7 +44,7 @@ Then run the PhoenixKit installer:
 
 ```bash
 mix deps.get
-mix phx.kit.install.igniter
+mix phx.kit.install
 ```
 
 This will automatically:
@@ -60,13 +60,13 @@ This will automatically:
 
 ```bash
 # Specify custom repository
-mix phx.kit.install.igniter --repo MyApp.Repo
+mix phx.kit.install --repo MyApp.Repo
 
 # Use PostgreSQL schema prefix for table isolation
-mix phx.kit.install.igniter --prefix "auth" --create-schema
+mix phx.kit.install --prefix "auth" --create-schema
 
 # Specify custom router file path
-mix phx.kit.install.igniter --router-path lib/my_app_web/router.ex
+mix phx.kit.install --router-path lib/my_app_web/router.ex
 ```
 
 ### Igniter Installation
@@ -200,7 +200,7 @@ For better table organization, you can use PostgreSQL schemas:
 
 ```bash
 # Install with schema prefix - creates tables in 'auth' schema
-mix phx.kit.install.igniter --prefix "auth" --create-schema
+mix phx.kit.install --prefix "auth" --create-schema
 ```
 
 This creates tables as:
@@ -214,7 +214,7 @@ Specify a different Ecto repository:
 
 ```bash
 # Use custom repository
-mix phx.kit.install.igniter --repo MyApp.CustomRepo
+mix phx.kit.install --repo MyApp.CustomRepo
 ```
 
 ### Multiple Ecto Repositories
