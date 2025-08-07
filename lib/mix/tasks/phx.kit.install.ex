@@ -163,12 +163,12 @@ defmodule Mix.Tasks.Phx.Kit.Install do
             auto_detect_repo_by_scanning(igniter)
 
           {igniter, repo} ->
-            {igniter, repo}
+            validate_postgres_adapter(igniter, repo)
         end
 
       {igniter, [repo | _]} ->
-        # Use first repo found
-        {igniter, repo}
+        # Use first repo found and validate PostgreSQL
+        validate_postgres_adapter(igniter, repo)
     end
   end
 
@@ -177,7 +177,7 @@ defmodule Mix.Tasks.Phx.Kit.Install do
 
     case Igniter.Project.Module.module_exists(igniter, repo_module) do
       {true, igniter} ->
-        {igniter, repo_module}
+        validate_postgres_adapter(igniter, repo_module)
 
       {false, igniter} ->
         Igniter.add_warning(igniter, "Specified repo #{repo_string} does not exist")
@@ -220,7 +220,7 @@ defmodule Mix.Tasks.Phx.Kit.Install do
         {igniter, nil}
 
       [repo | _] ->
-        {igniter, repo}
+        validate_postgres_adapter(igniter, repo)
     end
   end
 
@@ -230,10 +230,48 @@ defmodule Mix.Tasks.Phx.Kit.Install do
   defp find_existing_repo(igniter, [repo_module | rest]) do
     case Igniter.Project.Module.module_exists(igniter, repo_module) do
       {true, igniter} ->
-        {igniter, repo_module}
+        validate_postgres_adapter(igniter, repo_module)
 
       {false, igniter} ->
         find_existing_repo(igniter, rest)
+    end
+  end
+
+  # Validate that the repo uses PostgreSQL adapter
+  defp validate_postgres_adapter(igniter, repo_module) do
+    {_igniter, _source, zipper} = Igniter.Project.Module.find_module!(igniter, repo_module)
+
+    # Look for "use Ecto.Repo" with adapter configuration
+    case Igniter.Code.Module.move_to_use(zipper, Ecto.Repo) do
+      {:ok, _use_zipper} ->
+        # For now, we can't reliably detect the adapter from AST
+        # So we'll add a helpful notice about PostgreSQL requirement
+        notice = """
+
+        ℹ️  Database Adapter Check
+
+        PhoenixKit requires PostgreSQL. Please ensure #{inspect(repo_module)} is configured with:
+
+          adapter: Ecto.Adapters.Postgres
+
+        If you're using a different database adapter (MySQL, SQLite), 
+        PhoenixKit installation will fail during migration.
+        """
+
+        Igniter.add_notice(igniter, notice)
+        {igniter, repo_module}
+
+      :error ->
+        # Repo doesn't use Ecto.Repo properly
+        warning = """
+        Invalid Ecto Repository
+
+        #{inspect(repo_module)} does not appear to be a valid Ecto repository.
+        PhoenixKit requires a properly configured Ecto.Repo with PostgreSQL adapter.
+        """
+
+        Igniter.add_warning(igniter, warning)
+        {igniter, nil}
     end
   end
 

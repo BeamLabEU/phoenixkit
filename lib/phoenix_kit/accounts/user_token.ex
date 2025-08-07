@@ -10,6 +10,7 @@ defmodule PhoenixKit.Accounts.UserToken do
   - **Email confirmation tokens**: For account verification (7 days validity)  
   - **Password reset tokens**: For secure password recovery (1 day validity)
   - **Email change tokens**: For confirming new email addresses (7 days validity)
+  - **Magic link tokens**: For passwordless authentication (15 minutes validity)
 
   ## Security Features
 

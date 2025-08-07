@@ -22,19 +22,10 @@ defmodule PhoenixKit.Migrations.Postgres do
 
     cond do
       initial == 0 ->
-        # Check if we're in runtime context (has :repo key)
-        if Map.has_key?(opts, :repo) do
-          runtime_up(opts)
-        else
-          change(@initial_version..opts.version, :up, opts)
-        end
+        change(@initial_version..opts.version, :up, opts)
 
       initial < opts.version ->
-        if Map.has_key?(opts, :repo) do
-          runtime_up(opts)
-        else
-          change((initial + 1)..opts.version, :up, opts)
-        end
+        change((initial + 1)..opts.version, :up, opts)
 
       true ->
         :ok
@@ -66,27 +57,10 @@ defmodule PhoenixKit.Migrations.Postgres do
   @impl PhoenixKit.Migration
   def migrated_version(opts) do
     opts = with_defaults(opts, @initial_version)
-
-    repo =
-      case Map.get(opts, :repo) do
-        nil ->
-          try do
-            repo()
-          rescue
-            _error ->
-              # Fallback for auto-setup context
-              case Application.get_env(:phoenix_kit, :repo) do
-                nil -> reraise "No repo configured", __STACKTRACE__
-                configured_repo -> configured_repo
-              end
-          end
-
-        configured_repo ->
-          configured_repo
-      end
-
     escaped_prefix = Map.fetch!(opts, :escaped_prefix)
 
+    # Use standard Ecto migration functions instead of direct queries
+    # This will work correctly in migration context only
     query = """
     SELECT pg_catalog.obj_description(pg_class.oid, 'pg_class')
     FROM pg_class
@@ -95,7 +69,7 @@ defmodule PhoenixKit.Migrations.Postgres do
     AND pg_namespace.nspname = '#{escaped_prefix}'
     """
 
-    case repo.query(query, [], log: false) do
+    case repo().query(query, [], log: false) do
       {:ok, %{rows: [[version]]}} when is_binary(version) -> String.to_integer(version)
       _ -> 0
     end
@@ -122,71 +96,9 @@ defmodule PhoenixKit.Migrations.Postgres do
     :ok
   end
 
-  defp record_version(%{prefix: prefix, repo: repo}, version) do
-    sql = "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit IS '#{version}'"
-
-    case repo.query(sql) do
-      {:ok, _} -> :ok
-      error -> error
-    end
-  end
-
   defp record_version(%{prefix: prefix}, version) do
-    # Fallback for migration context - use execute
+    # Use execute for migration context
     execute "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit IS '#{version}'"
-  end
-
-  # Runtime migration for auto-setup context
-  defp runtime_up(%{repo: repo, prefix: prefix} = opts) do
-    migration_commands = [
-      "CREATE EXTENSION IF NOT EXISTS citext",
-      """
-      CREATE TABLE IF NOT EXISTS #{prefix}.phoenix_kit (
-        id serial PRIMARY KEY,
-        version integer NOT NULL,
-        migrated_at timestamp NOT NULL DEFAULT NOW()
-      )
-      """,
-      "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_version_index ON #{prefix}.phoenix_kit (version)",
-      """
-      CREATE TABLE IF NOT EXISTS #{prefix}.phoenix_kit_users (
-        id bigserial PRIMARY KEY,
-        email citext NOT NULL,
-        hashed_password varchar(255) NOT NULL,
-        confirmed_at timestamp,
-        inserted_at timestamp NOT NULL DEFAULT NOW(),
-        updated_at timestamp NOT NULL DEFAULT NOW()
-      )
-      """,
-      "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_users_email_index ON #{prefix}.phoenix_kit_users (email)",
-      """
-      CREATE TABLE IF NOT EXISTS #{prefix}.phoenix_kit_users_tokens (
-        id bigserial PRIMARY KEY,
-        user_id bigint NOT NULL REFERENCES #{prefix}.phoenix_kit_users(id) ON DELETE CASCADE,
-        token bytea NOT NULL,
-        context varchar(255) NOT NULL,
-        sent_to varchar(255),
-        inserted_at timestamp NOT NULL DEFAULT NOW()
-      )
-      """,
-      "CREATE INDEX IF NOT EXISTS phoenix_kit_users_tokens_user_id_index ON #{prefix}.phoenix_kit_users_tokens (user_id)",
-      "CREATE UNIQUE INDEX IF NOT EXISTS phoenix_kit_users_tokens_context_token_index ON #{prefix}.phoenix_kit_users_tokens (context, token)"
-    ]
-
-    # Execute each command
-    Enum.reduce_while(migration_commands, :ok, fn sql, _acc ->
-      case repo.query(sql) do
-        {:ok, _} -> {:cont, :ok}
-        {:error, error} -> {:halt, {:error, error}}
-      end
-    end)
-    |> case do
-      :ok ->
-        record_version(opts, @current_version)
-
-      error ->
-        error
-    end
   end
 
   defp with_defaults(opts, version) do
