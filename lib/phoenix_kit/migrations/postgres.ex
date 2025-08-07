@@ -34,18 +34,21 @@ defmodule PhoenixKit.Migrations.Postgres do
 
   @impl PhoenixKit.Migration
   def down(opts) do
-    opts = with_defaults(opts, @initial_version)
+    # For down operations, don't set a default version - let target_version logic handle it
+    opts = Enum.into(opts, %{prefix: @default_prefix})
+
+    opts =
+      opts
+      |> Map.put(:quoted_prefix, inspect(opts.prefix))
+      |> Map.put(:escaped_prefix, String.replace(opts.prefix, "'", "\\'"))
+      |> Map.put_new(:create_schema, opts.prefix != @default_prefix)
+
     current_version = migrated_version(opts)
 
     # Determine target version:
     # - If version not specified, rollback to complete removal (0)
     # - If version specified, rollback to that version
-    target_version =
-      case Map.get(opts, :version) do
-        # Complete removal (state before installation)
-        nil -> 0
-        specified_version -> specified_version
-      end
+    target_version = Map.get(opts, :version, 0)
 
     if current_version > target_version do
       # For rollback from version N to version M, execute down for versions N, N-1, ..., M+1

@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Phx.Kit.Gen.Migration do
+defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
   @moduledoc """
   Generate PhoenixKit authentication migration in parent application.
 
@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Phx.Kit.Gen.Migration do
 
   ## Usage
 
-      mix phx.kit.gen.migration
+      mix phoenix_kit.gen.migration
 
   ## Options
 
@@ -16,10 +16,10 @@ defmodule Mix.Tasks.Phx.Kit.Gen.Migration do
   ## Examples
 
       # Generate with default phoenix_kit_users prefix
-      mix phx.kit.gen.migration
+      mix phoenix_kit.gen.migration
 
       # Generate with custom prefix
-      mix phx.kit.gen.migration --table-prefix users
+      mix phoenix_kit.gen.migration --table-prefix users
 
   """
   @shortdoc "Generate PhoenixKit authentication migration"

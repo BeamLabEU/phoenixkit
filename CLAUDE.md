@@ -46,13 +46,13 @@ This is **Phoenix Module Template** - a professional library-first template for 
 
 ### PhoenixKit Migration System
 
-- `mix phx.kit.install` - Install PhoenixKit using igniter (recommended)
-- `mix phx.kit.migrate --status` - ⚠️ Check migration status (requires configured repo)
+- `mix phoenix_kit.install` - Install PhoenixKit using igniter (recommended)
+- `mix phoenix_kit.migrate --status` - ⚠️ Check migration status (requires configured repo)
 - **Professional versioned migrations** - Oban-style migration system with version tracking
 - **Prefix support** - Isolate PhoenixKit tables using PostgreSQL schemas
 - **Idempotent operations** - Safe to run migrations multiple times
 
-**Note:** `phx.kit.migrate --status` requires a configured repository to work.
+**Note:** `phoenix_kit.migrate --status` requires a configured repository to work.
 
 ### Testing
 
@@ -159,10 +159,10 @@ This ensures consistent code formatting across the project.
 
 ### Migration Architecture
 
-- **PhoenixKit.Migration** - Main migration interface with behaviour
+
 - **PhoenixKit.Migrations.Postgres** - PostgreSQL-specific migrator
 - **PhoenixKit.Migrations.Postgres.V01** - Version 1 auth tables migration
-- **Mix.Tasks.Phx.Kit.Install.Igniter** - Igniter-based installation task
+- **Mix.Tasks.PhoenixKit.Install** - Igniter-based installation task
 - **Versioned system** - Oban-style architecture for professional database management
 
 ### Key Design Principles

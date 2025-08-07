@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Phx.Kit.Migrate do
+defmodule Mix.Tasks.PhoenixKit.Migrate do
   @moduledoc """
   Manages PhoenixKit schema migrations.
 
@@ -9,15 +9,15 @@ defmodule Mix.Tasks.Phx.Kit.Migrate do
 
   Check current schema version:
 
-      mix phx.kit.migrate --status
+      mix phoenix_kit.migrate --status
 
   Migrate to latest version:
 
-      mix phx.kit.migrate
+      mix phoenix_kit.migrate
 
   Migrate with specific repo:
 
-      mix phx.kit.migrate --repo MyApp.Repo
+      mix phoenix_kit.migrate --repo MyApp.Repo
 
   ## Commands
 
@@ -80,7 +80,7 @@ defmodule Mix.Tasks.Phx.Kit.Migrate do
 
       {:error, reason} ->
         Logger.error("Could not detect repository: #{reason}")
-        Logger.error("Please specify repo with: mix phx.kit.migrate --repo YourApp.Repo")
+        Logger.error("Please specify repo with: mix phoenix_kit.migrate --repo YourApp.Repo")
         exit({:shutdown, 1})
     end
   end
@@ -129,7 +129,7 @@ defmodule Mix.Tasks.Phx.Kit.Migrate do
       end
 
       Logger.info("")
-      Logger.info("To apply migration: mix phx.kit.migrate")
+      Logger.info("To apply migration: mix phoenix_kit.migrate")
     else
       Logger.info("✅ Schema is up to date - no migration needed")
     end

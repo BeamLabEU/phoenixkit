@@ -44,7 +44,7 @@ Then run the PhoenixKit installer:
 
 ```bash
 mix deps.get
-mix phx.kit.install
+mix phoenix_kit.install
 ```
 
 This will automatically:
@@ -60,29 +60,29 @@ This will automatically:
 
 ```bash
 # Specify custom repository
-mix phx.kit.install --repo MyApp.Repo
+mix phoenix_kit.install --repo MyApp.Repo
 
 # Use PostgreSQL schema prefix for table isolation
-mix phx.kit.install --prefix "auth" --create-schema
+mix phoenix_kit.install --prefix "auth" --create-schema
 
 # Specify custom router file path
-mix phx.kit.install --router-path lib/my_app_web/router.ex
+mix phoenix_kit.install --router-path lib/my_app_web/router.ex
 ```
 
 ### Igniter Installation
 
 **Single command installation**
 
-For the simplest possible setup, use Igniter's package installation:
+For the simplest possible setup, use PhoenixKit's installer:
 
 ```bash
-mix igniter.install phoenix_kit
+mix phoenix_kit.install
 ```
 
 Optional repository specification:
 
 ```bash
-mix igniter.install phoenix_kit --repo MyApp.Repo
+mix phoenix_kit.install --repo MyApp.Repo
 ```
 
 ### Manual Installation
@@ -109,7 +109,7 @@ mix deps.get
 3. **Generate migration:**
 
 ```bash
-mix phx.kit.gen.migration add_phoenix_kit_auth_tables
+mix phoenix_kit.gen.migration add_phoenix_kit_auth_tables
 ```
 
 4. **Configure PhoenixKit:**
@@ -200,7 +200,7 @@ For better table organization, you can use PostgreSQL schemas:
 
 ```bash
 # Install with schema prefix - creates tables in 'auth' schema
-mix phx.kit.install --prefix "auth" --create-schema
+mix phoenix_kit.install --prefix "auth" --create-schema
 ```
 
 This creates tables as:
@@ -214,7 +214,7 @@ Specify a different Ecto repository:
 
 ```bash
 # Use custom repository
-mix phx.kit.install --repo MyApp.CustomRepo
+mix phoenix_kit.install --repo MyApp.CustomRepo
 ```
 
 ### Multiple Ecto Repositories
@@ -232,7 +232,7 @@ config :phoenix_kit,
 PhoenixKit uses your application's repository:
 
 ```elixir
-# config/config.exs (automatically added by igniter installation)
+# config/config.exs (automatically added by installer)
 config :phoenix_kit, repo: YourApp.Repo
 ```
 
@@ -362,7 +362,7 @@ PhoenixKit uses a professional versioned migration system:
 
 ```bash
 # Check migration status and version information
-mix phx.kit.migrate --status
+mix phoenix_kit.migrate --status
 ```
 
 ```elixir
@@ -405,7 +405,7 @@ lib/your_app_web/templates/phoenix_kit_web/
 ERROR: No repository configured for PhoenixKit
 ```
 
-Solution: Run `mix phx.kit.install --repo MyApp.Repo` or manually add config.
+Solution: Run `mix phoenix_kit.install --repo MyApp.Repo` or manually add config.
 
 **--repo parameter required**
 
@@ -413,7 +413,7 @@ Solution: Run `mix phx.kit.install --repo MyApp.Repo` or manually add config.
 ERROR: --repo is required!
 ```
 
-Solution: Always specify `--repo` parameter: `mix phx.kit.install --repo MyApp.Repo`
+Solution: Always specify `--repo` parameter: `mix phoenix_kit.install --repo MyApp.Repo`
 
 **Migration errors**
 
