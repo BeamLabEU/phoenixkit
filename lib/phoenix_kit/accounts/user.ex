@@ -11,6 +11,7 @@ defmodule PhoenixKit.Accounts.User do
   - `hashed_password`: Bcrypt-hashed password stored in database (redacted)
   - `current_password`: Virtual field for password confirmation (redacted)
   - `confirmed_at`: Timestamp when email was confirmed (nil for unconfirmed accounts)
+  - `role`: User role for authorization (user, moderator, admin)
 
   ## Security Features
 
@@ -29,6 +30,11 @@ defmodule PhoenixKit.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :naive_datetime
+    
+    # User role for authorization
+    field :role, Ecto.Enum, 
+      values: [:user, :moderator, :admin], 
+      default: :user
 
     timestamps()
   end
@@ -58,9 +64,10 @@ defmodule PhoenixKit.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :role])
     |> validate_email(opts)
     |> validate_password(opts)
+    |> validate_role()
   end
 
   defp validate_email(changeset, opts) do
@@ -178,5 +185,68 @@ defmodule PhoenixKit.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
+  end
+
+  @doc """
+  A user changeset for role changes.
+  
+  This changeset should typically only be used by administrators
+  to change user roles.
+  """
+  def role_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:role])
+    |> validate_role()
+  end
+
+  defp validate_role(changeset) do
+    changeset
+    |> validate_inclusion(:role, [:user, :moderator, :admin])
+  end
+
+  # Role checking helper functions
+
+  @doc """
+  Returns true if user has admin role.
+  """
+  def admin?(%__MODULE__{role: :admin}), do: true
+  def admin?(_), do: false
+
+  @doc """
+  Returns true if user has moderator or admin role.
+  """
+  def moderator?(%__MODULE__{role: role}) when role in [:moderator, :admin], do: true
+  def moderator?(_), do: false
+
+  @doc """
+  Returns true if user has regular user role.
+  """
+  def user?(%__MODULE__{role: :user}), do: true
+  def user?(_), do: false
+
+  @doc """
+  Returns true if user can perform moderation actions (moderator or admin).
+  """
+  def can_moderate?(%__MODULE__{role: role}) when role in [:moderator, :admin], do: true
+  def can_moderate?(_), do: false
+
+  @doc """
+  Checks if user has at least the required role level.
+  
+  Role hierarchy: user < moderator < admin
+  
+  ## Examples
+  
+      iex> user = %User{role: :admin}
+      iex> User.has_role_level?(user, :moderator)
+      true
+      
+      iex> user = %User{role: :user}
+      iex> User.has_role_level?(user, :admin)
+      false
+  """
+  def has_role_level?(%__MODULE__{role: user_role}, required_role) do
+    role_levels = %{user: 1, moderator: 2, admin: 3}
+    Map.get(role_levels, user_role, 0) >= Map.get(role_levels, required_role, 999)
   end
 end
