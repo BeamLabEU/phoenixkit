@@ -287,6 +287,7 @@ PhoenixKit creates these tables:
 - `email` - Email address (citext, unique)
 - `hashed_password` - Bcrypt hashed password
 - `confirmed_at` - Email confirmation timestamp
+- `role` - User role (user, moderator, admin) - *Added in v0.3.x*
 - `inserted_at`, `updated_at` - Timestamps
 
 ### `phoenix_kit_users_tokens` (Authentication Tokens)
@@ -457,6 +458,129 @@ config :logger, level: :debug
 PhoenixKit will automatically detect and run schema migrations. No manual intervention required.
 
 **Important:** Table names have been updated from `phoenix_kit`/`phoenix_kit_tokens` to `phoenix_kit_users`/`phoenix_kit_users_tokens`. Fresh installations will use the new names automatically.
+
+### From 0.2.x to 0.3.x - User Role System
+
+PhoenixKit v0.3.x introduces a user role system with support for `user`, `moderator`, and `admin` roles.
+
+#### What's New in v0.3.x:
+
+- 🔐 **User Roles**: Built-in support for user, moderator, and admin roles
+- 📊 **Role-based Authorization**: Helper functions for permission checking
+- 🛡️ **Backward Compatibility**: Existing users automatically get `user` role
+- 🚀 **Simple Integration**: Works with existing Phoenix plug-based authorization
+
+#### Upgrading to v0.3.x:
+
+**Step 1: Update PhoenixKit**
+
+```bash
+# Update your dependency
+mix deps.update phoenix_kit
+```
+
+**Step 2: Run Database Migration**
+
+```bash
+# Migrate to v0.3.x with role support
+mix phoenix_kit.migrate --version 3
+
+# Or check current version first
+mix phoenix_kit.migrate --status
+```
+
+**Step 3: Optional - Use Role-based Authorization**
+
+Add role-based authorization to your application:
+
+```elixir
+# lib/your_app_web/user_auth.ex
+defmodule YourAppWeb.UserAuth do
+  # ... existing functions ...
+
+  # Simple role-based authorization
+  def require_role(conn, required_role) do
+    user = conn.assigns.current_user
+    
+    if user && PhoenixKit.Accounts.User.has_role_level?(user, required_role) do
+      conn
+    else
+      conn
+      |> Phoenix.Controller.put_flash(:error, "Access denied")
+      |> Phoenix.Controller.redirect(to: "/")
+      |> Plug.Conn.halt()
+    end
+  end
+
+  # Admin only access
+  def require_admin(conn, _opts) do
+    require_role(conn, :admin)
+  end
+
+  # Moderator or admin access  
+  def require_moderator(conn, _opts) do
+    require_role(conn, :moderator)
+  end
+end
+```
+
+**Step 4: Use in Router**
+
+```elixir
+# lib/your_app_web/router.ex
+defmodule YourAppWeb.Router do
+  # ... existing pipelines ...
+  
+  # Admin-only routes
+  scope "/admin" do
+    pipe_through [:browser, :require_authenticated_user, :require_admin]
+    
+    get "/users", AdminController, :users
+    get "/settings", AdminController, :settings
+  end
+
+  # Moderator routes  
+  scope "/moderate" do
+    pipe_through [:browser, :require_authenticated_user, :require_moderator]
+    
+    get "/posts", ModerationController, :posts
+  end
+end
+```
+
+#### New Role Helper Functions:
+
+```elixir
+user = PhoenixKit.Accounts.get_user_by_email("user@example.com")
+
+# Check specific roles
+PhoenixKit.Accounts.User.admin?(user)        # true/false
+PhoenixKit.Accounts.User.moderator?(user)    # true/false  
+PhoenixKit.Accounts.User.can_moderate?(user) # true for moderator or admin
+
+# Check minimum role level
+PhoenixKit.Accounts.User.has_role_level?(user, :moderator)
+```
+
+#### Database Schema Changes:
+
+The migration adds a new `role` column to `phoenix_kit_users`:
+
+- **Column**: `role VARCHAR(20) DEFAULT 'user' NOT NULL`
+- **Index**: `phoenix_kit_users_role_index` for fast role-based queries
+- **Constraint**: Validates role values (`user`, `moderator`, `admin`)
+- **Backward Compatibility**: Existing users automatically get `user` role
+
+#### Rollback Support:
+
+If you need to rollback the role system:
+
+```bash
+# Rollback to v0.2.x (removes role column)
+mix phoenix_kit.migrate --version 2
+```
+
+**Note**: Rolling back will remove all role information from the database.
 
 ## License
 
