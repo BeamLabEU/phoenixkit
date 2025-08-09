@@ -205,6 +205,10 @@ defmodule PhoenixKitWeb.UserAuth do
   def init(opts), do: opts
 
   @doc false
+  def call(conn, :fetch_current_user),
+    do: fetch_current_user(conn, [])
+
+  @doc false
   def call(conn, :phoenix_kit_redirect_if_user_is_authenticated),
     do: redirect_if_user_is_authenticated(conn, [])
 
