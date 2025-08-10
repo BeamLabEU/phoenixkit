@@ -1,7 +1,7 @@
 defmodule PhoenixKit.Migrations.Postgres.V04 do
   @moduledoc """
   Migration V04: Add roles2 field to phoenix_kit_users table
-  
+
   Adds secondary role field with enum-like values:
   - guest (default)
   - member
@@ -24,7 +24,10 @@ defmodule PhoenixKit.Migrations.Postgres.V04 do
     end
 
     # Create index for fast roles2-based queries
-    create_if_not_exists index(table_name, [:roles2], prefix: prefix, name: "#{prefix}phoenix_kit_users_roles2_index")
+    create_if_not_exists index(table_name, [:roles2],
+                           prefix: prefix,
+                           name: "#{prefix}phoenix_kit_users_roles2_index"
+                         )
 
     # Add constraint for value validation
     execute """
@@ -44,7 +47,10 @@ defmodule PhoenixKit.Migrations.Postgres.V04 do
     """
 
     # Remove index
-    drop_if_exists index(table_name, [:roles2], prefix: prefix, name: "#{prefix}phoenix_kit_users_roles2_index")
+    drop_if_exists index(table_name, [:roles2],
+                     prefix: prefix,
+                     name: "#{prefix}phoenix_kit_users_roles2_index"
+                   )
 
     # Remove roles2 column
     alter table(table_name, prefix: prefix) do

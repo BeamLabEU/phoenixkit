@@ -44,15 +44,20 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix ecto.reset` - Drop and recreate database with fresh data
 - `mix ecto.setup` - Create database, run migrations, and seed data
 
-### PhoenixKit Migration System
+### PhoenixKit Installation System
 
-- `mix phoenix_kit.install` - Install PhoenixKit using igniter (recommended)
-- `mix phoenix_kit.migrate --status` - ⚠️ Check migration status (requires configured repo)
+- `mix phoenix_kit.install` - Install PhoenixKit using igniter (for new projects)
+- `mix phoenix_kit.update` - Update existing PhoenixKit installation to latest version
+- `mix phoenix_kit.update --status` - Check current version and available updates
 - **Professional versioned migrations** - Oban-style migration system with version tracking
 - **Prefix support** - Isolate PhoenixKit tables using PostgreSQL schemas
 - **Idempotent operations** - Safe to run migrations multiple times
+- **Multi-version upgrades** - Automatically handles upgrades across multiple versions
 
-**Note:** `phoenix_kit.migrate --status` requires a configured repository to work.
+**Installation vs Update:**
+- Use `phoenix_kit.install` for new projects (first-time setup)
+- Use `phoenix_kit.update` for upgrading existing installations
+- Install will redirect to update if PhoenixKit is already installed
 
 ### Testing
 
@@ -116,7 +121,7 @@ This ensures consistent code formatting across the project.
 
 - **Current Version**: 0.1.3 (in mix.exs)
 - **Version Strategy**: Semantic versioning (MAJOR.MINOR.PATCH)
-- **Migration Version**: V01 (current auth tables)
+- **Migration Version**: V04 (includes user roles and secondary role systems)
 - **Database Versioning**: Professional system with version tracking in table comments
 
 ### 🚀 Pre-Release Checklist

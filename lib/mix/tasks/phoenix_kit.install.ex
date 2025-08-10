@@ -77,7 +77,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     |> add_completion_notice()
   end
 
-  # Add PhoenixKit configuration to config/config.exs
+  # Add PhoenixKit configuration to config files
   defp add_phoenix_kit_configuration(igniter, custom_repo) do
     case find_or_detect_repo(igniter, custom_repo) do
       {igniter, nil} ->
@@ -99,10 +99,17 @@ defmodule Mix.Tasks.PhoenixKit.Install do
         Igniter.add_warning(igniter, warning)
 
       {igniter, repo_module} ->
-        # Use configure_new to avoid duplicating existing config
-        Igniter.Project.Config.configure_new(
-          igniter,
+        igniter
+        # Add repo config to main config.exs
+        |> Igniter.Project.Config.configure_new(
           "config.exs",
+          :phoenix_kit,
+          [:repo],
+          repo_module
+        )
+        # Also add repo config to test.exs for testing
+        |> Igniter.Project.Config.configure_new(
+          "test.exs",
           :phoenix_kit,
           [:repo],
           repo_module
@@ -128,7 +135,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     )
   end
 
-  # Add notice about production mailer configuration
+  # Add notice about mailer configuration
   defp add_mailer_production_notice(igniter) do
     notice = """
 
@@ -154,21 +161,51 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   # Find specified repo or auto-detect from project
   defp find_or_detect_repo(igniter, nil) do
-    # Auto-detect repo from ecto_repos configuration
+    # Try multiple methods to find repos
+
+    # Method 1: Use Igniter's Ecto lib
     case Igniter.Libs.Ecto.list_repos(igniter) do
-      {igniter, []} ->
-        # Try multiple fallback methods to find repo
-        case auto_detect_repo_by_name(igniter) do
-          {igniter, nil} ->
-            auto_detect_repo_by_scanning(igniter)
-
-          {igniter, repo} ->
-            validate_postgres_adapter(igniter, repo)
-        end
-
       {igniter, [repo | _]} ->
-        # Use first repo found and validate PostgreSQL
+        IO.puts("DEBUG: Found repo from Igniter.Libs.Ecto: #{inspect(repo)}")
         validate_postgres_adapter(igniter, repo)
+
+      {igniter, []} ->
+        IO.puts("DEBUG: No repos found via Igniter.Libs.Ecto")
+
+        # Method 2: Try Application config directly
+        parent_app_name = Mix.Project.config()[:app]
+        IO.puts("DEBUG: Parent app name: #{inspect(parent_app_name)}")
+
+        case Application.get_env(parent_app_name, :ecto_repos, []) do
+          [repo | _] ->
+            IO.puts("DEBUG: Found repo from Application config: #{inspect(repo)}")
+            validate_postgres_adapter(igniter, repo)
+
+          [] ->
+            IO.puts("DEBUG: No repos in Application config, trying naming patterns")
+
+            # Method 3: Try common naming patterns
+            case parent_app_name do
+              nil ->
+                IO.puts("DEBUG: Parent app name is nil")
+                {igniter, nil}
+
+              app_name ->
+                # Try most common pattern: AppName.Repo
+                repo_module = Module.concat([Macro.camelize(to_string(app_name)), "Repo"])
+                IO.puts("DEBUG: Trying repo module: #{inspect(repo_module)}")
+
+                case Igniter.Project.Module.module_exists(igniter, repo_module) do
+                  {true, igniter} ->
+                    IO.puts("DEBUG: Found repo module: #{inspect(repo_module)}")
+                    validate_postgres_adapter(igniter, repo_module)
+
+                  {false, igniter} ->
+                    IO.puts("DEBUG: Repo module does not exist: #{inspect(repo_module)}")
+                    {igniter, nil}
+                end
+            end
+        end
     end
   end
 
@@ -185,94 +222,27 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     end
   end
 
-  # Try to auto-detect repo by common naming patterns
-  defp auto_detect_repo_by_name(igniter) do
-    case Igniter.Project.Application.app_name(igniter) do
-      nil ->
-        # Can't determine app name, skip this method
-        {igniter, nil}
-
-      app_name ->
-        # Try common repo patterns
-        repo_patterns = [
-          Module.concat([Macro.camelize(to_string(app_name)), "Repo"]),
-          Module.concat([Macro.camelize(to_string(app_name)) <> "Web", "Repo"]),
-          Module.concat([Macro.camelize(to_string(app_name)), "Data", "Repo"])
-        ]
-
-        find_existing_repo(igniter, repo_patterns)
-    end
-  end
-
-  # Try to auto-detect repo by scanning project files
-  defp auto_detect_repo_by_scanning(igniter) do
-    # Look for modules that use Ecto.Repo
-    {igniter, all_modules} =
-      Igniter.Project.Module.find_all_matching_modules(igniter, fn _module, zipper ->
-        case Igniter.Code.Module.move_to_use(zipper, Ecto.Repo) do
-          {:ok, _} -> true
-          :error -> false
-        end
-      end)
-
-    case all_modules do
-      [] ->
-        {igniter, nil}
-
-      [repo | _] ->
-        validate_postgres_adapter(igniter, repo)
-    end
-  end
-
-  # Helper to find existing repo from patterns
-  defp find_existing_repo(igniter, []), do: {igniter, nil}
-
-  defp find_existing_repo(igniter, [repo_module | rest]) do
-    case Igniter.Project.Module.module_exists(igniter, repo_module) do
-      {true, igniter} ->
-        validate_postgres_adapter(igniter, repo_module)
-
-      {false, igniter} ->
-        find_existing_repo(igniter, rest)
-    end
-  end
-
   # Validate that the repo uses PostgreSQL adapter
   defp validate_postgres_adapter(igniter, repo_module) do
-    {_igniter, _source, zipper} = Igniter.Project.Module.find_module!(igniter, repo_module)
+    IO.puts("DEBUG: Validating PostgreSQL adapter for #{inspect(repo_module)}")
 
-    # Look for "use Ecto.Repo" with adapter configuration
-    case Igniter.Code.Module.move_to_use(zipper, Ecto.Repo) do
-      {:ok, _use_zipper} ->
-        # For now, we can't reliably detect the adapter from AST
-        # So we'll add a helpful notice about PostgreSQL requirement
-        notice = """
+    # If Igniter.Libs.Ecto.list_repos found this repo, it's already valid
+    # No need for complex AST parsing - trust Igniter's detection
+    notice = """
 
-        ℹ️  Database Adapter Check
+    ℹ️  Database Configuration
 
-        PhoenixKit requires PostgreSQL. Please ensure #{inspect(repo_module)} is configured with:
+    PhoenixKit will use #{inspect(repo_module)} as the database repository.
+    Please ensure it's configured with PostgreSQL adapter:
 
-          adapter: Ecto.Adapters.Postgres
+      adapter: Ecto.Adapters.Postgres
 
-        If you're using a different database adapter (MySQL, SQLite), 
-        PhoenixKit installation will fail during migration.
-        """
+    If you're using a different database (MySQL, SQLite), migration will fail.
+    """
 
-        Igniter.add_notice(igniter, notice)
-        {igniter, repo_module}
-
-      :error ->
-        # Repo doesn't use Ecto.Repo properly
-        warning = """
-        Invalid Ecto Repository
-
-        #{inspect(repo_module)} does not appear to be a valid Ecto repository.
-        PhoenixKit requires a properly configured Ecto.Repo with PostgreSQL adapter.
-        """
-
-        Igniter.add_warning(igniter, warning)
-        {igniter, nil}
-    end
+    igniter = Igniter.add_notice(igniter, notice)
+    IO.puts("DEBUG: Repo #{inspect(repo_module)} validated successfully")
+    {igniter, repo_module}
   end
 
   # Add PhoenixKit integration to router
@@ -289,10 +259,20 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   # Find router using Igniter.Libs.Phoenix
   defp find_router(igniter, nil) do
-    Igniter.Libs.Phoenix.select_router(
-      igniter,
-      "Which router should be used for PhoenixKit routes?"
-    )
+    # Check if this is the PhoenixKit library itself (not a real Phoenix app)
+    case Igniter.Project.Application.app_name(igniter) do
+      :phoenix_kit ->
+        # This is the PhoenixKit library itself, skip router integration
+        IO.puts("DEBUG: Detected PhoenixKit library project, skipping router integration")
+        {igniter, nil}
+
+      _ ->
+        # This is a real Phoenix app, proceed with router selection
+        Igniter.Libs.Phoenix.select_router(
+          igniter,
+          "Which router should be used for PhoenixKit routes?"
+        )
+    end
   end
 
   defp find_router(igniter, custom_path) do
@@ -487,16 +467,44 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     prefix = opts[:prefix] || "public"
     create_schema = opts[:create_schema] != false && prefix != "public"
 
-    # Check if this is a new installation or upgrade
+    # Check if this is a new installation or existing installation
     case determine_migration_strategy(igniter, prefix) do
       {:new_install, igniter} ->
         create_initial_migration(igniter, prefix, create_schema)
 
       {:upgrade_needed, igniter, current_version, target_version} ->
-        create_upgrade_migration(igniter, prefix, create_schema, current_version, target_version)
+        # Redirect to update task instead of handling upgrade here
+        notice = """
+
+        📦 PhoenixKit is already installed (V#{pad_version(current_version)}).
+
+        To update to the latest version (V#{pad_version(target_version)}), please use:
+          mix phoenix_kit.update#{if prefix != "public", do: " --prefix=#{prefix}", else: ""}
+
+        To check current status:
+          mix phoenix_kit.update --status#{if prefix != "public", do: " --prefix=#{prefix}", else: ""}
+        """
+
+        # Add notice early in pipeline so it appears first
+        igniter = Igniter.add_notice(igniter, notice)
+
+        # Return igniter without creating migration
+        igniter
 
       {:up_to_date, igniter} ->
-        Igniter.add_notice(igniter, "PhoenixKit is already up to date.")
+        # Redirect to update task for status check
+        notice = """
+
+        ✅ PhoenixKit is already installed and up to date.
+
+        To check current status:
+          mix phoenix_kit.update --status#{if prefix != "public", do: " --prefix=#{prefix}", else: ""}
+
+        To force reinstall:
+          mix phoenix_kit.update --force#{if prefix != "public", do: " --prefix=#{prefix}", else: ""}
+        """
+
+        Igniter.add_notice(igniter, notice)
         igniter
 
       {:error, igniter, reason} ->
@@ -519,17 +527,31 @@ defmodule Mix.Tasks.PhoenixKit.Install do
             # No existing PhoenixKit migrations
             {:new_install, igniter}
 
-          existing_migrations ->
-            # Check current and target versions
-            current_version = extract_highest_version_from_migrations(existing_migrations)
-            target_version = get_phoenix_kit_current_version()
+          _existing_migrations ->
+            # Check current and target versions using proper DB method
+            # Default prefix for install
+            prefix = "public"
+            opts = %{prefix: prefix, escaped_prefix: String.replace(prefix, "'", "\\'")}
 
-            cond do
-              current_version < target_version ->
+            try do
+              current_version = PhoenixKit.Migrations.Postgres.migrated_version(opts)
+              target_version = PhoenixKit.Migrations.Postgres.current_version()
+
+              cond do
+                current_version < target_version ->
+                  {:upgrade_needed, igniter, current_version, target_version}
+
+                current_version >= target_version ->
+                  {:up_to_date, igniter}
+              end
+            rescue
+              _ ->
+                # If DB not accessible but migration files exist, this is an update case
+                # Migration files exist but haven't been run yet
+                # No DB table = version 0
+                current_version = 0
+                target_version = PhoenixKit.Migrations.Postgres.current_version()
                 {:upgrade_needed, igniter, current_version, target_version}
-
-              current_version >= target_version ->
-                {:up_to_date, igniter}
             end
         end
     end
@@ -567,60 +589,11 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
         📦 PhoenixKit Initial Installation Created:
         - Migration: #{migration_file}
-        - This will install PhoenixKit version #{get_phoenix_kit_current_version()} (latest)
+        - This will install PhoenixKit version #{PhoenixKit.Migrations.Postgres.current_version()} (latest)
 
         Next steps:
           1. Run: mix ecto.migrate
           2. PhoenixKit will be ready to use!
-        """
-
-        Igniter.add_notice(igniter, notice)
-    end
-  end
-
-  # Create upgrade migration for existing installation
-  defp create_upgrade_migration(igniter, prefix, create_schema, current_version, target_version) do
-    case Igniter.Project.Application.app_name(igniter) do
-      nil ->
-        Igniter.add_warning(igniter, "Could not determine app name for upgrade migration")
-
-      app_name ->
-        timestamp = generate_timestamp()
-
-        migration_file =
-          "#{timestamp}_upgrade_phoenix_kit_v#{pad_version(current_version)}_to_v#{pad_version(target_version)}.exs"
-
-        migration_path = Path.join(["priv", "repo", "migrations", migration_file])
-
-        module_name =
-          "#{Macro.camelize(to_string(app_name))}.Repo.Migrations.UpgradePhoenixKitV#{pad_version(current_version)}ToV#{pad_version(target_version)}"
-
-        migration_opts = migration_opts(prefix, create_schema)
-
-        migration_content = """
-        defmodule #{module_name} do
-          use Ecto.Migration
-
-          def up, do: PhoenixKit.Migrations.up([version: #{target_version}] ++ #{migration_opts})
-
-          def down, do: PhoenixKit.Migrations.down([version: #{current_version}] ++ #{migration_opts})
-        end
-        """
-
-        igniter = Igniter.create_new_file(igniter, migration_path, migration_content)
-
-        notice = """
-
-        🔄 PhoenixKit Upgrade Migration Created:
-        - Migration: #{migration_file}
-        - Upgrading from version #{current_version} to #{target_version}
-
-        New features in version #{target_version}:
-        #{describe_version_changes(current_version, target_version)}
-
-        Next steps:
-          1. Run: mix ecto.migrate
-          2. New PhoenixKit features will be available!
         """
 
         Igniter.add_notice(igniter, notice)
@@ -644,58 +617,6 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     end
   rescue
     _ -> []
-  end
-
-  # Extract highest version from existing migrations
-  defp extract_highest_version_from_migrations(migration_files) do
-    migration_files
-    |> Enum.map(&extract_version_from_migration_file/1)
-    |> Enum.filter(&(&1 != nil))
-    |> case do
-      [] -> 0
-      versions -> Enum.max(versions)
-    end
-  end
-
-  # Extract version from migration file content
-  defp extract_version_from_migration_file(file_path) do
-    case File.read(file_path) do
-      {:ok, content} ->
-        # Look for version: X pattern
-        case Regex.run(~r/version:\s*(\d+)/, content) do
-          [_, version_str] ->
-            String.to_integer(version_str)
-
-          _ ->
-            # Fallback: if no version specified, assume it's version 1
-            if String.contains?(content, "PhoenixKit.Migrations.up") do
-              1
-            else
-              nil
-            end
-        end
-
-      _ ->
-        nil
-    end
-  end
-
-  # Get current PhoenixKit version from source
-  defp get_phoenix_kit_current_version do
-    # This should match @current_version in postgres.ex
-    # Updated to current version we set earlier
-    2
-  end
-
-  # Describe what changed between versions
-  defp describe_version_changes(from_version, to_version) do
-    changes =
-      case {from_version, to_version} do
-        {1, 2} -> "- Added phoenix_kit_ai table for AI configuration management"
-        {_, _} -> "- Various improvements and new features"
-      end
-
-    changes
   end
 
   # Pad version number for consistent naming

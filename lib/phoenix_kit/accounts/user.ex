@@ -31,10 +31,10 @@ defmodule PhoenixKit.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :naive_datetime
-    
+
     # User role for authorization
-    field :role, Ecto.Enum, 
-      values: [:user, :moderator, :admin], 
+    field :role, Ecto.Enum,
+      values: [:user, :moderator, :admin],
       default: :user
 
     # Secondary role system
@@ -196,7 +196,7 @@ defmodule PhoenixKit.Accounts.User do
 
   @doc """
   A user changeset for role changes.
-  
+
   This changeset should typically only be used by administrators
   to change user roles.
   """
@@ -208,7 +208,7 @@ defmodule PhoenixKit.Accounts.User do
 
   @doc """
   A user changeset for roles2 changes.
-  
+
   This changeset can be used to manage secondary role system.
   """
   def roles2_changeset(user, attrs) do
@@ -255,11 +255,11 @@ defmodule PhoenixKit.Accounts.User do
 
   @doc """
   Checks if user has at least the required role level.
-  
+
   Role hierarchy: user < moderator < admin
-  
+
   ## Examples
-  
+
       iex> user = %User{role: :admin}
       iex> User.has_role_level?(user, :moderator)
       true
@@ -307,11 +307,11 @@ defmodule PhoenixKit.Accounts.User do
 
   @doc """
   Checks if user has at least the required roles2 level.
-  
+
   Roles2 hierarchy: guest < member < editor < owner
-  
+
   ## Examples
-  
+
       iex> user = %User{roles2: :owner}
       iex> User.has_roles2_level?(user, :editor)
       true

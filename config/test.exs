@@ -1,4 +1,6 @@
 import Config
+config :phoenix_kit, repo: PhoenixKit.Repo
+config :phoenix_kit, PhoenixKit.Mailer, adapter: Swoosh.Adapters.Test
 
 # Only in tests, remove the complexity from the password hashing algorithm
 config :bcrypt_elixir, :log_rounds, 1

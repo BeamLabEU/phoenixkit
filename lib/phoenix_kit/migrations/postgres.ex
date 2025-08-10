@@ -78,6 +78,51 @@ defmodule PhoenixKit.Migrations.Postgres do
     end
   end
 
+  @doc """
+  Get current migrated version from database in runtime context (outside migrations).
+
+  This function can be called from Mix tasks and other non-migration contexts.
+  """
+  def migrated_version_runtime(opts) do
+    opts = with_defaults(opts, @initial_version)
+    escaped_prefix = Map.fetch!(opts, :escaped_prefix)
+
+    query = """
+    SELECT pg_catalog.obj_description(pg_class.oid, 'pg_class')
+    FROM pg_class
+    LEFT JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
+    WHERE pg_class.relname = 'phoenix_kit'
+    AND pg_namespace.nspname = '#{escaped_prefix}'
+    """
+
+    # Get repo from Application config (runtime context)
+    repo = Application.get_env(:phoenix_kit, :repo)
+
+    case repo do
+      nil ->
+        0
+
+      repo ->
+        # Start the parent application first to ensure repo is available
+        app = get_repo_app(repo)
+
+        if app do
+          Mix.Tasks.App.Start.run([to_string(app)])
+        end
+
+        # Use Ecto.Adapters.SQL.query which should work now
+        case Ecto.Adapters.SQL.query(repo, query, [], log: false) do
+          {:ok, %{rows: [[version]]}} when is_binary(version) -> String.to_integer(version)
+          {:ok, %{rows: []}} -> 0
+          # Table exists but no version comment - assume version 1
+          {:ok, %{rows: [[nil]]}} -> 1
+          _ -> 0
+        end
+    end
+  rescue
+    _ -> 0
+  end
+
   defp change(range, direction, opts) do
     for index <- range do
       pad_idx = String.pad_leading(to_string(index), 2, "0")
@@ -102,6 +147,24 @@ defmodule PhoenixKit.Migrations.Postgres do
   defp record_version(%{prefix: prefix}, version) do
     # Use execute for migration context
     execute "COMMENT ON TABLE #{inspect(prefix)}.phoenix_kit IS '#{version}'"
+  end
+
+  # Get the application that owns the repo module
+  defp get_repo_app(repo) do
+    case :application.get_application(repo) do
+      {:ok, app} ->
+        app
+
+      :undefined ->
+        # Fallback: try to guess from module name
+        case Module.split(repo) do
+          [app_name | _] ->
+            String.to_atom(Macro.underscore(app_name))
+
+          _ ->
+            nil
+        end
+    end
   end
 
   defp with_defaults(opts, version) do

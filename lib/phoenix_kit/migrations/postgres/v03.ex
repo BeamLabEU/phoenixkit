@@ -1,7 +1,7 @@
 defmodule PhoenixKit.Migrations.Postgres.V03 do
   @moduledoc """
   Migration V03: Add role field to phoenix_kit_users table
-  
+
   Adds user role support with enum-like values:
   - user (default)
   - moderator  
@@ -23,7 +23,10 @@ defmodule PhoenixKit.Migrations.Postgres.V03 do
     end
 
     # Create index for fast role-based queries
-    create_if_not_exists index(table_name, [:role], prefix: prefix, name: "#{prefix}phoenix_kit_users_role_index")
+    create_if_not_exists index(table_name, [:role],
+                           prefix: prefix,
+                           name: "#{prefix}phoenix_kit_users_role_index"
+                         )
 
     # Add constraint for value validation
     execute """
@@ -43,7 +46,10 @@ defmodule PhoenixKit.Migrations.Postgres.V03 do
     """
 
     # Remove index
-    drop_if_exists index(table_name, [:role], prefix: prefix, name: "#{prefix}phoenix_kit_users_role_index")
+    drop_if_exists index(table_name, [:role],
+                     prefix: prefix,
+                     name: "#{prefix}phoenix_kit_users_role_index"
+                   )
 
     # Remove role column
     alter table(table_name, prefix: prefix) do
