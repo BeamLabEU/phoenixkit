@@ -182,23 +182,20 @@ defmodule PhoenixKit.LayoutConfig do
     if module == PhoenixKitWeb.Layouts do
       {module, template}
     else
-      # For external modules, try multiple validation approaches
+      # For external modules, trust that they will be available at runtime
+      # Skip validation during compilation phase - just return the module
       cond do
-        # First check: module is already loaded
-        Code.ensure_loaded?(module) ->
-          {module, template}
+        # During active application runtime, validate module exists
+        Process.whereis(:application_controller) != nil and
+            Application.get_application(module) != nil ->
+          if Code.ensure_loaded?(module) do
+            {module, template}
+          else
+            log_missing_module_warning(module, fallback)
+            fallback
+          end
 
-        # Second check: try to load module (may fail during compilation)
-        match?({:module, _}, Code.ensure_loaded(module)) ->
-          {module, template}
-
-        # Third check: assume external modules will be available at runtime
-        # Only warn if we're in a running application context (not compilation)
-        Process.whereis(:application_controller) != nil ->
-          log_missing_module_warning(module, fallback)
-          fallback
-
-        # During compilation, trust that external modules will be available
+        # During compilation or when module's app is not loaded, trust configuration
         true ->
           {module, template}
       end

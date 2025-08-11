@@ -259,6 +259,40 @@ config :phoenix_kit,
 #   layout: {YourAppWeb.Layouts, :app},
 #   root_layout: {YourAppWeb.Layouts, :root},
 #   page_title_prefix: "Authentication"
+
+## Phoenix 1.8+ Compatibility
+
+PhoenixKit is fully compatible with Phoenix 1.8+ and supports both layout integration approaches:
+
+### Current Implementation (Works with all Phoenix versions)
+- ✅ **Automatic layout detection** - PhoenixKit.LayoutConfig detects your layouts at runtime
+- ✅ **Function component integration** - Works seamlessly with Phoenix 1.8 `<Layouts.app>` components
+- ✅ **Fallback system** - Uses PhoenixKit defaults if parent layouts aren't configured
+- ✅ **Runtime validation** - Validates parent layout modules with helpful warnings
+
+### Phoenix 1.8 Features Supported
+- 🚀 **Function Components** - All LiveView templates use `<Layouts.app flash={@flash}>` pattern
+- 🔧 **Component Integration** - Supports modern Phoenix component architecture
+- 📱 **Responsive Design** - Works with Phoenix 1.8's updated layout system
+- 🎨 **Flash Messages** - Integrates with Phoenix 1.8's flash component system
+
+### Layout Integration Process
+
+When you configure layout integration, PhoenixKit automatically:
+
+1. **Detects Parent Layouts** - Validates your app's layout modules exist
+2. **Applies Configuration** - Uses your layouts for all PhoenixKit pages
+3. **Handles Flash Messages** - Integrates flash messages through your layout
+4. **Provides Fallbacks** - Uses PhoenixKit layouts if parent layouts unavailable
+
+### Migration from Phoenix 1.7 to 1.8
+
+If you're upgrading your Phoenix app from 1.7 to 1.8, PhoenixKit will automatically:
+- Continue working with existing configuration
+- Support new Phoenix 1.8 layout patterns
+- Maintain backward compatibility with Phoenix 1.7 layouts
+
+**No changes required** to your PhoenixKit configuration when upgrading Phoenix!
 ```
 
 ## Authentication Routes

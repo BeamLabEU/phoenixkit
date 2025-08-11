@@ -142,6 +142,7 @@ defmodule Mix.Tasks.PhoenixKit.Update do
 
           current_version < target_version || force ->
             create_update_migration(prefix, current_version, target_version, force)
+            suggest_layout_integration_if_needed()
 
           true ->
             Mix.shell().info("No update needed.")
@@ -307,4 +308,85 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   # Pad version number for consistent naming
   defp pad_version(version) when version < 10, do: "0#{version}"
   defp pad_version(version), do: to_string(version)
+
+  # Suggest layout integration if parent app has layouts but PhoenixKit not configured
+  defp suggest_layout_integration_if_needed() do
+    case check_layout_integration_status() do
+      :already_configured ->
+        # Layout integration already configured, do nothing
+        :ok
+
+      {:suggest_integration, layouts_module} ->
+        Mix.shell().info("""
+
+        🎨 Layout Integration Available:
+
+        Your app has layouts (#{inspect(layouts_module)}), but PhoenixKit
+        is using its default layouts. To match your app's design:
+
+        Add to config/config.exs:
+          config :phoenix_kit,
+            layout: {#{inspect(layouts_module)}, :app},
+            root_layout: {#{inspect(layouts_module)}, :root},  # Optional
+            page_title_prefix: "Auth"                          # Optional
+
+        This will make PhoenixKit authentication pages use your app's design.
+        """)
+
+      :no_layouts_found ->
+        # No parent layouts detected, keep using PhoenixKit defaults
+        :ok
+    end
+  end
+
+  # Check if layout integration should be suggested
+  defp check_layout_integration_status() do
+    # Check if PhoenixKit layout is already configured
+    current_layout_config = Application.get_env(:phoenix_kit, :layout)
+
+    case current_layout_config do
+      {_module, _template} ->
+        # Layout integration already configured
+        :already_configured
+
+      _ ->
+        # No layout configured, check if parent app has layouts
+        case detect_parent_app_layouts() do
+          nil -> :no_layouts_found
+          layouts_module -> {:suggest_integration, layouts_module}
+        end
+    end
+  end
+
+  # Detect parent app layouts following Phoenix conventions
+  defp detect_parent_app_layouts() do
+    case Mix.Project.get() do
+      nil ->
+        nil
+
+      project ->
+        app_name = project.project()[:app]
+
+        if app_name && app_name != :phoenix_kit do
+          # Try common Phoenix layout module patterns
+          app_web_module = Module.concat([Macro.camelize(to_string(app_name)) <> "Web"])
+          layouts_module = Module.concat([app_web_module, "Layouts"])
+
+          if Code.ensure_loaded?(layouts_module) do
+            layouts_module
+          else
+            # Try alternative pattern
+            alt_layouts = Module.concat([Macro.camelize(to_string(app_name)), "Layouts"])
+
+            if Code.ensure_loaded?(alt_layouts) do
+              alt_layouts
+            else
+              nil
+            end
+          end
+        else
+          nil
+        end
+    end
+  end
 end

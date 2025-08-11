@@ -5,7 +5,7 @@ defmodule PhoenixKitWeb.UserSettingsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-base-200 py-8">
+    <div class="min-h-[80vh] bg-base-200 py-8">
       <div class="max-w-2xl mx-auto px-4">
         <div class="text-center mb-8">
           <h1 class="text-4xl font-bold mb-2">Account Settings</h1>

@@ -72,6 +72,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     igniter
     |> add_phoenix_kit_configuration(opts[:repo])
     |> add_mailer_configuration()
+    |> add_layout_integration_configuration()
     |> add_router_integration(opts[:router_path])
     |> create_or_upgrade_phoenix_kit_migration(opts)
     |> add_completion_notice()
@@ -154,6 +155,105 @@ defmodule Mix.Tasks.PhoenixKit.Install do
         password: System.get_env("SMTP_PASSWORD")
 
       # Or cloud services: SendGrid, Mailgun, Postmark, etc.
+    """
+
+    Igniter.add_notice(igniter, notice)
+  end
+
+  # Add layout integration configuration
+  defp add_layout_integration_configuration(igniter) do
+    case detect_app_layouts(igniter) do
+      {igniter, nil} ->
+        # No layouts detected, use PhoenixKit defaults
+        add_layout_integration_notice(igniter, :no_layouts_detected)
+
+      {igniter, {layouts_module, _}} ->
+        # Add layout configuration to config.exs
+        igniter
+        |> add_layout_config(layouts_module)
+        |> add_layout_integration_notice(:layouts_detected)
+    end
+  end
+
+  # Detect app layouts using Igniter.Libs.Phoenix
+  defp detect_app_layouts(igniter) do
+    case Igniter.Project.Application.app_name(igniter) do
+      nil ->
+        {igniter, nil}
+
+      app_name ->
+        # Try to detect layouts module following Phoenix conventions
+        app_web_module = Module.concat([Macro.camelize(to_string(app_name)) <> "Web"])
+        layouts_module = Module.concat([app_web_module, "Layouts"])
+
+        case Igniter.Project.Module.module_exists(igniter, layouts_module) do
+          {true, igniter} ->
+            # Layouts module exists, check if it has app function
+            {igniter, {layouts_module, :app}}
+
+          {false, igniter} ->
+            # Try alternative patterns like MyApp.Layouts
+            alt_layouts_module = Module.concat([Macro.camelize(to_string(app_name)), "Layouts"])
+
+            case Igniter.Project.Module.module_exists(igniter, alt_layouts_module) do
+              {true, igniter} ->
+                {igniter, {alt_layouts_module, :app}}
+
+              {false, igniter} ->
+                {igniter, nil}
+            end
+        end
+    end
+  end
+
+  # Add layout configuration to config.exs
+  defp add_layout_config(igniter, layouts_module) do
+    # Add layout configuration
+    Igniter.Project.Config.configure_new(
+      igniter,
+      "config.exs",
+      :phoenix_kit,
+      [:layout],
+      {layouts_module, :app}
+    )
+    # Optionally add root_layout if detected
+    |> Igniter.Project.Config.configure_new(
+      "config.exs",
+      :phoenix_kit,
+      [:root_layout],
+      {layouts_module, :root}
+    )
+  end
+
+  # Add notice about layout integration
+  defp add_layout_integration_notice(igniter, :layouts_detected) do
+    notice = """
+
+    🎨 Layout Integration Configured:
+    - PhoenixKit will use your app's layouts for authentication pages
+    - Configuration added to config/config.exs with layout and root_layout
+    - PhoenixKit pages will match your app's design automatically
+
+    💡 Optional: Add page_title_prefix for custom page titles:
+      config :phoenix_kit, page_title_prefix: "Auth"
+    """
+
+    Igniter.add_notice(igniter, notice)
+  end
+
+  defp add_layout_integration_notice(igniter, :no_layouts_detected) do
+    notice = """
+
+    🎨 Layout Integration Available:
+    - PhoenixKit will use its default layouts
+    - To integrate with your app's design, add to config/config.exs:
+
+      config :phoenix_kit,
+        layout: {YourAppWeb.Layouts, :app},
+        root_layout: {YourAppWeb.Layouts, :root},  # Optional
+        page_title_prefix: "Auth"                  # Optional
+
+    📖 See README.md for complete layout integration guide
     """
 
     Igniter.add_notice(igniter, notice)

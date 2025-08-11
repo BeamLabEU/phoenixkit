@@ -6,7 +6,7 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
 
   def render(assigns) do
     ~H"""
-    <div class="hero bg-base-200 min-h-screen">
+    <div class="hero bg-base-200 py-8 min-h-[80vh]">
       <div class="hero-content flex-col lg:flex-row-reverse">
         <!-- Welcome Section (Left side on desktop) -->
         <div class="text-center lg:text-left">

@@ -28,9 +28,11 @@ defmodule PhoenixKitWeb do
 
   def controller do
     quote do
+      {layout_module, _} = PhoenixKit.LayoutConfig.get_layout()
+
       use Phoenix.Controller,
         formats: [:html, :json],
-        layouts: [html: PhoenixKitWeb.Layouts]
+        layouts: [html: layout_module]
 
       import Plug.Conn
       use Gettext, backend: PhoenixKitWeb.Gettext

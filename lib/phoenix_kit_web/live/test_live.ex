@@ -3,7 +3,7 @@ defmodule PhoenixKitWeb.TestLive do
 
   def render(assigns) do
     ~H"""
-    <div class="hero min-h-screen bg-base-200">
+    <div class="hero py-8 min-h-[80vh] bg-base-200">
       <div class="hero-content text-center">
         <div class="max-w-md">
           <h1 class="text-5xl font-bold">LiveView Test</h1>
