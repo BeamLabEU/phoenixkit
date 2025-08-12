@@ -557,7 +557,16 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   # Add phoenix_kit_routes() call to router
   defp add_routes_call_to_router_module(igniter, router_module) do
     Igniter.Project.Module.find_and_update_module!(igniter, router_module, fn zipper ->
-      routes_code = "phoenix_kit_routes()"
+      routes_code = """
+      #   scope "/", PhoenixKitWeb do
+      #     live_session :zenclock_phoenix_kit_auth,
+      #       on_mount: [{PhoenixKitWeb.UserAuth, :ensure_authenticated}] do
+      #       live "/test", TestLive, :index 
+      #     end
+      #   end
+      phoenix_kit_routes()
+      """
+
       {:ok, Igniter.Code.Common.add_code(zipper, routes_code, placement: :after)}
     end)
   end

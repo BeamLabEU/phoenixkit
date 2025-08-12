@@ -94,7 +94,7 @@ defmodule PhoenixKitWeb.Integration do
 
         live_session :phoenix_kit_redirect_if_user_is_authenticated,
           on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}] do
-          live "/test", TestLive, :index
+          # live "/test", TestLive, :index  # Moved to require_authenticated section
           live "/register", UserRegistrationLive, :new
           live "/log_in", UserLoginLive, :new
           live "/reset_password", UserForgotPasswordLive, :new
@@ -109,6 +109,7 @@ defmodule PhoenixKitWeb.Integration do
 
         live_session :phoenix_kit_require_authenticated_user,
           on_mount: [{PhoenixKitWeb.UserAuth, :ensure_authenticated}] do
+          # live "/test", TestLive, :index
           live "/settings", UserSettingsLive, :edit
           live "/settings/confirm_email/:token", UserSettingsLive, :confirm_email
         end
