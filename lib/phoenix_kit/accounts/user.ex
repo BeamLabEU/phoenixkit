@@ -11,8 +11,6 @@ defmodule PhoenixKit.Accounts.User do
   - `hashed_password`: Bcrypt-hashed password stored in database (redacted)
   - `current_password`: Virtual field for password confirmation (redacted)
   - `confirmed_at`: Timestamp when email was confirmed (nil for unconfirmed accounts)
-  - `role`: User role for authorization (user, moderator, admin)
-  - `roles2`: Secondary user role (guest, member, editor, owner)
 
   ## Security Features
 
@@ -31,16 +29,6 @@ defmodule PhoenixKit.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :naive_datetime
-
-    # User role for authorization
-    field :role, Ecto.Enum,
-      values: [:user, :moderator, :admin],
-      default: :user
-
-    # Secondary role system
-    field :roles2, Ecto.Enum,
-      values: [:guest, :member, :editor, :owner],
-      default: :guest
 
     timestamps()
   end
@@ -70,11 +58,9 @@ defmodule PhoenixKit.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :role, :roles2])
+    |> cast(attrs, [:email, :password])
     |> validate_email(opts)
     |> validate_password(opts)
-    |> validate_role()
-    |> validate_roles2()
   end
 
   defp validate_email(changeset, opts) do
@@ -192,136 +178,5 @@ defmodule PhoenixKit.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
-  end
-
-  @doc """
-  A user changeset for role changes.
-
-  This changeset should typically only be used by administrators
-  to change user roles.
-  """
-  def role_changeset(user, attrs) do
-    user
-    |> cast(attrs, [:role])
-    |> validate_role()
-  end
-
-  @doc """
-  A user changeset for roles2 changes.
-
-  This changeset can be used to manage secondary role system.
-  """
-  def roles2_changeset(user, attrs) do
-    user
-    |> cast(attrs, [:roles2])
-    |> validate_roles2()
-  end
-
-  defp validate_role(changeset) do
-    changeset
-    |> validate_inclusion(:role, [:user, :moderator, :admin])
-  end
-
-  defp validate_roles2(changeset) do
-    changeset
-    |> validate_inclusion(:roles2, [:guest, :member, :editor, :owner])
-  end
-
-  # Role checking helper functions
-
-  @doc """
-  Returns true if user has admin role.
-  """
-  def admin?(%__MODULE__{role: :admin}), do: true
-  def admin?(_), do: false
-
-  @doc """
-  Returns true if user has moderator or admin role.
-  """
-  def moderator?(%__MODULE__{role: role}) when role in [:moderator, :admin], do: true
-  def moderator?(_), do: false
-
-  @doc """
-  Returns true if user has regular user role.
-  """
-  def user?(%__MODULE__{role: :user}), do: true
-  def user?(_), do: false
-
-  @doc """
-  Returns true if user can perform moderation actions (moderator or admin).
-  """
-  def can_moderate?(%__MODULE__{role: role}) when role in [:moderator, :admin], do: true
-  def can_moderate?(_), do: false
-
-  @doc """
-  Checks if user has at least the required role level.
-
-  Role hierarchy: user < moderator < admin
-
-  ## Examples
-
-      iex> user = %User{role: :admin}
-      iex> User.has_role_level?(user, :moderator)
-      true
-      
-      iex> user = %User{role: :user}
-      iex> User.has_role_level?(user, :admin)
-      false
-  """
-  def has_role_level?(%__MODULE__{role: user_role}, required_role) do
-    role_levels = %{user: 1, moderator: 2, admin: 3}
-    Map.get(role_levels, user_role, 0) >= Map.get(role_levels, required_role, 999)
-  end
-
-  # Roles2 checking helper functions
-
-  @doc """
-  Returns true if user has owner roles2.
-  """
-  def owner?(%__MODULE__{roles2: :owner}), do: true
-  def owner?(_), do: false
-
-  @doc """
-  Returns true if user has editor or owner roles2.
-  """
-  def editor?(%__MODULE__{roles2: roles2}) when roles2 in [:editor, :owner], do: true
-  def editor?(_), do: false
-
-  @doc """
-  Returns true if user has member, editor or owner roles2.
-  """
-  def member?(%__MODULE__{roles2: roles2}) when roles2 in [:member, :editor, :owner], do: true
-  def member?(_), do: false
-
-  @doc """
-  Returns true if user has guest roles2.
-  """
-  def guest?(%__MODULE__{roles2: :guest}), do: true
-  def guest?(_), do: false
-
-  @doc """
-  Returns true if user can edit content (editor or owner).
-  """
-  def can_edit?(%__MODULE__{roles2: roles2}) when roles2 in [:editor, :owner], do: true
-  def can_edit?(_), do: false
-
-  @doc """
-  Checks if user has at least the required roles2 level.
-
-  Roles2 hierarchy: guest < member < editor < owner
-
-  ## Examples
-
-      iex> user = %User{roles2: :owner}
-      iex> User.has_roles2_level?(user, :editor)
-      true
-      
-      iex> user = %User{roles2: :guest}
-      iex> User.has_roles2_level?(user, :member)
-      false
-  """
-  def has_roles2_level?(%__MODULE__{roles2: user_roles2}, required_roles2) do
-    roles2_levels = %{guest: 1, member: 2, editor: 3, owner: 4}
-    Map.get(roles2_levels, user_roles2, 0) >= Map.get(roles2_levels, required_roles2, 999)
   end
 end

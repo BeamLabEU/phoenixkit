@@ -73,6 +73,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     |> add_phoenix_kit_configuration(opts[:repo])
     |> add_mailer_configuration()
     |> add_layout_integration_configuration()
+    |> copy_test_demo_files()
     |> add_router_integration(opts[:router_path])
     |> create_or_upgrade_phoenix_kit_migration(opts)
     |> add_completion_notice()
@@ -136,25 +137,12 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     )
   end
 
-  # Add notice about mailer configuration
+  # Add brief notice about mailer configuration
   defp add_mailer_production_notice(igniter) do
     notice = """
 
-    📧 Mailer Configuration Added:
-    - Development: Swoosh.Adapters.Local (emails shown in browser)
-
-    ⚠️  IMPORTANT: Without mailer configuration, user registration will fail!
-
-    For production, configure appropriate adapter in config/prod.exs:
-
-      # Example with SMTP
-      config :phoenix_kit, PhoenixKit.Mailer,
-        adapter: Swoosh.Adapters.SMTP,
-        relay: "smtp.gmail.com",
-        username: System.get_env("SMTP_USERNAME"),
-        password: System.get_env("SMTP_PASSWORD")
-
-      # Or cloud services: SendGrid, Mailgun, Postmark, etc.
+    📧 Development mailer configured (Swoosh.Adapters.Local)
+    ⚠️  Production: Configure mailer in config/prod.exs
     """
 
     Igniter.add_notice(igniter, notice)
@@ -208,54 +196,76 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   # Add layout configuration to config.exs
   defp add_layout_config(igniter, layouts_module) do
-    # Add layout configuration
-    Igniter.Project.Config.configure_new(
-      igniter,
+    # Add layout configuration with inline comments
+    igniter
+    |> add_layout_config_with_comments(layouts_module)
+    |> recompile_phoenix_kit_dependency()
+  end
+
+  # Add layout configuration with comments
+  defp add_layout_config_with_comments(igniter, layouts_module) do
+    # First add layout config using standard Igniter methods
+    igniter
+    |> Igniter.Project.Config.configure_new(
       "config.exs",
       :phoenix_kit,
       [:layout],
       {layouts_module, :app}
     )
-    # Optionally add root_layout if detected
     |> Igniter.Project.Config.configure_new(
       "config.exs",
       :phoenix_kit,
       [:root_layout],
       {layouts_module, :root}
     )
+    # Then add comment above layout config
+    |> add_comment_to_layout_config()
+    |> add_manual_comment_instruction(layouts_module)
   end
 
-  # Add notice about layout integration
-  defp add_layout_integration_notice(igniter, :layouts_detected) do
-    notice = """
+  # Add comment above layout configuration in config file
+  defp add_comment_to_layout_config(igniter) do
+    config_path = "config/config.exs"
 
-    🎨 Layout Integration Configured:
-    - PhoenixKit will use your app's layouts for authentication pages
-    - Configuration added to config/config.exs with layout and root_layout
-    - PhoenixKit pages will match your app's design automatically
+    Igniter.update_file(igniter, config_path, fn source ->
+      content = Rewrite.Source.get(source, :content)
 
-    💡 Optional: Add page_title_prefix for custom page titles:
-      config :phoenix_kit, page_title_prefix: "Auth"
-    """
+      # Only add comment if it doesn't already exist
+      if String.contains?(
+           content,
+           "# IMPORTANT: After changing these settings, run: mix deps.compile phoenix_kit --force"
+         ) do
+        # Comment already exists, no changes needed
+        source
+      else
+        # Add comment before layout line
+        updated_content =
+          String.replace(
+            content,
+            "layout:",
+            "# IMPORTANT: After changing these settings, run: mix deps.compile phoenix_kit --force\n  layout:",
+            # Only replace first occurrence
+            global: false
+          )
 
+        Rewrite.Source.update(source, :content, updated_content)
+      end
+    end)
+  end
+
+  # Add brief reminder about recompilation
+  defp add_manual_comment_instruction(igniter, _layouts_module) do
+    notice = "🎨 Layout integration configured"
     Igniter.add_notice(igniter, notice)
   end
 
+  # Skip redundant layout notice since already covered
+  defp add_layout_integration_notice(igniter, :layouts_detected) do
+    igniter
+  end
+
   defp add_layout_integration_notice(igniter, :no_layouts_detected) do
-    notice = """
-
-    🎨 Layout Integration Available:
-    - PhoenixKit will use its default layouts
-    - To integrate with your app's design, add to config/config.exs:
-
-      config :phoenix_kit,
-        layout: {YourAppWeb.Layouts, :app},
-        root_layout: {YourAppWeb.Layouts, :root},  # Optional
-        page_title_prefix: "Auth"                  # Optional
-
-    📖 See README.md for complete layout integration guide
-    """
-
+    notice = "💡 To integrate with your app's design, see layout configuration in README.md"
     Igniter.add_notice(igniter, notice)
   end
 
@@ -325,22 +335,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   # Validate that the repo uses PostgreSQL adapter
   defp validate_postgres_adapter(igniter, repo_module) do
     IO.puts("DEBUG: Validating PostgreSQL adapter for #{inspect(repo_module)}")
-
-    # If Igniter.Libs.Ecto.list_repos found this repo, it's already valid
-    # No need for complex AST parsing - trust Igniter's detection
-    notice = """
-
-    ℹ️  Database Configuration
-
-    PhoenixKit will use #{inspect(repo_module)} as the database repository.
-    Please ensure it's configured with PostgreSQL adapter:
-
-      adapter: Ecto.Adapters.Postgres
-
-    If you're using a different database (MySQL, SQLite), migration will fail.
-    """
-
-    igniter = Igniter.add_notice(igniter, notice)
+    # Trust Igniter's detection - no need for verbose notices
     IO.puts("DEBUG: Repo #{inspect(repo_module)} validated successfully")
     {igniter, repo_module}
   end
@@ -557,36 +552,37 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   # Add phoenix_kit_routes() call to router
   defp add_routes_call_to_router_module(igniter, router_module) do
     Igniter.Project.Module.find_and_update_module!(igniter, router_module, fn zipper ->
+      # Get parent app name for module construction
+      app_name = Igniter.Project.Application.app_name(igniter)
+
+      app_web_module_name =
+        if app_name && app_name != :phoenix_kit do
+          "#{Macro.camelize(to_string(app_name))}Web"
+        else
+          "YourAppWeb"
+        end
+
       routes_code = """
-      # 1. Test phoenix_kit_current_user (always mounts)
-      scope "/", PhoenixKitWeb do
-        pipe_through [:browser, :phoenix_kit_auto_setup]
+      # PhoenixKit Demo Pages - Test Authentication Levels
+      scope "/" do
+        pipe_through :browser
 
-        live_session :test_phoenix_kit_current_user,
+        live_session :phoenix_kit_demo_current_user,
           on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
-          live "/test-current-user", TestRequireAuthLive, :index
+          live "/test-current-user", #{app_web_module_name}.PhoenixKitDemo.TestRequireAuthLive, :index
         end
-      end
 
-      # 2. Test phoenix_kit_redirect_if_user_is_authenticated  
-      scope "/", PhoenixKitWeb do
-        pipe_through [:browser, :phoenix_kit_auto_setup]
-
-        live_session :test_phoenix_kit_redirect_if_auth,
+        live_session :phoenix_kit_demo_redirect_if_auth,
           on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}] do
-          live "/test-redirect-if-auth", TestRedirectIfAuthLive, :index
+          live "/test-redirect-if-auth", #{app_web_module_name}.PhoenixKitDemo.TestRedirectIfAuthLive, :index
         end
-      end
 
-      # 3. Test phoenix_kit_require_authenticated_user
-      scope "/", PhoenixKitWeb do
-        pipe_through [:browser, :phoenix_kit_auto_setup]
-
-        live_session :test_phoenix_kit_require_auth,
+        live_session :phoenix_kit_demo_ensure_auth,
           on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated}] do
-          live "/test-ensure-auth", TestEnsureAuthLive, :index
+          live "/test-ensure-auth", #{app_web_module_name}.PhoenixKitDemo.TestEnsureAuthLive, :index
         end
       end
+
       phoenix_kit_routes()
       """
 
@@ -775,7 +771,264 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   defp pad(i) when i < 10, do: <<?0, ?0 + i>>
   defp pad(i), do: to_string(i)
 
-  # Add completion notice with next steps
+  # Recompile PhoenixKit dependency to pick up layout configuration changes
+  defp recompile_phoenix_kit_dependency(igniter) do
+    # Since this is running during installation, we need to recompile the dependency
+    # to ensure the layout configuration changes are picked up immediately
+    recompile_notice = """
+
+    🔄 Recompiling PhoenixKit to apply layout configuration...
+    """
+
+    igniter = Igniter.add_notice(igniter, recompile_notice)
+
+    # Run the recompilation in the background using System.cmd instead of Mix task
+    # to avoid potential issues with Mix state during Igniter execution
+    try do
+      {output, exit_code} =
+        System.cmd("mix", ["deps.compile", "phoenix_kit", "--force"], stderr_to_stdout: true)
+
+      if exit_code == 0 do
+        success_notice = "✅ PhoenixKit dependency recompiled successfully!"
+        Igniter.add_notice(igniter, success_notice)
+      else
+        warning_notice =
+          "⚠️ Could not automatically recompile PhoenixKit dependency. Output: #{String.slice(output, 0, 200)}"
+
+        Igniter.add_warning(igniter, warning_notice)
+      end
+    rescue
+      _ ->
+        warning_notice =
+          "⚠️ Could not automatically recompile PhoenixKit dependency. Please run: mix deps.compile phoenix_kit --force"
+
+        Igniter.add_warning(igniter, warning_notice)
+    end
+  end
+
+  # Copy test demo files to parent project
+  defp copy_test_demo_files(igniter) do
+    case Igniter.Project.Application.app_name(igniter) do
+      nil ->
+        Igniter.add_warning(igniter, "Could not determine app name for copying test demo files")
+
+      :phoenix_kit ->
+        # This is the PhoenixKit library itself, skip copying test files
+        igniter
+
+      app_name ->
+        app_web_module = Module.concat([Macro.camelize(to_string(app_name)) <> "Web"])
+
+        # Create demo directory path - manually construct lib path
+        app_web_dir = Macro.underscore(to_string(app_name)) <> "_web"
+        demo_dir = Path.join(["lib", app_web_dir, "live", "phoenix_kit_demo"])
+
+        igniter
+        |> copy_test_file("test_ensure_auth_live.ex", demo_dir, app_web_module)
+        |> copy_test_file("test_redirect_if_auth_live.ex", demo_dir, app_web_module)
+        |> copy_test_file("test_require_auth_live.ex", demo_dir, app_web_module)
+        |> add_test_demo_notice()
+    end
+  end
+
+  # Copy a single test file to demo directory using embedded content
+  defp copy_test_file(igniter, filename, demo_dir, app_web_module) do
+    dest_path = Path.join([demo_dir, filename])
+
+    content = get_embedded_test_file_content(filename)
+
+    if content do
+      # First update use statement to avoid conflicts
+      app_web_module_string = inspect(app_web_module)
+
+      updated_content =
+        String.replace(
+          content,
+          "use PhoenixKitWeb, :live_view",
+          "use #{app_web_module_string}, :live_view"
+        )
+
+      # Then replace module names (but not the use statement)
+      updated_content =
+        String.replace(
+          updated_content,
+          "defmodule PhoenixKitWeb",
+          "defmodule #{app_web_module_string}.PhoenixKitDemo"
+        )
+
+      Igniter.create_new_file(igniter, dest_path, updated_content)
+    else
+      Igniter.add_warning(igniter, "Unknown test file: #{filename}")
+    end
+  end
+
+  # Get embedded content for test files
+  defp get_embedded_test_file_content("test_ensure_auth_live.ex") do
+    """
+    defmodule PhoenixKitWeb.TestEnsureAuthLive do
+      @moduledoc \"\"\"
+      Test component for phoenix_kit_ensure_authenticated authentication level.
+      This page should only be accessible to authenticated users using PhoenixKit auth.
+      \"\"\"
+      use PhoenixKitWeb, :live_view
+
+      def render(assigns) do
+        ~H\"\"\"
+        <div class="hero py-8 min-h-[80vh] bg-success">
+          <div class="hero-content text-center">
+            <div class="max-w-md">
+              <h1 class="text-5xl font-bold text-success-content">phoenix_kit_ensure_authenticated</h1>
+              <div class="py-6 text-success-content">
+                <p class="mb-4">
+                  This page is protected by PhoenixKit <code>phoenix_kit_ensure_authenticated</code>.
+                  You can only see this if you are logged in through PhoenixKit auth system.
+                </p>
+
+                <%= if @current_user do %>
+                  <div class="alert alert-info">
+                    <div>
+                      <h3 class="font-bold">Welcome, authenticated user!</h3>
+                      <div class="text-sm">
+                        <p><strong>Email:</strong> {@current_user.email}</p>
+                        <p><strong>User ID:</strong> {@current_user.id}</p>
+                        <%= if @current_user.confirmed_at do %>
+                          <p><strong>Account:</strong> Confirmed at {@current_user.confirmed_at}</p>
+                        <% else %>
+                          <p><strong>Account:</strong> Not yet confirmed</p>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% else %>
+                  <div class="alert alert-error">
+                    <div>
+                      <p>This should never be visible - authentication is required!</p>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+              <div class="badge badge-success">PhoenixKit Authentication: REQUIRED</div>
+            </div>
+          </div>
+        </div>
+        \"\"\"
+      end
+
+      def mount(_params, _session, socket) do
+        {:ok, socket}
+      end
+    end
+    """
+  end
+
+  defp get_embedded_test_file_content("test_redirect_if_auth_live.ex") do
+    """
+    defmodule PhoenixKitWeb.TestRedirectIfAuthLive do
+      @moduledoc \"\"\"
+      Test component for redirect_if_user_is_authenticated authentication level.
+      This page should redirect authenticated users away (like login/register pages).
+      \"\"\"
+      use PhoenixKitWeb, :live_view
+
+      def render(assigns) do
+        ~H\"\"\"
+        <div class="hero py-8 min-h-[80vh] bg-base-300">
+          <div class="hero-content text-center">
+            <div class="max-w-md">
+              <h1 class="text-5xl font-bold text-warning">redirect_if_user_is_authenticated</h1>
+              <p class="py-6">
+                This page is protected by <code>redirect_if_user_is_authenticated</code> authentication.
+                If you are logged in, you should be redirected away from this page.
+              </p>
+              <div class="badge badge-warning">Authentication: REDIRECT IF LOGGED IN</div>
+            </div>
+          </div>
+        </div>
+        \"\"\"
+      end
+
+      def mount(_params, _session, socket) do
+        {:ok, socket}
+      end
+    end
+    """
+  end
+
+  defp get_embedded_test_file_content("test_require_auth_live.ex") do
+    """
+    defmodule PhoenixKitWeb.TestRequireAuthLive do
+      @moduledoc \"\"\"
+      Test component for phoenix_kit_mount_current_user authentication level.
+      This page shows current user information without requiring authentication.
+      \"\"\"
+      use PhoenixKitWeb, :live_view
+
+      def render(assigns) do
+        ~H\"\"\"
+        <div class="hero py-8 min-h-[80vh] bg-info">
+          <div class="hero-content text-center">
+            <div class="max-w-md">
+              <h1 class="text-5xl font-bold text-info-content">phoenix_kit_mount_current_user</h1>
+              <div class="py-6 text-info-content">
+                <p class="mb-4">
+                  This page uses PhoenixKit <code>phoenix_kit_mount_current_user</code>.
+                  It mounts current user without requiring authentication.
+                </p>
+
+                <%= if @current_user do %>
+                  <div class="alert alert-success">
+                    <div>
+                      <h3 class="font-bold">User is logged in!</h3>
+                      <div class="text-sm">
+                        <p><strong>Email:</strong> {@current_user.email}</p>
+                        <p><strong>ID:</strong> {@current_user.id}</p>
+                        <%= if @current_user.confirmed_at do %>
+                          <p><strong>Status:</strong> Confirmed</p>
+                        <% else %>
+                          <p><strong>Status:</strong> Not confirmed</p>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% else %>
+                  <div class="alert alert-warning">
+                    <div>
+                      <h3 class="font-bold">No user logged in</h3>
+                      <p class="text-sm">Page is accessible but current_user is nil</p>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+              <div class="badge badge-info">PhoenixKit Mount: ALWAYS ACCESSIBLE</div>
+            </div>
+          </div>
+        </div>
+        \"\"\"
+      end
+
+      def mount(_params, _session, socket) do
+        {:ok, socket}
+      end
+    end
+    """
+  end
+
+  defp get_embedded_test_file_content(_), do: nil
+
+  # Add notice about demo files
+  defp add_test_demo_notice(igniter) do
+    notice = """
+
+    📄 Test demo pages copied to your app:
+    - lib/*_web/live/phoenix_kit_demo/
+
+    These demonstrate PhoenixKit authentication levels.
+    """
+
+    Igniter.add_notice(igniter, notice)
+  end
+
+  # Add completion notice with essential next steps
   defp add_completion_notice(igniter) do
     notice = """
 
@@ -783,16 +1036,11 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
     Next steps:
       1. Run: mix ecto.migrate
-      2. Start your Phoenix server: mix phx.server
-      3. Visit /phoenix_kit/register to test user registration
+      2. Start server: mix phx.server  
+      3. Visit /phoenix_kit/register
+      4. Test demo pages: /test-current-user, /test-redirect-if-auth, /test-ensure-auth
 
-    📚 Visit /phoenix_kit routes for complete authentication system:
-      - User registration and login
-      - Password reset and email confirmation
-      - User settings and profile management
-
-    ⚡ PhoenixKit routes work independently of your app's browser pipeline
-       and are automatically configured for LiveView forms.
+    💡 Layout changes require: mix deps.compile phoenix_kit --force
     """
 
     Igniter.add_notice(igniter, notice)

@@ -33,7 +33,7 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   PhoenixKit uses a versioned migration system similar to Oban. Each version
   contains specific database schema changes that can be applied incrementally.
 
-  Current version: V04 (includes user roles and secondary role systems)
+  Current version: V02 (includes AI settings table)
 
   ## Safe Updates
 
@@ -272,21 +272,6 @@ defmodule Mix.Tasks.PhoenixKit.Update do
     case {from_version, to_version} do
       {1, 2} ->
         "- Added phoenix_kit_ai table for AI configuration management"
-
-      {2, 3} ->
-        "- Added role field to phoenix_kit_users (user, moderator, admin)"
-
-      {3, 4} ->
-        "- Added roles2 field to phoenix_kit_users (guest, member, editor, owner)"
-
-      {1, 3} ->
-        "- Added phoenix_kit_ai table for AI configuration management\n- Added role field to phoenix_kit_users (user, moderator, admin)"
-
-      {1, 4} ->
-        "- Added phoenix_kit_ai table for AI configuration management\n- Added role field to phoenix_kit_users (user, moderator, admin)\n- Added roles2 field to phoenix_kit_users (guest, member, editor, owner)"
-
-      {2, 4} ->
-        "- Added role field to phoenix_kit_users (user, moderator, admin)\n- Added roles2 field to phoenix_kit_users (guest, member, editor, owner)"
 
       {0, _} ->
         "- Complete PhoenixKit installation with all features"

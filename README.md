@@ -223,8 +223,7 @@ If you have multiple repos, PhoenixKit will auto-detect the first one, or specif
 
 ```elixir
 # config/config.exs
-config :phoenix_kit,
-  repo: MyApp.AuthRepo  # Use specific repo for auth
+![alt text](image.png) # Use specific repo for auth
 ```
 
 ## Configuration
@@ -259,6 +258,22 @@ config :phoenix_kit,
 #   layout: {YourAppWeb.Layouts, :app},
 #   root_layout: {YourAppWeb.Layouts, :root},
 #   page_title_prefix: "Authentication"
+
+### ⚠️ Important: Recompilation Required
+
+When you modify layout configuration, you **must** recompile PhoenixKit:
+
+```bash
+mix deps.compile phoenix_kit --force
+```
+
+**Why?** Elixir configuration is compiled at build-time. Changes to `config/config.exs` won't take effect until PhoenixKit is recompiled.
+
+**When to recompile:**
+- After adding layout configuration
+- After changing `layout` or `root_layout` values  
+- After modifying `page_title_prefix`
+- When layout integration stops working after config changes
 
 ## Phoenix 1.8+ Compatibility
 
@@ -338,6 +353,64 @@ PhoenixKit creates these tables:
 - Professional versioning system tracks schema changes
 - Enables safe upgrades and rollbacks
 - Current version: 1.0.0
+
+## Requirements & Configuration
+
+### Database Requirements
+
+PhoenixKit requires **PostgreSQL** as the database adapter:
+
+```elixir
+# config/config.exs (your repository configuration)
+config :your_app, YourApp.Repo,
+  adapter: Ecto.Adapters.Postgres,  # Required
+  # ... your database settings
+```
+
+**Supported databases:**
+- ✅ PostgreSQL (required)
+- ❌ MySQL, SQLite, other databases not supported
+
+If you're using a different database, PhoenixKit migration will fail with clear error messages.
+
+### Email Configuration
+
+PhoenixKit requires email configuration for user registration and password reset:
+
+#### Development Setup (Automatic)
+```elixir
+# config/dev.exs (automatically added by installer)
+config :phoenix_kit, PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.Local  # Emails shown at /dev/mailbox
+```
+
+#### Production Setup (Required)
+Configure a production email adapter in `config/prod.exs`:
+
+```elixir
+# Example: SMTP Configuration
+config :phoenix_kit, PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.gmail.com",
+  username: System.get_env("SMTP_USERNAME"),
+  password: System.get_env("SMTP_PASSWORD"),
+  port: 587,
+  auth: :always,
+  tls: :always
+
+# Example: SendGrid
+config :phoenix_kit, PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.Sendgrid,
+  api_key: System.get_env("SENDGRID_API_KEY")
+
+# Example: Mailgun  
+config :phoenix_kit, PhoenixKit.Mailer,
+  adapter: Swoosh.Adapters.Mailgun,
+  api_key: System.get_env("MAILGUN_API_KEY"),
+  domain: System.get_env("MAILGUN_DOMAIN")
+```
+
+**⚠️ Important**: Without proper mailer configuration, user registration and password reset will fail.
 
 ## API Usage
 

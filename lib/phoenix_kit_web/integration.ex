@@ -47,6 +47,7 @@ defmodule PhoenixKitWeb.Integration do
   - GET /phoenix_kit/settings/confirm_email/:token - Email confirmation
   - GET /phoenix_kit/confirm/:token - Account confirmation
   - GET /phoenix_kit/confirm - Resend confirmation instructions
+  - GET /phoenix_kit/magic_link/:token - Magic link verification
 
   ## Configuration
 
@@ -86,6 +87,7 @@ defmodule PhoenixKitWeb.Integration do
 
         delete "/log_out", UserSessionController, :delete
         get "/log_out", UserSessionController, :get_logout
+        get "/magic_link/:token", UserMagicLinkController, :verify
       end
 
       # LiveView routes with proper authentication
