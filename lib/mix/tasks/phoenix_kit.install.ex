@@ -558,12 +558,35 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   defp add_routes_call_to_router_module(igniter, router_module) do
     Igniter.Project.Module.find_and_update_module!(igniter, router_module, fn zipper ->
       routes_code = """
-      #   scope "/", PhoenixKitWeb do
-      #     live_session :zenclock_phoenix_kit_auth,
-      #       on_mount: [{PhoenixKitWeb.UserAuth, :ensure_authenticated}] do
-      #       live "/test", TestLive, :index 
-      #     end
-      #   end
+      # 1. Test phoenix_kit_current_user (always mounts)
+      scope "/", PhoenixKitWeb do
+        pipe_through [:browser, :phoenix_kit_auto_setup]
+
+        live_session :test_phoenix_kit_current_user,
+          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
+          live "/test-current-user", TestRequireAuthLive, :index
+        end
+      end
+
+      # 2. Test phoenix_kit_redirect_if_user_is_authenticated  
+      scope "/", PhoenixKitWeb do
+        pipe_through [:browser, :phoenix_kit_auto_setup]
+
+        live_session :test_phoenix_kit_redirect_if_auth,
+          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}] do
+          live "/test-redirect-if-auth", TestRedirectIfAuthLive, :index
+        end
+      end
+
+      # 3. Test phoenix_kit_require_authenticated_user
+      scope "/", PhoenixKitWeb do
+        pipe_through [:browser, :phoenix_kit_auto_setup]
+
+        live_session :test_phoenix_kit_require_auth,
+          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated}] do
+          live "/test-ensure-auth", TestEnsureAuthLive, :index
+        end
+      end
       phoenix_kit_routes()
       """
 

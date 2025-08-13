@@ -102,13 +102,13 @@ defmodule PhoenixKitWeb.Integration do
         end
 
         live_session :phoenix_kit_current_user,
-          on_mount: [{PhoenixKitWeb.UserAuth, :mount_current_user}] do
+          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
           live "/confirm/:token", UserConfirmationLive, :edit
           live "/confirm", UserConfirmationInstructionsLive, :new
         end
 
         live_session :phoenix_kit_require_authenticated_user,
-          on_mount: [{PhoenixKitWeb.UserAuth, :ensure_authenticated}] do
+          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated}] do
           # live "/test", TestLive, :index
           live "/settings", UserSettingsLive, :edit
           live "/settings/confirm_email/:token", UserSettingsLive, :confirm_email
