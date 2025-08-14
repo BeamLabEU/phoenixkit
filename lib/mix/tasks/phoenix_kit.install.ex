@@ -276,42 +276,31 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     # Method 1: Use Igniter's Ecto lib
     case Igniter.Libs.Ecto.list_repos(igniter) do
       {igniter, [repo | _]} ->
-        IO.puts("DEBUG: Found repo from Igniter.Libs.Ecto: #{inspect(repo)}")
         validate_postgres_adapter(igniter, repo)
 
       {igniter, []} ->
-        IO.puts("DEBUG: No repos found via Igniter.Libs.Ecto")
-
         # Method 2: Try Application config directly
         parent_app_name = Mix.Project.config()[:app]
-        IO.puts("DEBUG: Parent app name: #{inspect(parent_app_name)}")
 
         case Application.get_env(parent_app_name, :ecto_repos, []) do
           [repo | _] ->
-            IO.puts("DEBUG: Found repo from Application config: #{inspect(repo)}")
             validate_postgres_adapter(igniter, repo)
 
           [] ->
-            IO.puts("DEBUG: No repos in Application config, trying naming patterns")
-
             # Method 3: Try common naming patterns
             case parent_app_name do
               nil ->
-                IO.puts("DEBUG: Parent app name is nil")
                 {igniter, nil}
 
               app_name ->
                 # Try most common pattern: AppName.Repo
                 repo_module = Module.concat([Macro.camelize(to_string(app_name)), "Repo"])
-                IO.puts("DEBUG: Trying repo module: #{inspect(repo_module)}")
 
                 case Igniter.Project.Module.module_exists(igniter, repo_module) do
                   {true, igniter} ->
-                    IO.puts("DEBUG: Found repo module: #{inspect(repo_module)}")
                     validate_postgres_adapter(igniter, repo_module)
 
                   {false, igniter} ->
-                    IO.puts("DEBUG: Repo module does not exist: #{inspect(repo_module)}")
                     {igniter, nil}
                 end
             end
@@ -334,9 +323,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   # Validate that the repo uses PostgreSQL adapter
   defp validate_postgres_adapter(igniter, repo_module) do
-    IO.puts("DEBUG: Validating PostgreSQL adapter for #{inspect(repo_module)}")
     # Trust Igniter's detection - no need for verbose notices
-    IO.puts("DEBUG: Repo #{inspect(repo_module)} validated successfully")
     {igniter, repo_module}
   end
 
@@ -358,15 +345,24 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     case Igniter.Project.Application.app_name(igniter) do
       :phoenix_kit ->
         # This is the PhoenixKit library itself, skip router integration
-        IO.puts("DEBUG: Detected PhoenixKit library project, skipping router integration")
         {igniter, nil}
 
-      _ ->
-        # This is a real Phoenix app, proceed with router selection
-        Igniter.Libs.Phoenix.select_router(
-          igniter,
-          "Which router should be used for PhoenixKit routes?"
-        )
+      app_name ->
+        # Try to auto-detect router first based on app name
+        app_web_module = Module.concat([Macro.camelize(to_string(app_name)) <> "Web"])
+        router_module = Module.concat([app_web_module, "Router"])
+
+        case Igniter.Project.Module.module_exists(igniter, router_module) do
+          {true, igniter} ->
+            {igniter, router_module}
+
+          {false, igniter} ->
+            # Fallback to Igniter's router selection
+            Igniter.Libs.Phoenix.select_router(
+              igniter,
+              "Which router should be used for PhoenixKit routes?"
+            )
+        end
     end
   end
 
@@ -569,17 +565,17 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
         live_session :phoenix_kit_demo_current_user,
           on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
-          live "/test-current-user", #{app_web_module_name}.PhoenixKitDemo.TestRequireAuthLive, :index
+          live "/test-current-user", #{app_web_module_name}.PhoenixKitLive.TestRequireAuthLive, :index
         end
 
         live_session :phoenix_kit_demo_redirect_if_auth,
           on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}] do
-          live "/test-redirect-if-auth", #{app_web_module_name}.PhoenixKitDemo.TestRedirectIfAuthLive, :index
+          live "/test-redirect-if-auth", #{app_web_module_name}.PhoenixKitLive.TestRedirectIfAuthLive, :index
         end
 
         live_session :phoenix_kit_demo_ensure_auth,
           on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated}] do
-          live "/test-ensure-auth", #{app_web_module_name}.PhoenixKitDemo.TestEnsureAuthLive, :index
+          live "/test-ensure-auth", #{app_web_module_name}.PhoenixKitLive.TestEnsureAuthLive, :index
         end
       end
 
@@ -819,9 +815,9 @@ defmodule Mix.Tasks.PhoenixKit.Install do
       app_name ->
         app_web_module = Module.concat([Macro.camelize(to_string(app_name)) <> "Web"])
 
-        # Create demo directory path - ensure live directory is included
+        # Create demo directory path - directly in app_web as phoenix_kit_live
         app_web_dir = Macro.underscore(to_string(app_name)) <> "_web"
-        demo_dir = Path.join(["lib", app_web_dir, "live", "phoenix_kit_demo"])
+        demo_dir = Path.join([app_web_dir, "phoenix_kit_live"])
 
         igniter
         |> copy_test_file("test_ensure_auth_live.ex", demo_dir, app_web_module)
@@ -833,8 +829,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
   # Copy a single test file to demo directory using embedded content
   defp copy_test_file(igniter, filename, demo_dir, app_web_module) do
-    dest_path = Path.join([demo_dir, filename])
-
+    # Create files in live/ directory with proper notifications
     content = get_embedded_test_file_content(filename)
 
     if content do
@@ -853,9 +848,11 @@ defmodule Mix.Tasks.PhoenixKit.Install do
         String.replace(
           updated_content,
           "defmodule PhoenixKitWeb",
-          "defmodule #{app_web_module_string}.PhoenixKitDemo"
+          "defmodule #{app_web_module_string}.PhoenixKitLive"
         )
 
+      # Create file in phoenix_kit_demo directory
+      dest_path = Path.join(["lib", demo_dir, filename])
       Igniter.create_new_file(igniter, dest_path, updated_content)
     else
       Igniter.add_warning(igniter, "Unknown test file: #{filename}")
@@ -1020,7 +1017,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     notice = """
 
     📄 Test demo pages copied to your app:
-    - lib/*_web/live/phoenix_kit_demo/
+    - lib/*_web/phoenix_kit_live/
 
     These demonstrate PhoenixKit authentication levels.
     """

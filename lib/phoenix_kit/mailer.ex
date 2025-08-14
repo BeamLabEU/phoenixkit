@@ -83,7 +83,7 @@ defmodule PhoenixKit.Mailer do
     """
   end
 
-  # Text version of the magic link email  
+  # Text version of the magic link email
   defp magic_link_text_body(%User{} = user, magic_link_url) do
     """
     Secure Login Link

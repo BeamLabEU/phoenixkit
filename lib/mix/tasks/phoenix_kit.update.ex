@@ -295,7 +295,7 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   defp pad_version(version), do: to_string(version)
 
   # Suggest layout integration if parent app has layouts but PhoenixKit not configured
-  defp suggest_layout_integration_if_needed() do
+  defp suggest_layout_integration_if_needed do
     case check_layout_integration_status() do
       :already_configured ->
         # Layout integration already configured, do nothing
@@ -325,7 +325,7 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   end
 
   # Check if layout integration should be suggested
-  defp check_layout_integration_status() do
+  defp check_layout_integration_status do
     # Check if PhoenixKit layout is already configured
     current_layout_config = Application.get_env(:phoenix_kit, :layout)
 
@@ -344,7 +344,7 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   end
 
   # Detect parent app layouts following Phoenix conventions
-  defp detect_parent_app_layouts() do
+  defp detect_parent_app_layouts do
     case Mix.Project.get() do
       nil ->
         nil

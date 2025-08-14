@@ -96,7 +96,7 @@ defmodule PhoenixKit.ConfigEnv do
     |> maybe_put(:repo, detect_repo())
   end
 
-  # Load Phoenix application configuration  
+  # Load Phoenix application configuration
   defp load_phoenix_config(config) do
     config
     |> maybe_put(:secret_key_base, System.get_env("SECRET_KEY_BASE"))
@@ -142,7 +142,7 @@ defmodule PhoenixKit.ConfigEnv do
 
   defp parse_port(port_string) when is_binary(port_string) do
     case Integer.parse(port_string) do
-      {port, ""} when port > 0 and port <= 65535 -> port
+      {port, ""} when port > 0 and port <= 65_535 -> port
       _ -> nil
     end
   end
