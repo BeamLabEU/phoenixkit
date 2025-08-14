@@ -418,7 +418,7 @@ config :phoenix_kit, PhoenixKit.Mailer,
 
 ```elixir
 # In your controller or LiveView
-current_user = conn.assigns[:current_user]
+phoenix_kit_current_user = conn.assigns[:phoenix_kit_current_user]
 ```
 
 ### User Operations
@@ -607,7 +607,7 @@ defmodule YourAppWeb.UserAuth do
 
   # Simple role-based authorization
   def require_role(conn, required_role) do
-    user = conn.assigns.current_user
+    user = conn.assigns.phoenix_kit_current_user
     
     if user && PhoenixKit.Accounts.User.has_role_level?(user, required_role) do
       conn

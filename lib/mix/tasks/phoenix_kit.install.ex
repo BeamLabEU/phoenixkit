@@ -819,7 +819,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
       app_name ->
         app_web_module = Module.concat([Macro.camelize(to_string(app_name)) <> "Web"])
 
-        # Create demo directory path - manually construct lib path
+        # Create demo directory path - ensure live directory is included
         app_web_dir = Macro.underscore(to_string(app_name)) <> "_web"
         demo_dir = Path.join(["lib", app_web_dir, "live", "phoenix_kit_demo"])
 
@@ -884,15 +884,15 @@ defmodule Mix.Tasks.PhoenixKit.Install do
                   You can only see this if you are logged in through PhoenixKit auth system.
                 </p>
 
-                <%= if @current_user do %>
+                <%= if @phoenix_kit_current_user do %>
                   <div class="alert alert-info">
                     <div>
                       <h3 class="font-bold">Welcome, authenticated user!</h3>
                       <div class="text-sm">
-                        <p><strong>Email:</strong> {@current_user.email}</p>
-                        <p><strong>User ID:</strong> {@current_user.id}</p>
-                        <%= if @current_user.confirmed_at do %>
-                          <p><strong>Account:</strong> Confirmed at {@current_user.confirmed_at}</p>
+                        <p><strong>Email:</strong> {@phoenix_kit_current_user.email}</p>
+                        <p><strong>User ID:</strong> {@phoenix_kit_current_user.id}</p>
+                        <%= if @phoenix_kit_current_user.confirmed_at do %>
+                          <p><strong>Account:</strong> Confirmed at {@phoenix_kit_current_user.confirmed_at}</p>
                         <% else %>
                           <p><strong>Account:</strong> Not yet confirmed</p>
                         <% end %>
@@ -975,14 +975,14 @@ defmodule Mix.Tasks.PhoenixKit.Install do
                   It mounts current user without requiring authentication.
                 </p>
 
-                <%= if @current_user do %>
+                <%= if @phoenix_kit_current_user do %>
                   <div class="alert alert-success">
                     <div>
                       <h3 class="font-bold">User is logged in!</h3>
                       <div class="text-sm">
-                        <p><strong>Email:</strong> {@current_user.email}</p>
-                        <p><strong>ID:</strong> {@current_user.id}</p>
-                        <%= if @current_user.confirmed_at do %>
+                        <p><strong>Email:</strong> {@phoenix_kit_current_user.email}</p>
+                        <p><strong>ID:</strong> {@phoenix_kit_current_user.id}</p>
+                        <%= if @phoenix_kit_current_user.confirmed_at do %>
                           <p><strong>Status:</strong> Confirmed</p>
                         <% else %>
                           <p><strong>Status:</strong> Not confirmed</p>
@@ -994,7 +994,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
                   <div class="alert alert-warning">
                     <div>
                       <h3 class="font-bold">No user logged in</h3>
-                      <p class="text-sm">Page is accessible but current_user is nil</p>
+                      <p class="text-sm">Page is accessible but phoenix_kit_current_user is nil</p>
                     </div>
                   </div>
                 <% end %>

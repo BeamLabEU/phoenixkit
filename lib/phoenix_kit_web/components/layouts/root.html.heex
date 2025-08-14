@@ -18,11 +18,11 @@
       </div>
       <div class="navbar-end">
         <div class="flex-none gap-2">
-          <%= if @current_user do %>
+          <%= if @phoenix_kit_current_user do %>
             <div class="dropdown dropdown-end">
               <label tabindex="0" class="btn btn-ghost btn-circle avatar">
                 <div class="w-10 rounded-full">
-                  <img src="https://ui-avatars.com/api/?name={@current_user.email}&background=random" />
+                  <img src="https://ui-avatars.com/api/?name={@phoenix_kit_current_user.email}&background=random" />
                 </div>
               </label>
               <ul

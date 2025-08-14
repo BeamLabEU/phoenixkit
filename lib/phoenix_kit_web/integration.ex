@@ -72,7 +72,7 @@ defmodule PhoenixKitWeb.Integration do
       end
 
       pipeline :phoenix_kit_require_authenticated do
-        plug PhoenixKitWeb.UserAuth, :fetch_current_user
+        plug PhoenixKitWeb.UserAuth, :fetch_phoenix_kit_current_user
         plug PhoenixKitWeb.UserAuth, :phoenix_kit_require_authenticated_user
       end
 

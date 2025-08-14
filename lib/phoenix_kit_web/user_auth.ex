@@ -109,10 +109,10 @@ defmodule PhoenixKitWeb.UserAuth do
   Authenticates the user by looking into the session
   and remember me token.
   """
-  def fetch_current_user(conn, _opts) do
+  def fetch_phoenix_kit_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
-    assign(conn, :current_user, user)
+    assign(conn, :phoenix_kit_current_user, user)
   end
 
   defp ensure_user_token(conn) do
@@ -130,16 +130,16 @@ defmodule PhoenixKitWeb.UserAuth do
   end
 
   @doc """
-  Handles mounting and authenticating the current_user in LiveViews.
+  Handles mounting and authenticating the phoenix_kit_current_user in LiveViews.
 
   ## `on_mount` arguments
 
-    * `:phoenix_kit_mount_current_user` - Assigns current_user
+    * `:phoenix_kit_mount_current_user` - Assigns phoenix_kit_current_user
       to socket assigns based on user_token, or nil if
       there's no user_token or no matching user.
 
     * `:phoenix_kit_ensure_authenticated` - Authenticates the user from the session,
-      and assigns the current_user to socket assigns based
+      and assigns the phoenix_kit_current_user to socket assigns based
       on user_token.
       Redirects to login page if there's no logged user.
 
@@ -165,13 +165,13 @@ defmodule PhoenixKitWeb.UserAuth do
       end
   """
   def on_mount(:phoenix_kit_mount_current_user, _params, session, socket) do
-    {:cont, mount_current_user(socket, session)}
+    {:cont, mount_phoenix_kit_current_user(socket, session)}
   end
 
   def on_mount(:phoenix_kit_ensure_authenticated, _params, session, socket) do
-    socket = mount_current_user(socket, session)
+    socket = mount_phoenix_kit_current_user(socket, session)
 
-    if socket.assigns.current_user do
+    if socket.assigns.phoenix_kit_current_user do
       {:cont, socket}
     else
       socket =
@@ -184,17 +184,17 @@ defmodule PhoenixKitWeb.UserAuth do
   end
 
   def on_mount(:phoenix_kit_redirect_if_user_is_authenticated, _params, session, socket) do
-    socket = mount_current_user(socket, session)
+    socket = mount_phoenix_kit_current_user(socket, session)
 
-    if socket.assigns.current_user do
+    if socket.assigns.phoenix_kit_current_user do
       {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
     else
       {:cont, socket}
     end
   end
 
-  defp mount_current_user(socket, session) do
-    Phoenix.Component.assign_new(socket, :current_user, fn ->
+  defp mount_phoenix_kit_current_user(socket, session) do
+    Phoenix.Component.assign_new(socket, :phoenix_kit_current_user, fn ->
       if user_token = session["user_token"] do
         Accounts.get_user_by_session_token(user_token)
       end
@@ -205,8 +205,8 @@ defmodule PhoenixKitWeb.UserAuth do
   def init(opts), do: opts
 
   @doc false
-  def call(conn, :fetch_current_user),
-    do: fetch_current_user(conn, [])
+  def call(conn, :fetch_phoenix_kit_current_user),
+    do: fetch_phoenix_kit_current_user(conn, [])
 
   @doc false
   def call(conn, :phoenix_kit_redirect_if_user_is_authenticated),
@@ -220,7 +220,7 @@ defmodule PhoenixKitWeb.UserAuth do
   Used for routes that require the user to not be authenticated.
   """
   def redirect_if_user_is_authenticated(conn, _opts) do
-    if conn.assigns[:current_user] do
+    if conn.assigns[:phoenix_kit_current_user] do
       conn
       |> redirect(to: signed_in_path(conn))
       |> halt()
@@ -236,7 +236,7 @@ defmodule PhoenixKitWeb.UserAuth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
-    if conn.assigns[:current_user] do
+    if conn.assigns[:phoenix_kit_current_user] do
       conn
     else
       conn

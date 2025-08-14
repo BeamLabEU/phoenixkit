@@ -32,7 +32,7 @@ defmodule PhoenixKitWeb.AuthRouter do
     plug :put_root_layout, html: PhoenixKit.LayoutConfig.get_root_layout()
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :fetch_current_user
+    plug :fetch_phoenix_kit_current_user
   end
 
   pipeline :phoenix_kit_redirect_if_authenticated do
