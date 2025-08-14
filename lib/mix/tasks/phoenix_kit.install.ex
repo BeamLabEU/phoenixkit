@@ -851,9 +851,16 @@ defmodule Mix.Tasks.PhoenixKit.Install do
           "defmodule #{app_web_module_string}.PhoenixKitLive"
         )
 
-      # Create file in phoenix_kit_demo directory
+      # Create file only if it doesn't exist (skip if already exists)
       dest_path = Path.join(["lib", demo_dir, filename])
-      Igniter.create_new_file(igniter, dest_path, updated_content)
+      
+      if File.exists?(dest_path) do
+        # File exists, add notice and skip creation
+        Igniter.add_notice(igniter, "Demo file already exists, skipping: #{dest_path}")
+      else
+        # File doesn't exist, create it
+        Igniter.create_new_file(igniter, dest_path, updated_content)
+      end
     else
       Igniter.add_warning(igniter, "Unknown test file: #{filename}")
     end
