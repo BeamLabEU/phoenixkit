@@ -46,6 +46,8 @@ defmodule Mix.Tasks.PhoenixKit.Update do
 
   use Mix.Task
 
+  alias PhoenixKit.Migrations.Postgres
+
   @shortdoc "Updates PhoenixKit to the latest version"
 
   @switches [
@@ -85,7 +87,7 @@ defmodule Mix.Tasks.PhoenixKit.Update do
         """)
 
       {:current_version, version} ->
-        target_version = PhoenixKit.Migrations.Postgres.current_version()
+        target_version = Postgres.current_version()
 
         if version >= target_version do
           Mix.shell().info("""
@@ -114,6 +116,48 @@ defmodule Mix.Tasks.PhoenixKit.Update do
     end
   end
 
+  # Handle not installed scenario
+  defp handle_not_installed do
+    Mix.shell().error("""
+
+    ❌ PhoenixKit is not installed.
+
+    Please run: mix phoenix_kit.install
+    """)
+  end
+
+  # Handle update check logic
+  defp handle_update_check(prefix, current_version, force) do
+    target_version = Postgres.current_version()
+
+    cond do
+      current_version >= target_version && !force ->
+        handle_already_up_to_date(current_version)
+
+      current_version < target_version || force ->
+        handle_update_needed(prefix, current_version, target_version, force)
+
+      true ->
+        Mix.shell().info("No update needed.")
+    end
+  end
+
+  # Handle already up to date scenario
+  defp handle_already_up_to_date(current_version) do
+    Mix.shell().info("""
+
+    ✅ PhoenixKit is already up to date (V#{pad_version(current_version)}).
+
+    Use --force to regenerate the migration anyway.
+    """)
+  end
+
+  # Handle update needed scenario
+  defp handle_update_needed(prefix, current_version, target_version, force) do
+    create_update_migration(prefix, current_version, target_version, force)
+    suggest_layout_integration_if_needed()
+  end
+
   # Perform the actual update
   defp perform_update(opts) do
     prefix = opts[:prefix] || "public"
@@ -121,32 +165,10 @@ defmodule Mix.Tasks.PhoenixKit.Update do
 
     case check_installation_status(prefix) do
       {:not_installed} ->
-        Mix.shell().error("""
-
-        ❌ PhoenixKit is not installed.
-
-        Please run: mix phoenix_kit.install
-        """)
+        handle_not_installed()
 
       {:current_version, current_version} ->
-        target_version = PhoenixKit.Migrations.Postgres.current_version()
-
-        cond do
-          current_version >= target_version && !force ->
-            Mix.shell().info("""
-
-            ✅ PhoenixKit is already up to date (V#{pad_version(current_version)}).
-
-            Use --force to regenerate the migration anyway.
-            """)
-
-          current_version < target_version || force ->
-            create_update_migration(prefix, current_version, target_version, force)
-            suggest_layout_integration_if_needed()
-
-          true ->
-            Mix.shell().info("No update needed.")
-        end
+        handle_update_check(prefix, current_version, force)
     end
   end
 
@@ -232,7 +254,7 @@ defmodule Mix.Tasks.PhoenixKit.Update do
 
     try do
       # Use PhoenixKit's centralized runtime version detection function
-      current_version = PhoenixKit.Migrations.Postgres.migrated_version_runtime(opts)
+      current_version = Postgres.migrated_version_runtime(opts)
 
       if current_version == 0 do
         # Check if migration files exist but haven't been run
@@ -346,32 +368,43 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   # Detect parent app layouts following Phoenix conventions
   defp detect_parent_app_layouts do
     case Mix.Project.get() do
-      nil ->
-        nil
+      nil -> nil
+      project -> detect_layouts_for_project(project)
+    end
+  end
 
-      project ->
-        app_name = project.project()[:app]
+  # Detect layouts for a given project
+  defp detect_layouts_for_project(project) do
+    app_name = project.project()[:app]
 
-        if app_name && app_name != :phoenix_kit do
-          # Try common Phoenix layout module patterns
-          app_web_module = Module.concat([Macro.camelize(to_string(app_name)) <> "Web"])
-          layouts_module = Module.concat([app_web_module, "Layouts"])
+    if app_name && app_name != :phoenix_kit do
+      try_layout_module_patterns(app_name)
+    else
+      nil
+    end
+  end
 
-          if Code.ensure_loaded?(layouts_module) do
-            layouts_module
-          else
-            # Try alternative pattern
-            alt_layouts = Module.concat([Macro.camelize(to_string(app_name)), "Layouts"])
+  # Try different layout module patterns for the app
+  defp try_layout_module_patterns(app_name) do
+    # Try common Phoenix layout module patterns
+    app_web_module = Module.concat([Macro.camelize(to_string(app_name)) <> "Web"])
+    layouts_module = Module.concat([app_web_module, "Layouts"])
 
-            if Code.ensure_loaded?(alt_layouts) do
-              alt_layouts
-            else
-              nil
-            end
-          end
-        else
-          nil
-        end
+    if Code.ensure_loaded?(layouts_module) do
+      layouts_module
+    else
+      try_alternative_layout_pattern(app_name)
+    end
+  end
+
+  # Try alternative layout pattern
+  defp try_alternative_layout_pattern(app_name) do
+    alt_layouts = Module.concat([Macro.camelize(to_string(app_name)), "Layouts"])
+
+    if Code.ensure_loaded?(alt_layouts) do
+      alt_layouts
+    else
+      nil
     end
   end
 end

@@ -78,18 +78,22 @@ defmodule PhoenixKitWeb.UserMagicLinkLive do
      |> assign(:error, "Failed to send magic link. Please try again.")}
   end
 
+  # Send magic link email to user and handle response
+  defp send_magic_link_email_to_user(user, token) do
+    magic_link_url = MagicLink.magic_link_url(token)
+
+    case Mailer.send_magic_link_email(user, magic_link_url) do
+      {:ok, _} -> {:ok, user}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   # Process the magic link sending in the background
   defp send_magic_link_async(socket, email) do
     Phoenix.LiveView.start_async(socket, :send_magic_link, fn ->
       case MagicLink.generate_magic_link(email) do
         {:ok, user, token} ->
-          # Send the magic link email
-          magic_link_url = MagicLink.magic_link_url(token)
-
-          case Mailer.send_magic_link_email(user, magic_link_url) do
-            {:ok, _} -> {:ok, user}
-            {:error, reason} -> {:error, reason}
-          end
+          send_magic_link_email_to_user(user, token)
 
         {:error, :user_not_found} ->
           # For security, we simulate the same delay as successful case

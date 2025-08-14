@@ -5,6 +5,9 @@ defmodule PhoenixKit.Migrations.Postgres do
 
   use Ecto.Migration
 
+  alias Ecto.Adapters.SQL
+  alias Mix.Tasks.App.Start, as: AppStart
+
   @initial_version 1
   @current_version 2
   @default_prefix "public"
@@ -107,11 +110,11 @@ defmodule PhoenixKit.Migrations.Postgres do
         app = get_repo_app(repo)
 
         if app do
-          Mix.Tasks.App.Start.run([to_string(app)])
+          AppStart.run([to_string(app)])
         end
 
         # Use Ecto.Adapters.SQL.query which should work now
-        case Ecto.Adapters.SQL.query(repo, query, [], log: false) do
+        case SQL.query(repo, query, [], log: false) do
           {:ok, %{rows: [[version]]}} when is_binary(version) -> String.to_integer(version)
           {:ok, %{rows: []}} -> 0
           # Table exists but no version comment - assume version 1

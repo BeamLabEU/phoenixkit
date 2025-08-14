@@ -119,18 +119,21 @@ defmodule PhoenixKit.ConfigEnv do
     end)
   end
 
+  # Extract repository from application's ecto_repos configuration
+  defp extract_repo_from_app({app, _description, _version}) do
+    case Application.get_env(app, :ecto_repos) do
+      [repo | _] -> repo
+      _ -> nil
+    end
+  end
+
   # Auto-detect Ecto repository from application configuration
   defp detect_repo do
     case Application.get_env(:phoenix_kit, :repo) do
       nil ->
         # Try to detect from common patterns
         Application.loaded_applications()
-        |> Enum.find_value(fn {app, _description, _version} ->
-          case Application.get_env(app, :ecto_repos) do
-            [repo | _] -> repo
-            _ -> nil
-          end
-        end)
+        |> Enum.find_value(&extract_repo_from_app/1)
 
       configured_repo ->
         configured_repo

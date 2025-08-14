@@ -176,6 +176,23 @@ defmodule PhoenixKit.LayoutConfig do
     end
   end
 
+  @spec should_validate_runtime_module?(module()) :: boolean()
+  defp should_validate_runtime_module?(module) do
+    # During active application runtime, validate module exists
+    Process.whereis(:application_controller) != nil and
+      Application.get_application(module) != nil
+  end
+
+  @spec validate_runtime_module(module(), atom(), {module(), atom()}) :: {module(), atom()}
+  defp validate_runtime_module(module, template, fallback) do
+    if Code.ensure_loaded?(module) do
+      {module, template}
+    else
+      log_missing_module_warning(module, fallback)
+      fallback
+    end
+  end
+
   @spec validate_layout_module(module(), atom(), {module(), atom()}) :: {module(), atom()}
   defp validate_layout_module(module, template, fallback) do
     # For PhoenixKitWeb.Layouts, always allow (it's our own module)
@@ -184,20 +201,11 @@ defmodule PhoenixKit.LayoutConfig do
     else
       # For external modules, trust that they will be available at runtime
       # Skip validation during compilation phase - just return the module
-      cond do
-        # During active application runtime, validate module exists
-        Process.whereis(:application_controller) != nil and
-            Application.get_application(module) != nil ->
-          if Code.ensure_loaded?(module) do
-            {module, template}
-          else
-            log_missing_module_warning(module, fallback)
-            fallback
-          end
-
+      if should_validate_runtime_module?(module) do
+        validate_runtime_module(module, template, fallback)
+      else
         # During compilation or when module's app is not loaded, trust configuration
-        true ->
-          {module, template}
+        {module, template}
       end
     end
   end
