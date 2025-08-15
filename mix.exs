@@ -1,7 +1,7 @@
 defmodule PhoenixKit.MixProject do
   use Mix.Project
 
-  @version "0.1.13"
+  @version "0.1.14"
   @description "Professional authentication library for Phoenix applications with zero-config setup"
   @source_url "https://github.com/BeamLabEU/phoenixkit"
 
@@ -106,8 +106,37 @@ defmodule PhoenixKit.MixProject do
       name: "PhoenixKit",
       source_ref: "v#{@version}",
       source_url: @source_url,
-      main: "readme",
-      extras: ["README.md", "CHANGELOG.md"]
+      main: "PhoenixKit",
+      extras: ["README.md", "CHANGELOG.md"],
+      groups_for_modules: [
+        Authentication: [
+          PhoenixKit.Accounts,
+          PhoenixKit.Accounts.User,
+          PhoenixKit.Accounts.UserToken,
+          PhoenixKit.Accounts.MagicLink,
+          PhoenixKit.Accounts.Scope
+        ],
+        "Web Integration": [
+          PhoenixKitWeb.Integration,
+          PhoenixKitWeb.UserAuth,
+          PhoenixKit.LayoutConfig
+        ],
+        Database: [
+          PhoenixKit.Migration,
+          PhoenixKit.Repo,
+          PhoenixKit.RepoHelper
+        ],
+        Configuration: [
+          PhoenixKit.Config,
+          PhoenixKit.ConfigEnv,
+          PhoenixKit.Mailer
+        ],
+        "Mix Tasks": [
+          Mix.Tasks.PhoenixKit.Install,
+          Mix.Tasks.PhoenixKit.Update,
+          Mix.Tasks.PhoenixKit.Gen.Migration
+        ]
+      ]
     ]
   end
 

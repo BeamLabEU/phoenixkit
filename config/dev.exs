@@ -19,11 +19,7 @@ config :phoenix_kit, PhoenixKitWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "YqF5ZG5h7JgS8N1w2VbOqLUY8I+8V8f+iQlC8tO7a8gYK8e8n+x4iP+YsEQ2J8GF",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:phoenix_kit, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:phoenix_kit, ~w(--watch)]}
-  ]
+  secret_key_base: "YqF5ZG5h7JgS8N1w2VbOqLUY8I+8V8f+iQlC8tO7a8gYK8e8n+x4iP+YsEQ2J8GF"
 
 # Watch static and templates for browser reloading.
 config :phoenix_kit, PhoenixKitWeb.Endpoint,

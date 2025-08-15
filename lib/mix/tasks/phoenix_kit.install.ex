@@ -1078,9 +1078,6 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   defp add_test_demo_notice(igniter) do
     notice = """
 
-    📄 Test demo pages copied to your app:
-    - lib/*_web/phoenix_kit_live/
-
     These demonstrate PhoenixKit authentication levels.
     """
 

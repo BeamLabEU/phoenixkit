@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.14] - 2025-08-15
+
+### Added
+- **MIT LICENSE file** - Required for hex.pm publication with proper copyright attribution
+- **Comprehensive API documentation** - Complete PhoenixKit main module documentation with usage examples
+- **Enhanced module documentation** - Detailed documentation for PhoenixKit.Accounts with security features
+- **Professional ExDoc configuration** - Organized module groups for better documentation navigation
+
+### Changed
+- **Documentation architecture** - Changed main page from README to PhoenixKit API for professional hex.pm presentation
+- **Module organization** - Added logical grouping: Authentication, Web Integration, Database, Configuration, Mix Tasks
+
+### Fixed
+- **ExDoc warnings** - Added missing @type definition for PhoenixKit.Accounts.User.t()
+- **Test warnings** - Removed duplicate function definitions in test/support/conn_case.ex
+- **LICENSE references** - Updated README.md links to GitHub LICENSE URL for consistency
+- **Documentation generation** - Fixed empty documentation issue with proper ExDoc main page configuration
+
+### Security
+- **Package verification** - Added comprehensive quality checks for production-ready hex.pm publication
+
 ## [0.1.13] - 2025-08-15
 
 ### Added

@@ -23,6 +23,17 @@ defmodule PhoenixKit.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{
+          id: integer() | nil,
+          email: String.t(),
+          password: String.t() | nil,
+          hashed_password: String.t(),
+          current_password: String.t() | nil,
+          confirmed_at: NaiveDateTime.t() | nil,
+          inserted_at: NaiveDateTime.t(),
+          updated_at: NaiveDateTime.t()
+        }
+
   schema "phoenix_kit_users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true

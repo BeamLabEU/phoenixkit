@@ -1,6 +1,61 @@
 defmodule PhoenixKit.Accounts do
   @moduledoc """
-  The Accounts context.
+  The Accounts context for user authentication and management.
+
+  This module provides functions for user registration, authentication, password management,
+  and email confirmation. It serves as the main interface for all user-related operations
+  in PhoenixKit.
+
+  ## Core Functions
+
+  ### User Registration and Authentication
+
+  - `register_user/1` - Register a new user with email and password
+  - `get_user_by_email_and_password/2` - Authenticate user credentials
+  - `get_user_by_email/1` - Find user by email address
+
+  ### Password Management
+
+  - `change_user_password/2` - Update user password
+  - `reset_user_password/2` - Reset password with token
+  - `deliver_user_reset_password_instructions/1` - Send password reset email
+
+  ### Email Confirmation
+
+  - `deliver_user_confirmation_instructions/1` - Send confirmation email
+  - `confirm_user/1` - Confirm user account with token
+  - `update_user_email/2` - Change user email with confirmation
+
+  ### Session Management
+
+  - `generate_user_session_token/1` - Create session token for login
+  - `get_user_by_session_token/1` - Get user from session token
+  - `delete_user_session_token/1` - Logout user session
+
+  ## Usage Examples
+
+      # Register a new user
+      {:ok, user} = PhoenixKit.Accounts.register_user(%{
+        email: "user@example.com",
+        password: "secure_password123"
+      })
+
+      # Authenticate user
+      case PhoenixKit.Accounts.get_user_by_email_and_password(email, password) do
+        %User{} = user -> {:ok, user}
+        nil -> {:error, :invalid_credentials}
+      end
+
+      # Send confirmation email
+      PhoenixKit.Accounts.deliver_user_confirmation_instructions(user)
+
+  ## Security Features
+
+  - Passwords are hashed using bcrypt
+  - Email confirmation prevents unauthorized account creation
+  - Session tokens provide secure authentication
+  - Password reset tokens expire for security
+  - All sensitive operations are logged
   """
 
   import Ecto.Query, warn: false

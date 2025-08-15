@@ -4,7 +4,7 @@
 
 <!-- [![Hex.pm](https://img.shields.io/hexpm/v/phoenix_kit.svg)](https://hex.pm/packages/phoenix_kit)
 [![Documentation](https://img.shields.io/badge/docs-hexpm-blue.svg)](https://hexdocs.pm/phoenix_kit)
-[![License](https://img.shields.io/hexpm/l/phoenix_kit.svg)](LICENSE) -->
+[![License](https://img.shields.io/hexpm/l/phoenix_kit.svg)](https://github.com/BeamLabEU/phoenixkit/blob/main/LICENSE) -->
 
 ## Overview
 
@@ -455,7 +455,7 @@ plug :phoenix_kit_redirect_if_user_is_authenticated
 
 ## PhoenixKit Scope System
 
-PhoenixKit v0.1.13+ introduces an advanced **Scope System** for better authentication state management in your application layouts and LiveViews. This system provides structured access to authentication data with improved encapsulation and type safety.
+PhoenixKit v0.1.14+ introduces an advanced **Scope System** for better authentication state management in your application layouts and LiveViews. This system provides structured access to authentication data with improved encapsulation and type safety.
 
 ### What is the Scope System?
 
@@ -948,7 +948,7 @@ mix phoenix_kit.migrate --version 2
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## Changelog
 
