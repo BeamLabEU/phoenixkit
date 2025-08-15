@@ -24,6 +24,7 @@ defmodule PhoenixKitWeb.UserAuth do
   import Phoenix.Controller
 
   alias PhoenixKit.Accounts
+  alias PhoenixKit.Accounts.Scope
 
   # Make the remember me cookie valid for 60 days.
   # If you want bump or reduce this value, also change
@@ -115,6 +116,25 @@ defmodule PhoenixKitWeb.UserAuth do
     assign(conn, :phoenix_kit_current_user, user)
   end
 
+  @doc """
+  Fetches the current user and creates a scope for authentication context.
+
+  This plug combines user fetching with scope creation, providing a
+  structured way to handle authentication state in your application.
+
+  The scope is assigned to `:phoenix_kit_current_scope` and includes
+  both the user and authentication status.
+  """
+  def fetch_phoenix_kit_current_scope(conn, _opts) do
+    {user_token, conn} = ensure_user_token(conn)
+    user = user_token && Accounts.get_user_by_session_token(user_token)
+    scope = Scope.for_user(user)
+
+    conn
+    |> assign(:phoenix_kit_current_user, user)
+    |> assign(:phoenix_kit_current_scope, scope)
+  end
+
   defp ensure_user_token(conn) do
     if token = get_session(conn, :user_token) do
       {token, conn}
@@ -138,12 +158,23 @@ defmodule PhoenixKitWeb.UserAuth do
       to socket assigns based on user_token, or nil if
       there's no user_token or no matching user.
 
+    * `:phoenix_kit_mount_current_scope` - Assigns both phoenix_kit_current_user
+      and phoenix_kit_current_scope to socket assigns. The scope provides
+      structured access to authentication state.
+
     * `:phoenix_kit_ensure_authenticated` - Authenticates the user from the session,
       and assigns the phoenix_kit_current_user to socket assigns based
       on user_token.
       Redirects to login page if there's no logged user.
 
+    * `:phoenix_kit_ensure_authenticated_scope` - Authenticates the user via scope system,
+      assigns both phoenix_kit_current_user and phoenix_kit_current_scope.
+      Redirects to login page if there's no logged user.
+
     * `:phoenix_kit_redirect_if_user_is_authenticated` - Authenticates the user from the session.
+      Redirects to signed_in_path if there's a logged user.
+
+    * `:phoenix_kit_redirect_if_authenticated_scope` - Checks authentication via scope system.
       Redirects to signed_in_path if there's a logged user.
 
   ## Examples
@@ -158,9 +189,18 @@ defmodule PhoenixKitWeb.UserAuth do
         ...
       end
 
+  Or use the scope system for better encapsulation:
+
+      defmodule PhoenixKitWeb.PageLive do
+        use PhoenixKitWeb, :live_view
+
+        on_mount {PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}
+        ...
+      end
+
   Or use the `live_session` of your router to invoke the on_mount callback:
 
-      live_session :authenticated, on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated}] do
+      live_session :authenticated, on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated_scope}] do
         live "/profile", ProfileLive, :index
       end
   """
@@ -168,10 +208,29 @@ defmodule PhoenixKitWeb.UserAuth do
     {:cont, mount_phoenix_kit_current_user(socket, session)}
   end
 
+  def on_mount(:phoenix_kit_mount_current_scope, _params, session, socket) do
+    {:cont, mount_phoenix_kit_current_scope(socket, session)}
+  end
+
   def on_mount(:phoenix_kit_ensure_authenticated, _params, session, socket) do
     socket = mount_phoenix_kit_current_user(socket, session)
 
     if socket.assigns.phoenix_kit_current_user do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
+        |> Phoenix.LiveView.redirect(to: "/phoenix_kit/log_in")
+
+      {:halt, socket}
+    end
+  end
+
+  def on_mount(:phoenix_kit_ensure_authenticated_scope, _params, session, socket) do
+    socket = mount_phoenix_kit_current_scope(socket, session)
+
+    if Scope.authenticated?(socket.assigns.phoenix_kit_current_scope) do
       {:cont, socket}
     else
       socket =
@@ -193,12 +252,30 @@ defmodule PhoenixKitWeb.UserAuth do
     end
   end
 
+  def on_mount(:phoenix_kit_redirect_if_authenticated_scope, _params, session, socket) do
+    socket = mount_phoenix_kit_current_scope(socket, session)
+
+    if Scope.authenticated?(socket.assigns.phoenix_kit_current_scope) do
+      {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
+    else
+      {:cont, socket}
+    end
+  end
+
   defp mount_phoenix_kit_current_user(socket, session) do
     Phoenix.Component.assign_new(socket, :phoenix_kit_current_user, fn ->
       if user_token = session["user_token"] do
         Accounts.get_user_by_session_token(user_token)
       end
     end)
+  end
+
+  defp mount_phoenix_kit_current_scope(socket, session) do
+    socket = mount_phoenix_kit_current_user(socket, session)
+    user = socket.assigns.phoenix_kit_current_user
+    scope = Scope.for_user(user)
+
+    Phoenix.Component.assign(socket, :phoenix_kit_current_scope, scope)
   end
 
   @doc false
@@ -209,12 +286,20 @@ defmodule PhoenixKitWeb.UserAuth do
     do: fetch_phoenix_kit_current_user(conn, [])
 
   @doc false
+  def call(conn, :fetch_phoenix_kit_current_scope),
+    do: fetch_phoenix_kit_current_scope(conn, [])
+
+  @doc false
   def call(conn, :phoenix_kit_redirect_if_user_is_authenticated),
     do: redirect_if_user_is_authenticated(conn, [])
 
   @doc false
   def call(conn, :phoenix_kit_require_authenticated_user),
     do: require_authenticated_user(conn, [])
+
+  @doc false
+  def call(conn, :phoenix_kit_require_authenticated_scope),
+    do: require_authenticated_scope(conn, [])
 
   @doc """
   Used for routes that require the user to not be authenticated.
@@ -244,6 +329,36 @@ defmodule PhoenixKitWeb.UserAuth do
       |> maybe_store_return_to()
       |> redirect(to: "/phoenix_kit/log_in")
       |> halt()
+    end
+  end
+
+  @doc """
+  Used for routes that require the user to be authenticated via scope.
+
+  This function checks authentication status through the scope system,
+  providing a more structured approach to authentication checks.
+
+  If you want to enforce the user email is confirmed before
+  they use the application at all, here would be a good place.
+  """
+  def require_authenticated_scope(conn, _opts) do
+    case conn.assigns[:phoenix_kit_current_scope] do
+      %Scope{} = scope ->
+        if Scope.authenticated?(scope) do
+          conn
+        else
+          conn
+          |> put_flash(:error, "You must log in to access this page.")
+          |> maybe_store_return_to()
+          |> redirect(to: "/phoenix_kit/log_in")
+          |> halt()
+        end
+
+      _ ->
+        # Scope not found, try to create it from current_user
+        conn
+        |> fetch_phoenix_kit_current_scope([])
+        |> require_authenticated_scope([])
     end
   end
 
