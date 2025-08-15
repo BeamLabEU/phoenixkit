@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.13] - 2025-08-15
+
+### Added
+- **PhoenixKit Scope System** - New structured authentication state management
+  - `PhoenixKit.Accounts.Scope` module for better encapsulation of user authentication state
+  - New plugs: `fetch_phoenix_kit_current_scope`, `require_authenticated_scope`
+  - Enhanced on_mount callbacks: `:phoenix_kit_mount_current_scope`, `:phoenix_kit_ensure_authenticated_scope`, `:phoenix_kit_redirect_if_authenticated_scope`
+  - Comprehensive router integration examples in `PhoenixKitWeb.Integration` documentation
+  - Layout examples with scope usage in app.html.heex and root.html.heex
+  - Full backward compatibility with existing `phoenix_kit_current_user` patterns
+
+### Improved
+- Enhanced documentation in Integration module with detailed scope usage examples
+- Better encapsulation of authentication state through structured Scope API
+- Type safety with proper Elixir specs and comprehensive error handling
+- Ready for future extensions (roles, permissions, additional authentication context)
+
 ### Added
 - Nothing yet
 
@@ -47,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Deprecated `schema_migrations.ex` file (replaced with metadata-based versioning)
 
-## [0.1.0] - 2024-01-01
+## [0.1.0] - 2025-07-01
 
 ### Added
 - Initial release of Phoenix Module Template

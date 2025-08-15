@@ -108,6 +108,123 @@ This ensures consistent code formatting across the project.
 - ❌ `migration fixes` (not descriptive enough)
 - ❌ `Add new feature with Claude assistance` (mentions AI)
 
+### 🏷️ Version Management Protocol
+
+**MANDATORY steps for version updates (follows Elixir best practices):**
+
+#### 1. Version Update Requirements
+
+When creating a new version release:
+
+```bash
+# Current version locations to update:
+# - mix.exs (@version constant)
+# - CHANGELOG.md (new version entry)
+# - README.md (if version mentioned in examples)
+```
+
+#### 2. Version Number Schema
+
+- **Format**: `MAJOR.MINOR.PATCH` (Semantic Versioning)
+- **MAJOR**: Breaking changes, backward incompatibility
+- **MINOR**: New features, backward compatible
+- **PATCH**: Bug fixes, backward compatible
+
+**Examples:**
+- `0.1.13` → `0.1.14` (patch: bug fixes)
+- `0.1.14` → `0.2.0` (minor: new features)
+- `0.2.x` → `1.0.0` (major: breaking changes)
+
+#### 3. Update Process Checklist
+
+**Step 1: Update mix.exs**
+```elixir
+# In mix.exs, update @version constant
+@version "0.1.14"  # Increment from current version
+```
+
+**Step 2: Update CHANGELOG.md**
+```markdown
+## [Unreleased]
+
+## [0.1.14] - 2025-08-15
+
+### Added
+- Description of new features
+
+### Changed  
+- Description of modifications
+
+### Fixed
+- Description of bug fixes
+
+### Removed
+- Description of deletions
+```
+
+**Step 3: Update README.md (if needed)**
+```markdown
+# Update any version references in examples
+{:phoenix_kit, "~> 0.1.14"}
+```
+
+**Step 4: Commit Version Changes**
+```bash
+git add mix.exs CHANGELOG.md README.md
+git commit -m "Update version to 0.1.14 with comprehensive changelog
+
+Version Changes:
+- Bump version from 0.1.13 to 0.1.14 in mix.exs
+- Add comprehensive CHANGELOG.md entry for v0.1.14 release
+- Update documentation with new version references
+
+Release includes: [brief description of main changes]"
+```
+
+#### 4. Version Validation
+
+**Before committing version changes:**
+- ✅ Mix compiles without errors: `mix compile`
+- ✅ Tests pass: `mix test`
+- ✅ Code formatted: `mix format`
+- ✅ CHANGELOG.md includes current date
+- ✅ Version number incremented correctly
+- ✅ No references to old version in docs
+
+#### 5. Release Documentation
+
+**CHANGELOG.md must include:**
+- Release date in format: `YYYY-MM-DD`
+- Categorized changes: Added, Changed, Fixed, Removed
+- Security section if CVEs addressed
+- Clear descriptions of breaking changes
+
+**Example CHANGELOG.md entry:**
+```markdown
+## [0.1.14] - 2025-08-15
+
+### Added
+- New PhoenixKit Scope system for structured authentication
+- Enhanced on_mount callbacks for better LiveView integration
+
+### Changed
+- Improved documentation with comprehensive examples
+- Enhanced router integration patterns
+
+### Fixed
+- Password validation consistency between client and server
+- Layout integration edge cases
+
+### Security
+- Fixed CVE-XXXX-XXXX: Description if applicable
+```
+
+**⚠️ Critical Notes:**
+- **NEVER ship without updating CHANGELOG.md**
+- **ALWAYS validate version number increments**  
+- **NEVER reference old version in new documentation**
+- **ALWAYS test compilation after version changes**
+
 ### Documentation
 
 - `mix docs` - Generate documentation with ExDoc
