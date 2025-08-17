@@ -1,5 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" class="[scrollbar-gutter:stable]">
+<html
+  lang="en"
+  class="[scrollbar-gutter:stable]"
+  {if PhoenixKit.ThemeConfig.theme_enabled?(), do: PhoenixKit.ThemeConfig.theme_data_attributes(), else: []}
+  data-theme={
+    if PhoenixKit.ThemeConfig.theme_enabled?(),
+      do: PhoenixKit.ThemeConfig.daisy_theme_name(PhoenixKit.ThemeConfig.get_theme_mode()),
+      else: "light"
+  }
+  style={
+    if PhoenixKit.ThemeConfig.theme_enabled?(),
+      do: PhoenixKit.ThemeConfig.theme_css_variables(),
+      else: ""
+  }
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,6 +32,9 @@
       </div>
       <div class="navbar-end">
         <div class="flex-none gap-2">
+          <!-- Theme Switcher -->
+          <.theme_switcher size="small" />
+
           <%= if @phoenix_kit_current_user do %>
             <!-- 
             Example 1: Using @phoenix_kit_current_user directly (current approach)

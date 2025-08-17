@@ -25,6 +25,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
   * `--router-path` - Specify custom path to router.ex file
   * `--prefix` - Specify PostgreSQL schema prefix (defaults to "public")
   * `--create-schema` - Create schema if using custom prefix (default: true for non-public prefixes)
+  * `--theme-enabled` - Enable PhoenixKit theme system with light/dark mode support
 
   ## Auto-detection
 
@@ -64,7 +65,8 @@ defmodule Mix.Tasks.PhoenixKit.Install do
         router_path: :string,
         repo: :string,
         prefix: :string,
-        create_schema: :boolean
+        create_schema: :boolean,
+        theme_enabled: :boolean
       ],
       aliases: [
         r: :router_path,
@@ -82,6 +84,7 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     |> add_phoenix_kit_configuration(opts[:repo])
     |> add_mailer_configuration()
     |> add_layout_integration_configuration()
+    |> add_theme_configuration(opts[:theme_enabled])
     |> copy_test_demo_files()
     |> add_router_integration(opts[:router_path])
     |> create_or_upgrade_phoenix_kit_migration(opts)
@@ -111,6 +114,8 @@ defmodule Mix.Tasks.PhoenixKit.Install do
 
       {igniter, repo_module} ->
         igniter
+        # Validate PostgreSQL adapter early
+        |> validate_postgresql_adapter(repo_module)
         # Add repo config to main config.exs
         |> Config.configure_new(
           "config.exs",
@@ -128,10 +133,53 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     end
   end
 
+  # Validate that the repo uses PostgreSQL adapter
+  defp validate_postgresql_adapter(igniter, repo_module) do
+    # Check if module is loaded and has __adapter__ function
+    if Code.ensure_loaded?(repo_module) and function_exported?(repo_module, :__adapter__, 0) do
+      case repo_module.__adapter__() do
+        Ecto.Adapters.Postgres ->
+          # PostgreSQL detected - add informational notice
+          notice = """
+
+          ✅ PostgreSQL adapter detected (#{inspect(repo_module)})
+          """
+
+          Igniter.add_notice(igniter, notice)
+
+        other_adapter ->
+          # Non-PostgreSQL adapter - add warning but continue
+          warning = """
+          ⚠️  PhoenixKit is optimized for PostgreSQL (Ecto.Adapters.Postgres)
+          Current adapter: #{inspect(other_adapter)}
+
+          Some features may not work as expected with other databases.
+          Consider switching to PostgreSQL for the best experience.
+          """
+
+          Igniter.add_warning(igniter, warning)
+      end
+    else
+      # Cannot determine adapter - add notice
+      notice = """
+
+      💡 Cannot determine database adapter at install time.
+      PhoenixKit is optimized for PostgreSQL (Ecto.Adapters.Postgres).
+      """
+
+      Igniter.add_notice(igniter, notice)
+    end
+  rescue
+    _ ->
+      # Error checking adapter - just continue silently
+      igniter
+  end
+
   # Add PhoenixKit mailer configuration
   defp add_mailer_configuration(igniter) do
     igniter
     |> add_dev_mailer_config()
+    |> add_prod_mailer_config()
     |> add_mailer_production_notice()
   end
 
@@ -146,12 +194,61 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     )
   end
 
+  # Add production mailer configuration template as comments
+  defp add_prod_mailer_config(igniter) do
+    prod_config_template = """
+    # Configure PhoenixKit mailer for production
+    # Uncomment and configure the adapter you want to use:
+
+    # SMTP configuration (recommended for most providers)
+    # config :phoenix_kit, PhoenixKit.Mailer,
+    #   adapter: Swoosh.Adapters.SMTP,
+    #   relay: "smtp.sendgrid.net",
+    #   username: System.get_env("SENDGRID_USERNAME"),
+    #   password: System.get_env("SENDGRID_PASSWORD"),
+    #   port: 587,
+    #   auth: :always,
+    #   tls: :always
+
+    # SendGrid API configuration
+    # config :phoenix_kit, PhoenixKit.Mailer,
+    #   adapter: Swoosh.Adapters.Sendgrid,
+    #   api_key: System.get_env("SENDGRID_API_KEY")
+
+    # Mailgun configuration
+    # config :phoenix_kit, PhoenixKit.Mailer,
+    #   adapter: Swoosh.Adapters.Mailgun,
+    #   api_key: System.get_env("MAILGUN_API_KEY"),
+    #   domain: System.get_env("MAILGUN_DOMAIN")
+
+    # Amazon SES configuration
+    # config :phoenix_kit, PhoenixKit.Mailer,
+    #   adapter: Swoosh.Adapters.AmazonSES,
+    #   region: "us-east-1",
+    #   access_key: System.get_env("AWS_ACCESS_KEY_ID"),
+    #   secret: System.get_env("AWS_SECRET_ACCESS_KEY")
+
+    """
+
+    if File.exists?("config/prod.exs") do
+      # Append template to existing prod.exs
+      Igniter.update_file(igniter, "config/prod.exs", fn source ->
+        source <> "\n" <> prod_config_template
+      end)
+    else
+      # Create prod.exs with import Config and template
+      initial_content = "import Config\n" <> prod_config_template
+      Igniter.create_new_file(igniter, "config/prod.exs", initial_content)
+    end
+  end
+
   # Add brief notice about mailer configuration
   defp add_mailer_production_notice(igniter) do
     notice = """
 
     📧 Development mailer configured (Swoosh.Adapters.Local)
-    ⚠️  Production: Configure mailer in config/prod.exs
+    📄 Production mailer templates added to config/prod.exs (as comments)
+    💡 Uncomment and configure your preferred email provider
     """
 
     Igniter.add_notice(igniter, notice)
@@ -170,6 +267,96 @@ defmodule Mix.Tasks.PhoenixKit.Install do
         |> add_layout_config(layouts_module)
         |> add_layout_integration_notice(:layouts_detected)
     end
+  end
+
+  # Add theme system configuration if enabled
+  defp add_theme_configuration(igniter, theme_enabled) when theme_enabled == true do
+    igniter
+    |> add_theme_config_to_application()
+    |> copy_theme_assets_to_project()
+    |> add_theme_integration_notice()
+  end
+
+  defp add_theme_configuration(igniter, _), do: igniter
+
+  # Add theme configuration to config/config.exs
+  defp add_theme_config_to_application(igniter) do
+    Config.configure(
+      igniter,
+      "config.exs",
+      :phoenix_kit,
+      [:theme_enabled],
+      true,
+      %{
+        updater: :keyword
+      }
+    )
+  end
+
+  # Copy theme assets to parent project
+  defp copy_theme_assets_to_project(igniter) do
+    # Copy CSS file
+    css_source =
+      Path.join([:code.priv_dir(:phoenix_kit), "static", "assets", "phoenix_kit_theme.css"])
+
+    css_target = "priv/static/assets/phoenix_kit_theme.css"
+
+    # Copy JavaScript file
+    js_source =
+      Path.join([:code.priv_dir(:phoenix_kit), "static", "assets", "phoenix_kit_theme.js"])
+
+    js_target = "priv/static/assets/phoenix_kit_theme.js"
+
+    igniter
+    |> copy_file_content(css_source, css_target)
+    |> copy_file_content(js_source, js_target)
+  end
+
+  # Helper function to copy file content
+  defp copy_file_content(igniter, source_path, target_path) do
+    case File.read(source_path) do
+      {:ok, content} ->
+        Igniter.create_new_file(igniter, target_path, content)
+
+      {:error, _reason} ->
+        Igniter.add_warning(igniter, "Could not copy file from #{source_path} to #{target_path}")
+    end
+  end
+
+  # Add theme integration notice
+  defp add_theme_integration_notice(igniter) do
+    notice = """
+
+    🎨 PhoenixKit Theme System enabled!
+
+    Theme assets copied to:
+      - priv/static/assets/phoenix_kit_theme.css
+      - priv/static/assets/phoenix_kit_theme.js
+
+    To complete theme integration:
+      1. Add assets to your layout:
+         <link rel="stylesheet" href={~p"/assets/phoenix_kit_theme.css"} />
+         <script defer src={~p"/assets/phoenix_kit_theme.js"}></script>
+
+      2. Add theme switcher to navigation:
+         <.theme_switcher size="small" />
+
+      3. Configure themes (optional):
+         config :phoenix_kit,
+           theme: %{
+             mode: :auto,  # :light, :dark, :auto
+             primary_color: "#3b82f6"
+           }
+
+    Theme system features:
+      - Light/Dark/Auto mode support
+      - DaisyUI integration
+      - Local storage persistence
+      - System preference detection
+      - Keyboard shortcuts (Alt+T)
+    """
+
+    Igniter.add_notice(igniter, notice)
   end
 
   # Detect app layouts using IgniterPhoenix
@@ -762,21 +949,164 @@ defmodule Mix.Tasks.PhoenixKit.Install do
         end
         """
 
-        igniter = Igniter.create_new_file(igniter, migration_path, migration_content)
+        igniter
+        |> Igniter.create_new_file(migration_path, migration_content)
+        |> maybe_run_migrations_interactively(migration_file)
+    end
+  end
 
-        notice = """
+  # Interactive migration runner with smart conditions
+  defp maybe_run_migrations_interactively(igniter, migration_file) do
+    initial_notice = """
 
-        📦 PhoenixKit Initial Installation Created:
-        - Migration: #{migration_file}
-        - This will install PhoenixKit version #{Postgres.current_version()} (latest)
+    📦 PhoenixKit Initial Installation Created:
+    - Migration: #{migration_file}
+    - This will install PhoenixKit version #{Postgres.current_version()} (latest)
+    """
 
-        Next steps:
-          1. Run: mix ecto.migrate
-          2. PhoenixKit will be ready to use!
+    igniter = Igniter.add_notice(igniter, initial_notice)
+
+    # Check if we can run migrations safely
+    case check_migration_conditions(igniter) do
+      {:ok, igniter} ->
+        run_interactive_migration_prompt(igniter)
+
+      {:error, igniter, reason} ->
+        fallback_migration_notice(igniter, reason)
+    end
+  end
+
+  # Check if conditions are met for running migrations
+  defp check_migration_conditions(igniter) do
+    with {:ok, _app_name} <- get_app_name(igniter),
+         {:ok, _repo} <- get_repo_config() do
+      check_interactive_mode(igniter)
+    end
+  rescue
+    _ ->
+      {:error, igniter, "Unknown error checking migration conditions"}
+  end
+
+  defp get_app_name(igniter) do
+    case Application.app_name(igniter) do
+      nil -> {:error, igniter, "Cannot determine application name"}
+      app_name -> {:ok, app_name}
+    end
+  end
+
+  defp get_repo_config do
+    case Elixir.Application.get_env(:phoenix_kit, :repo) do
+      nil -> {:error, "PhoenixKit repo not configured yet"}
+      repo -> {:ok, repo}
+    end
+  end
+
+  defp check_interactive_mode(igniter) do
+    if System.get_env("CI") || !System.get_env("TERM") do
+      {:error, igniter, "Non-interactive environment (CI or no TTY)"}
+    else
+      {:ok, igniter}
+    end
+  end
+
+  # Run interactive migration prompt
+  defp run_interactive_migration_prompt(igniter) do
+    prompt = """
+
+    🚀 Would you like to run the database migration now?
+    This will create the PhoenixKit authentication tables.
+
+    Options:
+    - y/yes: Run 'mix ecto.migrate' now
+    - n/no:  Skip migration (you can run it manually later)
+    """
+
+    IO.puts(prompt)
+
+    case Mix.shell().prompt("Run migration? [Y/n]") |> String.trim() |> String.downcase() do
+      response when response in ["", "y", "yes"] ->
+        run_migration_with_feedback(igniter)
+
+      _ ->
+        manual_migration_notice(igniter)
+    end
+  end
+
+  # Actually run the migration and provide feedback
+  defp run_migration_with_feedback(igniter) do
+    IO.puts("\n⏳ Running database migration...")
+
+    try do
+      # Use System.cmd instead of Mix.Task to avoid state conflicts
+      case System.cmd("mix", ["ecto.migrate"], stderr_to_stdout: true) do
+        {output, 0} ->
+          success_notice = """
+
+          ✅ Migration completed successfully!
+
+          #{String.trim(output)}
+
+          🎉 PhoenixKit is now ready to use!
+          📖 Check the demo pages at: /test-current-user, /test-ensure-auth
+          """
+
+          Igniter.add_notice(igniter, success_notice)
+
+        {error_output, _exit_code} ->
+          failure_notice = """
+
+          ❌ Migration failed. Output:
+
+          #{String.trim(error_output)}
+
+          💡 Please run 'mix ecto.migrate' manually to complete the installation.
+          """
+
+          Igniter.add_warning(igniter, failure_notice)
+      end
+    rescue
+      error ->
+        exception_notice = """
+
+        ⚠️  Could not run migration automatically: #{inspect(error)}
+
+        💡 Please run 'mix ecto.migrate' manually to complete the installation.
         """
 
-        Igniter.add_notice(igniter, notice)
+        Igniter.add_warning(igniter, exception_notice)
     end
+  end
+
+  # Fallback notice when conditions aren't met
+  defp fallback_migration_notice(igniter, reason) do
+    notice = """
+
+    📝 Automatic migration skipped: #{reason}
+
+    Next steps:
+      1. Run: mix ecto.migrate
+      2. PhoenixKit will be ready to use!
+
+    💡 Tip: For automatic migrations, ensure you're in an interactive terminal.
+    """
+
+    Igniter.add_notice(igniter, notice)
+  end
+
+  # Manual migration notice when user declines
+  defp manual_migration_notice(igniter) do
+    notice = """
+
+    📝 Migration skipped by user choice.
+
+    Next steps:
+      1. Run: mix ecto.migrate
+      2. PhoenixKit will be ready to use!
+
+    💡 You can run migrations anytime with 'mix ecto.migrate'
+    """
+
+    Igniter.add_notice(igniter, notice)
   end
 
   # Find all existing PhoenixKit migrations

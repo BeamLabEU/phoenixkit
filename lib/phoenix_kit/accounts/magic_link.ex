@@ -57,7 +57,6 @@ defmodule PhoenixKit.Accounts.MagicLink do
 
   alias PhoenixKit.Accounts
   alias PhoenixKit.Accounts.{User, UserToken}
-  alias PhoenixKit.Repo
 
   import Ecto.Query
 
@@ -89,7 +88,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
         # Generate new magic link token
         {token, user_token} = UserToken.build_email_token(user, @magic_link_context)
 
-        case Repo.insert(user_token) do
+        case repo().insert(user_token) do
           {:ok, _} ->
             {:ok, user, token}
 
@@ -123,22 +122,26 @@ defmodule PhoenixKit.Accounts.MagicLink do
       {:error, :invalid_token}
   """
   def verify_magic_link(token) when is_binary(token) do
-    case UserToken.verify_email_token_query(token, @magic_link_context) do
-      {:ok, query} ->
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(:sha256, decoded_token)
         expiry_minutes = get_expiry_minutes()
 
-        # Update query to use minutes instead of days for magic links
-        updated_query =
-          from token_query in query,
-            join: token in UserToken,
-            on: token.user_id == token_query.id and token.context == ^@magic_link_context,
-            where: token.inserted_at > ago(^expiry_minutes, "minute"),
-            select: {token_query, token}
+        # Create query specifically for magic links with minute-based expiry
+        query =
+          from token in UserToken,
+            join: user in assoc(token, :user),
+            where:
+              token.token == ^hashed_token and
+                token.context == ^@magic_link_context and
+                token.inserted_at > ago(^expiry_minutes, "minute") and
+                token.sent_to == user.email,
+            select: {user, token}
 
-        case Repo.one(updated_query) do
+        case repo().one(query) do
           {user, user_token} ->
             # Delete the token to make it single-use
-            Repo.delete(user_token)
+            repo().delete(user_token)
 
             {:ok, user}
 
@@ -169,7 +172,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
       from t in UserToken,
         where: t.user_id == ^user.id and t.context == ^@magic_link_context
 
-    Repo.delete_all(query)
+    repo().delete_all(query)
     :ok
   end
 
@@ -208,7 +211,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
             t.context == ^@magic_link_context and
             t.inserted_at > ago(^expiry_minutes, "minute")
 
-    Repo.aggregate(query, :count)
+    repo().aggregate(query, :count)
   end
 
   @doc """
@@ -252,7 +255,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
           t.context == ^@magic_link_context and
             t.inserted_at <= ago(^expiry_minutes, "minute")
 
-    {deleted_count, _} = Repo.delete_all(query)
+    {deleted_count, _} = repo().delete_all(query)
     deleted_count
   end
 
@@ -260,6 +263,16 @@ defmodule PhoenixKit.Accounts.MagicLink do
   defp get_expiry_minutes do
     Application.get_env(:phoenix_kit, __MODULE__, [])
     |> Keyword.get(:expiry_minutes, @default_expiry_minutes)
+  end
+
+  # Get configured repo module
+  defp repo do
+    Application.get_env(:phoenix_kit, :repo) ||
+      raise """
+      No repo configured for PhoenixKit. Please add to your config:
+
+      config :phoenix_kit, repo: YourApp.Repo
+      """
   end
 
   # Get base URL for magic link construction

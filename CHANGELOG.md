@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.15] - 2025-08-17
+
+### Added
+- **Theme System** - Comprehensive light/dark/auto mode support with DaisyUI integration and localStorage persistence
+- **PostgreSQL Validation** - Automatic database adapter detection with warnings for non-PostgreSQL setups during installation
+- **Interactive Migration Runner** - Optional automatic migration execution with smart CI detection for streamlined setup
+- **Production Mailer Templates** - Auto-generated configuration examples for SMTP, SendGrid, Mailgun, Amazon SES in config/prod.exs
+- **Theme Configuration Module** - PhoenixKit.ThemeConfig for centralized theme management with complete API
+- **Theme Switcher Component** - Professional UI component with dropdown menu, icons, and accessibility features
+
+### Changed
+- **Installation Process** - Enhanced phoenix_kit.install with --theme-enabled option and improved user experience
+- **Magic Link Security** - Enhanced verification logic with email validation and proper minute-based expiry
+- **Repository Architecture** - Dynamic repo configuration with proper error handling instead of hardcoded references
+- **Documentation** - Comprehensive theme system documentation with integration examples and API reference
+
+### Fixed
+- **Magic Link Token Handling** - Improved token verification with SHA256 hashing and proper query optimization
+- **Routing Links** - Corrected LiveView navigation links to use string paths instead of verified routes for library compatibility
+
 ## [0.1.14] - 2025-08-15
 
 ### Added

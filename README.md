@@ -50,9 +50,12 @@ mix phoenix_kit.install
 This will automatically:
 
 - ✅ Auto-detect your Ecto repository
-- ✅ Generate migration files for authentication tables
+- ✅ **Validate PostgreSQL compatibility** with adapter detection
+- ✅ Generate migration files for authentication tables  
+- ✅ **Optionally run migrations interactively** for instant setup
 - ✅ Add PhoenixKit configuration to `config/config.exs`
 - ✅ Configure mailer settings for development
+- ✅ **Create production mailer templates** in `config/prod.exs`
 - ✅ Add authentication routes to your router
 - ✅ Provide detailed setup instructions
 
@@ -384,8 +387,8 @@ config :phoenix_kit, PhoenixKit.Mailer,
   adapter: Swoosh.Adapters.Local  # Emails shown at /dev/mailbox
 ```
 
-#### Production Setup (Required)
-Configure a production email adapter in `config/prod.exs`:
+#### Production Setup (Automatic Templates)
+The installer automatically creates production mailer templates in `config/prod.exs` as comments. Simply uncomment and configure your preferred adapter:
 
 ```elixir
 # Example: SMTP Configuration
@@ -409,6 +412,8 @@ config :phoenix_kit, PhoenixKit.Mailer,
   api_key: System.get_env("MAILGUN_API_KEY"),
   domain: System.get_env("MAILGUN_DOMAIN")
 ```
+
+💡 **Auto-Generated**: These examples are automatically added to your `config/prod.exs` during installation.
 
 **⚠️ Important**: Without proper mailer configuration, user registration and password reset will fail.
 
@@ -759,6 +764,133 @@ lib/your_app_web/templates/phoenix_kit_web/
 └── layouts/
     └── phoenix_kit.html.heex
 ```
+
+### Theme System
+
+PhoenixKit includes a comprehensive theme system with light/dark mode support, automatic system preference detection, and DaisyUI integration.
+
+#### Quick Start
+
+Enable the theme system in your configuration:
+
+```elixir
+# config/config.exs
+config :phoenix_kit, theme_enabled: true
+```
+
+Add theme assets to your layout:
+
+```html
+<!-- In your app.html.heex or root.html.heex -->
+<link rel="stylesheet" href={~p"/assets/phoenix_kit_theme.css"} />
+<script defer src={~p"/assets/phoenix_kit_theme.js"}></script>
+```
+
+Add the theme switcher to your navigation:
+
+```heex
+<!-- Minimal theme switcher -->
+<.theme_switcher />
+
+<!-- Theme switcher with label -->
+<.theme_switcher show_label={true} />
+
+<!-- Custom styled theme switcher -->
+<.theme_switcher class="mr-4" size="large" />
+```
+
+#### Full Configuration
+
+Configure all theme system options:
+
+```elixir
+# config/config.exs
+config :phoenix_kit,
+  theme_enabled: true,
+  theme: %{
+    mode: :auto,                    # :light, :dark, :auto
+    primary_color: "#3b82f6",      # Primary brand color
+    themes: [:light, :dark],        # Available themes
+    storage: :local_storage         # :local_storage, :session, :cookie
+  }
+```
+
+#### Theme Modes
+
+- **Light Mode**: Forces light theme regardless of system preference
+- **Dark Mode**: Forces dark theme regardless of system preference  
+- **Auto Mode**: Automatically switches based on system preference (`prefers-color-scheme`)
+
+#### DaisyUI Integration
+
+PhoenixKit automatically integrates with DaisyUI themes:
+
+```css
+/* Your CSS can use DaisyUI theme variables */
+.custom-element {
+  background-color: hsl(var(--base-100));
+  color: hsl(var(--base-content));
+}
+```
+
+#### Programmatic Theme Control
+
+Use the JavaScript API for advanced theme management:
+
+```javascript
+// Switch to dark mode
+window.PhoenixKitTheme.switch('dark');
+
+// Toggle between light and dark
+window.PhoenixKitTheme.toggle();
+
+// Get current theme info
+const info = window.PhoenixKitTheme.info();
+console.log('Current theme:', info.current);
+console.log('Effective theme:', info.effective);
+```
+
+#### Layout Integration Examples
+
+**Root Layout Integration:**
+
+```heex
+<!DOCTYPE html>
+<html lang="en" 
+      {PhoenixKit.ThemeConfig.theme_data_attributes()}
+      data-theme={PhoenixKit.ThemeConfig.daisy_theme_name(PhoenixKit.ThemeConfig.get_theme_mode())}
+      style={PhoenixKit.ThemeConfig.theme_css_variables()}>
+  <head>
+    <!-- Your head content -->
+    <link rel="stylesheet" href={~p"/assets/phoenix_kit_theme.css"} />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-end">
+        <.theme_switcher size="small" />
+      </div>
+    </nav>
+    
+    <main>{@inner_content}</main>
+    
+    <script defer src={~p"/assets/phoenix_kit_theme.js"}></script>
+  </body>
+</html>
+```
+
+#### Installation Integration
+
+The theme system is automatically configured during PhoenixKit installation:
+
+```bash
+mix phoenix_kit.install --theme-enabled
+```
+
+This will:
+- ✅ Enable theme configuration in config.exs
+- ✅ Copy theme assets to your project
+- ✅ Update layout files with theme integration
+- ✅ Add theme switcher to navigation
 
 ## Troubleshooting
 

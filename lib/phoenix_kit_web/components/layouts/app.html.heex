@@ -18,6 +18,8 @@
     
 <!-- User info display - shows how to access user data in layouts -->
     <div class="flex items-center gap-2 text-sm text-zinc-600">
+      <!-- Theme Switcher -->
+      <.theme_switcher size="small" show_label={false} class="mr-2" />
       <!-- Option 1: Basic user check (standard approach) -->
       <%= if @phoenix_kit_current_user do %>
         <span class="bg-green-100 text-green-800 px-2 py-1 rounded">

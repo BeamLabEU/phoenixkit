@@ -54,6 +54,12 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - **Idempotent operations** - Safe to run migrations multiple times
 - **Multi-version upgrades** - Automatically handles upgrades across multiple versions
 
+**Recent Installation Enhancements:**
+- **PostgreSQL Validation** - Automatic database adapter detection with warnings for non-PostgreSQL setups
+- **Production Mailer Templates** - Auto-generated configuration examples for SMTP, SendGrid, Mailgun, Amazon SES
+- **Interactive Migration Runner** - Optional automatic migration execution with smart CI detection
+- **Enhanced User Experience** - One-command setup from empty project to working authentication
+
 **Installation vs Update:**
 - Use `phoenix_kit.install` for new projects (first-time setup)
 - Use `phoenix_kit.update` for upgrading existing installations

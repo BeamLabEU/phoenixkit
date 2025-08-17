@@ -329,6 +329,7 @@ defmodule PhoenixKitWeb.Integration do
 
   - GET /phoenix_kit/register - User registration page
   - GET /phoenix_kit/log_in - User login page  
+  - GET /phoenix_kit/magic_link - Magic link login page
   - POST /phoenix_kit/log_in - User login form submission
   - DELETE /phoenix_kit/log_out - User logout
   - GET /phoenix_kit/log_out - User logout (direct URL access)
@@ -390,6 +391,7 @@ defmodule PhoenixKitWeb.Integration do
           # live "/test", TestLive, :index  # Moved to require_authenticated section
           live "/register", UserRegistrationLive, :new
           live "/log_in", UserLoginLive, :new
+          live "/magic_link", UserMagicLinkLive, :new
           live "/reset_password", UserForgotPasswordLive, :new
           live "/reset_password/:token", UserResetPasswordLive, :edit
         end

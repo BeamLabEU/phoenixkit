@@ -10,6 +10,7 @@ defmodule PhoenixKitWeb.CoreComponents do
   use Gettext, backend: PhoenixKitWeb.Gettext
   alias Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
+  alias PhoenixKit.ThemeConfig
 
   @doc """
   Renders a simple form.
@@ -374,6 +375,181 @@ defmodule PhoenixKitWeb.CoreComponents do
       </div>
     </header>
     """
+  end
+
+  @doc """
+  Renders a theme switcher component for light/dark mode toggle.
+
+  This component automatically integrates with the PhoenixKit theme system
+  and persists theme preferences in localStorage.
+
+  ## Examples
+
+      <.theme_switcher />
+      
+      <.theme_switcher class="mr-4" />
+      
+      <.theme_switcher show_label={true} />
+
+  ## Features
+
+  - Automatic theme detection from system preferences
+  - Light/Dark/Auto mode support  
+  - DaisyUI integration
+  - localStorage persistence
+  - Accessible keyboard navigation
+  - Beautiful icons and animations
+  """
+  attr :class, :string, default: "", doc: "Additional CSS classes"
+  attr :show_label, :boolean, default: false, doc: "Show text label next to switcher"
+
+  attr :size, :string,
+    default: "normal",
+    values: ~w(small normal large),
+    doc: "Size of the switcher"
+
+  attr :rest, :global, doc: "Additional HTML attributes"
+
+  def theme_switcher(assigns) do
+    # Only render if theme system is enabled
+    if ThemeConfig.theme_enabled?() do
+      assigns = assign_theme_data(assigns)
+      render_theme_switcher(assigns)
+    else
+      assigns = assign(assigns, :theme_enabled, false)
+
+      ~H"""
+      <!-- Theme system disabled -->
+      """
+    end
+  end
+
+  defp assign_theme_data(assigns) do
+    theme_config = ThemeConfig.get_theme_config()
+
+    assigns
+    |> assign(:theme_enabled, true)
+    |> assign(:current_theme, theme_config.mode)
+    |> assign(:supported_themes, theme_config.themes)
+    |> assign(:storage_method, theme_config.storage)
+    |> assign(:css_variables, ThemeConfig.theme_css_variables())
+    |> assign(:data_attributes, ThemeConfig.theme_data_attributes())
+  end
+
+  defp render_theme_switcher(assigns) do
+    ~H"""
+    <div class={["theme-switcher flex items-center gap-2", @class]} {@data_attributes} {@rest}>
+      
+    <!-- Theme Toggle Button -->
+      <div class="dropdown dropdown-end">
+        <div
+          tabindex="0"
+          role="button"
+          class={theme_button_classes(@size)}
+          id="theme-switcher-btn"
+          aria-label="Toggle theme"
+        >
+          <.theme_icon theme={@current_theme} />
+        </div>
+        
+    <!-- Dropdown Menu -->
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+          <li :for={theme <- @supported_themes}>
+            <button
+              type="button"
+              class="flex items-center gap-3 px-4 py-2 hover:bg-base-200 rounded-lg"
+              phx-click={switch_theme_js(theme)}
+              data-theme={theme}
+            >
+              <.theme_icon theme={theme} />
+              <span class="capitalize">{theme_display_name(theme)}</span>
+              <.theme_check_icon :if={@current_theme == theme} />
+            </button>
+          </li>
+          
+    <!-- Auto mode (system preference) -->
+          <li>
+            <button
+              type="button"
+              class="flex items-center gap-3 px-4 py-2 hover:bg-base-200 rounded-lg"
+              phx-click={switch_theme_js(:auto)}
+              data-theme="auto"
+            >
+              <.theme_icon theme={:auto} />
+              <span>Auto (System)</span>
+              <.theme_check_icon :if={@current_theme == :auto} />
+            </button>
+          </li>
+        </ul>
+      </div>
+      
+    <!-- Optional Label -->
+      <span :if={@show_label} class="text-sm text-base-content opacity-70">
+        Theme
+      </span>
+    </div>
+    """
+  end
+
+  # Theme icon component
+  defp theme_icon(%{theme: :light} = assigns) do
+    ~H"""
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fill-rule="evenodd"
+        d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+        clip-rule="evenodd"
+      />
+    </svg>
+    """
+  end
+
+  defp theme_icon(%{theme: :dark} = assigns) do
+    ~H"""
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+    </svg>
+    """
+  end
+
+  defp theme_icon(%{theme: :auto} = assigns) do
+    ~H"""
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fill-rule="evenodd"
+        d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z"
+        clip-rule="evenodd"
+      />
+    </svg>
+    """
+  end
+
+  # Check mark icon for selected theme
+  defp theme_check_icon(assigns) do
+    ~H"""
+    <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fill-rule="evenodd"
+        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+        clip-rule="evenodd"
+      />
+    </svg>
+    """
+  end
+
+  # Helper functions
+  defp theme_button_classes("small"), do: "btn btn-sm btn-ghost btn-circle"
+  defp theme_button_classes("large"), do: "btn btn-lg btn-ghost btn-circle"
+  defp theme_button_classes(_), do: "btn btn-ghost btn-circle"
+
+  defp theme_display_name(:light), do: "Light"
+  defp theme_display_name(:dark), do: "Dark"
+  defp theme_display_name(:auto), do: "Auto"
+  defp theme_display_name(theme), do: String.capitalize(to_string(theme))
+
+  # JavaScript for theme switching
+  defp switch_theme_js(theme) do
+    JS.dispatch("phoenix-kit:switch-theme", detail: %{theme: theme})
   end
 
   defp hide_flash(js, selector) do
