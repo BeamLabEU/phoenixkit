@@ -67,8 +67,8 @@ This is **Phoenix Module Template** - a professional library-first template for 
 
 ### Testing
 
-- `mix test` - Run all tests with database sandbox
-- `mix test --cover` - Run tests with coverage report
+- `mix test` - Run all tests (12 tests, no database required)
+- ⚠️ Ecto warnings are normal for library - tests focus on API validation
 
 ### Code Quality
 

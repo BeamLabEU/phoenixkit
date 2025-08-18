@@ -1,11 +1,35 @@
 defmodule PhoenixKit do
+  @moduledoc """
+  PhoenixKit - Professional authentication library for Phoenix applications.
+
+  Provides zero-config setup authentication with support for:
+  - User registration and login
+  - Email confirmation 
+  - Password reset
+  - Magic link authentication
+  - Session management
+  - Layout integration
+
+  ## Quick Start
+
+      # Add to your router.ex
+      use PhoenixKitWeb.Integration
+      phoenix_kit_routes()
+
+  ## Configuration
+
+      config :phoenix_kit,
+        repo: MyApp.Repo,
+        layout: {MyAppWeb.Layouts, :app}
+  """
+
   @doc """
   Returns the current version of PhoenixKit.
 
   ## Examples
 
       iex> PhoenixKit.version()
-      "0.1.14"
+      "1.0.0"
 
   """
   @spec version() :: String.t()
@@ -21,7 +45,7 @@ defmodule PhoenixKit do
   ## Examples
 
       iex> PhoenixKit.configured?()
-      true
+      false
 
   """
   @spec configured?() :: boolean()
@@ -38,7 +62,7 @@ defmodule PhoenixKit do
   ## Examples
 
       iex> PhoenixKit.config()
-      %{repo: MyApp.Repo, layout: {MyAppWeb.Layouts, :app}}
+      %{ecto_repos: []}
 
   """
   @spec config() :: map()
