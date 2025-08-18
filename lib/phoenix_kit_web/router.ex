@@ -2,7 +2,7 @@ defmodule PhoenixKitWeb.Router do
   use PhoenixKitWeb, :router
 
   import PhoenixKitWeb.Integration
-  import PhoenixKitWeb.UserAuth
+  import PhoenixKitWeb.Users.Auth
 
   pipeline :browser do
     plug :accepts, ["html"]

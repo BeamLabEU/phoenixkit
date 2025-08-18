@@ -110,15 +110,15 @@ defmodule PhoenixKit.MixProject do
       extras: ["README.md", "CHANGELOG.md"],
       groups_for_modules: [
         Authentication: [
-          PhoenixKit.Accounts,
-          PhoenixKit.Accounts.User,
-          PhoenixKit.Accounts.UserToken,
-          PhoenixKit.Accounts.MagicLink,
-          PhoenixKit.Accounts.Scope
+          PhoenixKit.Users.Auth,
+          PhoenixKit.Users.Auth.User,
+          PhoenixKit.Users.Auth.UserToken,
+          PhoenixKit.Users.MagicLink,
+          PhoenixKit.Users.Auth.Scope
         ],
         "Web Integration": [
           PhoenixKitWeb.Integration,
-          PhoenixKitWeb.UserAuth,
+          PhoenixKitWeb.Users.Auth,
           PhoenixKit.LayoutConfig
         ],
         Database: [

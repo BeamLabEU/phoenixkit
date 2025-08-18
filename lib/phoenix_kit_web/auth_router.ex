@@ -23,7 +23,7 @@ defmodule PhoenixKitWeb.AuthRouter do
   import Plug.Conn
   import Phoenix.Controller
   import Phoenix.LiveView.Router
-  import PhoenixKitWeb.UserAuth
+  import PhoenixKitWeb.Users.Auth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -36,11 +36,11 @@ defmodule PhoenixKitWeb.AuthRouter do
   end
 
   pipeline :phoenix_kit_redirect_if_authenticated do
-    plug PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated
+    plug PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_user_is_authenticated
   end
 
   pipeline :require_authenticated do
-    plug PhoenixKitWeb.UserAuth, :phoenix_kit_require_authenticated_user
+    plug PhoenixKitWeb.Users.Auth, :phoenix_kit_require_authenticated_user
   end
 
   scope "/" do
@@ -50,29 +50,29 @@ defmodule PhoenixKitWeb.AuthRouter do
     live "/test", PhoenixKitWeb.TestLive, :index
 
     # LiveView routes for authentication
-    live "/register", PhoenixKitWeb.UserRegistrationLive, :new
-    live "/log_in", PhoenixKitWeb.UserLoginLive, :new
+    live "/register", PhoenixKitWeb.Users.RegistrationLive, :new
+    live "/log_in", PhoenixKitWeb.Users.LoginLive, :new
 
-    post "/log_in", PhoenixKitWeb.UserSessionController, :create
+    post "/log_in", PhoenixKitWeb.Users.SessionController, :create
 
-    live "/reset_password", PhoenixKitWeb.UserForgotPasswordLive, :new
-    live "/reset_password/:token", PhoenixKitWeb.UserResetPasswordLive, :edit
+    live "/reset_password", PhoenixKitWeb.Users.ForgotPasswordLive, :new
+    live "/reset_password/:token", PhoenixKitWeb.Users.ResetPasswordLive, :edit
   end
 
   scope "/" do
     pipe_through [:browser]
 
-    delete "/log_out", PhoenixKitWeb.UserSessionController, :delete
-    get "/log_out", PhoenixKitWeb.UserSessionController, :get_logout
+    delete "/log_out", PhoenixKitWeb.Users.SessionController, :delete
+    get "/log_out", PhoenixKitWeb.Users.SessionController, :get_logout
 
-    live "/confirm/:token", PhoenixKitWeb.UserConfirmationLive, :edit
-    live "/confirm", PhoenixKitWeb.UserConfirmationInstructionsLive, :new
+    live "/confirm/:token", PhoenixKitWeb.Users.ConfirmationLive, :edit
+    live "/confirm", PhoenixKitWeb.Users.ConfirmationInstructionsLive, :new
   end
 
   scope "/" do
     pipe_through [:browser, :require_authenticated]
 
-    live "/settings", PhoenixKitWeb.UserSettingsLive, :edit
-    live "/settings/confirm_email/:token", PhoenixKitWeb.UserSettingsLive, :confirm_email
+    live "/settings", PhoenixKitWeb.Users.SettingsLive, :edit
+    live "/settings/confirm_email/:token", PhoenixKitWeb.Users.SettingsLive, :confirm_email
   end
 end

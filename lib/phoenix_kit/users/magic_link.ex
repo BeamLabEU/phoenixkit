@@ -1,4 +1,4 @@
-defmodule PhoenixKit.Accounts.MagicLink do
+defmodule PhoenixKit.Users.MagicLink do
   @moduledoc """
   Magic Link authentication system for PhoenixKit.
 
@@ -16,7 +16,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
   ## Usage
 
       # Generate and send magic link
-      case PhoenixKit.Accounts.MagicLink.generate_magic_link(email) do
+      case PhoenixKit.Users.MagicLink.generate_magic_link(email) do
         {:ok, user, token} ->
           # Send email with magic link
           PhoenixKit.Mailer.send_magic_link_email(user, token)
@@ -28,7 +28,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
       end
       
       # Verify magic link token
-      case PhoenixKit.Accounts.MagicLink.verify_magic_link(token) do
+      case PhoenixKit.Users.MagicLink.verify_magic_link(token) do
         {:ok, user} ->
           # Log user in
           {:ok, user}
@@ -51,12 +51,12 @@ defmodule PhoenixKit.Accounts.MagicLink do
   Magic link expiry can be configured in your application:
 
       # config/config.exs
-      config :phoenix_kit, PhoenixKit.Accounts.MagicLink,
+      config :phoenix_kit, PhoenixKit.Users.MagicLink,
         expiry_minutes: 15  # Default: 15 minutes
   """
 
-  alias PhoenixKit.Accounts
-  alias PhoenixKit.Accounts.{User, UserToken}
+  alias PhoenixKit.Users.Auth
+  alias PhoenixKit.Users.Auth.{User, UserToken}
 
   import Ecto.Query
 
@@ -71,16 +71,16 @@ defmodule PhoenixKit.Accounts.MagicLink do
 
   ## Examples
 
-      iex> PhoenixKit.Accounts.MagicLink.generate_magic_link("user@example.com")
+      iex> PhoenixKit.Users.MagicLink.generate_magic_link("user@example.com")
       {:ok, %User{}, "magic_link_token_here"}
       
-      iex> PhoenixKit.Accounts.MagicLink.generate_magic_link("nonexistent@example.com")
+      iex> PhoenixKit.Users.MagicLink.generate_magic_link("nonexistent@example.com")
       {:error, :user_not_found}
   """
   def generate_magic_link(email) when is_binary(email) do
     email = String.trim(email) |> String.downcase()
 
-    case Accounts.get_user_by_email(email) do
+    case Auth.get_user_by_email(email) do
       %User{} = user ->
         # Revoke any existing magic link tokens for this user
         revoke_magic_links(user)
@@ -115,10 +115,10 @@ defmodule PhoenixKit.Accounts.MagicLink do
 
   ## Examples
 
-      iex> PhoenixKit.Accounts.MagicLink.verify_magic_link("valid_token")
+      iex> PhoenixKit.Users.MagicLink.verify_magic_link("valid_token")
       {:ok, %User{}}
       
-      iex> PhoenixKit.Accounts.MagicLink.verify_magic_link("invalid_token")  
+      iex> PhoenixKit.Users.MagicLink.verify_magic_link("invalid_token")  
       {:error, :invalid_token}
   """
   def verify_magic_link(token) when is_binary(token) do
@@ -164,7 +164,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
 
   ## Examples
 
-      iex> PhoenixKit.Accounts.MagicLink.revoke_magic_links(user)
+      iex> PhoenixKit.Users.MagicLink.revoke_magic_links(user)
       :ok
   """
   def revoke_magic_links(%User{} = user) do
@@ -183,7 +183,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
 
   ## Examples
 
-      iex> PhoenixKit.Accounts.MagicLink.enabled?()
+      iex> PhoenixKit.Users.MagicLink.enabled?()
       true
   """
   def enabled? do
@@ -198,7 +198,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
 
   ## Examples
 
-      iex> PhoenixKit.Accounts.MagicLink.active_magic_links_count(user)
+      iex> PhoenixKit.Users.MagicLink.active_magic_links_count(user)
       1
   """
   def active_magic_links_count(%User{} = user) do
@@ -222,10 +222,10 @@ defmodule PhoenixKit.Accounts.MagicLink do
 
   ## Examples
 
-      iex> PhoenixKit.Accounts.MagicLink.magic_link_url("token123")
+      iex> PhoenixKit.Users.MagicLink.magic_link_url("token123")
       "http://localhost:4000/phoenix_kit/magic_link/token123"
       
-      iex> PhoenixKit.Accounts.MagicLink.magic_link_url("token123", "https://myapp.com")
+      iex> PhoenixKit.Users.MagicLink.magic_link_url("token123", "https://myapp.com")
       "https://myapp.com/phoenix_kit/magic_link/token123"
   """
   def magic_link_url(token, base_url \\ nil) when is_binary(token) do
@@ -243,7 +243,7 @@ defmodule PhoenixKit.Accounts.MagicLink do
 
   ## Examples
 
-      iex> PhoenixKit.Accounts.MagicLink.cleanup_expired_tokens()
+      iex> PhoenixKit.Users.MagicLink.cleanup_expired_tokens()
       5  # 5 expired tokens were deleted
   """
   def cleanup_expired_tokens do

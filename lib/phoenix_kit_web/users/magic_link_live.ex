@@ -1,4 +1,4 @@
-defmodule PhoenixKitWeb.UserMagicLinkLive do
+defmodule PhoenixKitWeb.Users.MagicLinkLive do
   @moduledoc """
   LiveView for magic link authentication.
 
@@ -12,8 +12,8 @@ defmodule PhoenixKitWeb.UserMagicLinkLive do
   """
   use PhoenixKitWeb, :live_view
 
-  alias PhoenixKit.Accounts.MagicLink
   alias PhoenixKit.Mailer
+  alias PhoenixKit.Users.MagicLink
 
   @impl true
   def mount(_params, _session, socket) do
@@ -169,13 +169,16 @@ defmodule PhoenixKitWeb.UserMagicLinkLive do
         </div>
 
         <div class="mt-6 text-center">
-          <.link navigate="/phoenix_kit/log_in" class="text-sm text-brand hover:underline">
+          <.link navigate="/phoenix_kit/users/log_in" class="text-sm text-brand hover:underline">
             Sign in with password
           </.link>
         </div>
 
         <div class="mt-3 text-center">
-          <.link navigate="/phoenix_kit/register" class="text-sm text-gray-600 hover:text-gray-500">
+          <.link
+            navigate="/phoenix_kit/users/register"
+            class="text-sm text-gray-600 hover:text-gray-500"
+          >
             Don't have an account? Sign up
           </.link>
         </div>

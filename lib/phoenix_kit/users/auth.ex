@@ -1,6 +1,6 @@
-defmodule PhoenixKit.Accounts do
+defmodule PhoenixKit.Users.Auth do
   @moduledoc """
-  The Accounts context for user authentication and management.
+  The Auth context for user authentication and management.
 
   This module provides functions for user registration, authentication, password management,
   and email confirmation. It serves as the main interface for all user-related operations
@@ -35,19 +35,19 @@ defmodule PhoenixKit.Accounts do
   ## Usage Examples
 
       # Register a new user
-      {:ok, user} = PhoenixKit.Accounts.register_user(%{
+      {:ok, user} = PhoenixKit.Users.Auth.register_user(%{
         email: "user@example.com",
         password: "secure_password123"
       })
 
       # Authenticate user
-      case PhoenixKit.Accounts.get_user_by_email_and_password(email, password) do
+      case PhoenixKit.Users.Auth.get_user_by_email_and_password(email, password) do
         %User{} = user -> {:ok, user}
         nil -> {:error, :invalid_credentials}
       end
 
       # Send confirmation email
-      PhoenixKit.Accounts.deliver_user_confirmation_instructions(user)
+      PhoenixKit.Users.Auth.deliver_user_confirmation_instructions(user)
 
   ## Security Features
 
@@ -63,7 +63,7 @@ defmodule PhoenixKit.Accounts do
 
   # This module will be populated by mix phx.gen.auth
 
-  alias PhoenixKit.Accounts.{User, UserNotifier, UserToken}
+  alias PhoenixKit.Users.Auth.{User, UserNotifier, UserToken}
 
   ## Database getters
 
@@ -219,7 +219,7 @@ defmodule PhoenixKit.Accounts do
 
   ## Examples
 
-      iex> deliver_user_update_email_instructions(user, current_email, &"/phoenix_kit/settings/confirm_email/#{&1}")
+      iex> deliver_user_update_email_instructions(user, current_email, &"/phoenix_kit/users/settings/confirm_email/#{&1}")
       {:ok, %{to: ..., body: ...}}
 
   """
@@ -306,10 +306,10 @@ defmodule PhoenixKit.Accounts do
 
   ## Examples
 
-      iex> deliver_user_confirmation_instructions(user, &"/phoenix_kit/confirm/#{&1}")
+      iex> deliver_user_confirmation_instructions(user, &"/phoenix_kit/users/confirm/#{&1}")
       {:ok, %{to: ..., body: ...}}
 
-      iex> deliver_user_confirmation_instructions(confirmed_user, &"/phoenix_kit/confirm/#{&1}")
+      iex> deliver_user_confirmation_instructions(confirmed_user, &"/phoenix_kit/users/confirm/#{&1}")
       {:error, :already_confirmed}
 
   """
@@ -353,7 +353,7 @@ defmodule PhoenixKit.Accounts do
 
   ## Examples
 
-      iex> deliver_user_reset_password_instructions(user, &"/phoenix_kit/reset_password/#{&1}")
+      iex> deliver_user_reset_password_instructions(user, &"/phoenix_kit/users/reset_password/#{&1}")
       {:ok, %{to: ..., body: ...}}
 
   """

@@ -1,4 +1,4 @@
-defmodule PhoenixKit.Accounts.UserNotifier do
+defmodule PhoenixKit.Users.Auth.UserNotifier do
   @moduledoc """
   User notification system for PhoenixKit authentication workflows.
 

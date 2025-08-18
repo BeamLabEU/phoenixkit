@@ -1,7 +1,7 @@
 defmodule PhoenixKitWeb.UserSessionControllerTest do
   use PhoenixKitWeb.ConnCase, async: true
 
-  import PhoenixKit.AccountsFixtures
+  import PhoenixKit.UsersFixtures
 
   setup do
     %{user: user_fixture()}

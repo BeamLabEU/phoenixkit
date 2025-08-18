@@ -1,4 +1,4 @@
-defmodule PhoenixKit.Accounts.UserToken do
+defmodule PhoenixKit.Users.Auth.UserToken do
   @moduledoc """
   User token schema for PhoenixKit authentication system.
 
@@ -21,7 +21,7 @@ defmodule PhoenixKit.Accounts.UserToken do
   """
   use Ecto.Schema
   import Ecto.Query
-  alias PhoenixKit.Accounts.UserToken
+  alias PhoenixKit.Users.Auth.UserToken
 
   @hash_algorithm :sha256
   @rand_size 32
@@ -38,7 +38,7 @@ defmodule PhoenixKit.Accounts.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
-    belongs_to :user, PhoenixKit.Accounts.User
+    belongs_to :user, PhoenixKit.Users.Auth.User
 
     timestamps(updated_at: false)
   end

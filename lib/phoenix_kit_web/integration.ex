@@ -40,7 +40,7 @@ defmodule PhoenixKitWeb.Integration do
       # Basic approach - adds @phoenix_kit_current_user to assigns
       live_session :default,
         layout: {MyAppWeb.Layouts, :app},
-        on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
+        on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}] do
         live "/", PageLive
         live "/dashboard", DashboardLive
         # ... your routes
@@ -49,7 +49,7 @@ defmodule PhoenixKitWeb.Integration do
       # Advanced approach - adds both @phoenix_kit_current_user and @phoenix_kit_current_scope
       live_session :default,
         layout: {MyAppWeb.Layouts, :app},
-        on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}] do
+        on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
         live "/", PageLive
         live "/dashboard", DashboardLive
         # ... your routes
@@ -61,27 +61,27 @@ defmodule PhoenixKitWeb.Integration do
       <%= if @phoenix_kit_current_user do %>
         <div class="user-menu">
           Welcome, {@phoenix_kit_current_user.email}!
-          <.link href="/phoenix_kit/settings">Settings</.link>
-          <.link href="/phoenix_kit/log_out" method="delete">Logout</.link>
+          <.link href="/phoenix_kit/users/settings">Settings</.link>
+          <.link href="/phoenix_kit/users/log_out" method="delete">Logout</.link>
         </div>
       <% else %>
         <div class="auth-links">
-          <.link href="/phoenix_kit/log_in">Login</.link>
-          <.link href="/phoenix_kit/register">Sign Up</.link>
+          <.link href="/phoenix_kit/users/log_in">Login</.link>
+          <.link href="/phoenix_kit/users/register">Sign Up</.link>
         </div>
       <% end %>
 
       <!-- Using the scope approach for better encapsulation -->
-      <%= if PhoenixKit.Accounts.Scope.authenticated?(@phoenix_kit_current_scope) do %>
+      <%= if PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
         <div class="user-menu">
-          Welcome, {PhoenixKit.Accounts.Scope.user_email(@phoenix_kit_current_scope)}!
-          <.link href="/phoenix_kit/settings">Settings</.link>
-          <.link href="/phoenix_kit/log_out" method="delete">Logout</.link>
+          Welcome, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!
+          <.link href="/phoenix_kit/users/settings">Settings</.link>
+          <.link href="/phoenix_kit/users/log_out" method="delete">Logout</.link>
         </div>
       <% else %>
         <div class="auth-links">
-          <.link href="/phoenix_kit/log_in">Login</.link>
-          <.link href="/phoenix_kit/register">Sign Up</.link>
+          <.link href="/phoenix_kit/users/log_in">Login</.link>
+          <.link href="/phoenix_kit/users/register">Sign Up</.link>
         </div>
       <% end %>
 
@@ -127,7 +127,7 @@ defmodule PhoenixKitWeb.Integration do
           # Public routes with optional user info in layouts
           live_session :public,
             layout: {MyAppWeb.Layouts, :app},
-            on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}] do
+            on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
             live "/", PageLive
             live "/about", AboutLive
             live "/pricing", PricingLive
@@ -136,17 +136,17 @@ defmodule PhoenixKitWeb.Integration do
           # Protected routes requiring authentication
           live_session :authenticated,
             layout: {MyAppWeb.Layouts, :app},
-            on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated_scope}] do
+            on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}] do
             live "/dashboard", DashboardLive
             live "/profile", ProfileLive
-            live "/settings", AppSettingsLive  # Note: different from /phoenix_kit/settings
+            live "/settings", AppSettingsLive  # Note: different from /phoenix_kit/users/settings
           end
 
           # Admin-only routes (you can add your own authorization logic)
           live_session :admin,
             layout: {MyAppWeb.Layouts, :admin},
             on_mount: [
-              {PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated_scope},
+              {PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope},
               {MyAppWeb.AdminAuth, :ensure_admin}  # Your custom admin check
             ] do
             live "/admin", AdminDashboardLive
@@ -179,13 +179,13 @@ defmodule PhoenixKitWeb.Integration do
       <% end %>
 
       # Use scope for better structure
-      <%= if PhoenixKit.Accounts.Scope.authenticated?(@phoenix_kit_current_scope) do %>
+      <%= if PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
         <!-- content -->
       <% end %>
 
       # Easy access to user data through scope
-      <span>Welcome, {PhoenixKit.Accounts.Scope.user_email(@phoenix_kit_current_scope)}!</span>
-      <span>User ID: {PhoenixKit.Accounts.Scope.user_id(@phoenix_kit_current_scope)}</span>
+      <span>Welcome, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!</span>
+      <span>User ID: {PhoenixKit.Users.Auth.Scope.user_id(@phoenix_kit_current_scope)}</span>
 
 
   ## Authentication Levels Available
@@ -228,7 +228,7 @@ defmodule PhoenixKitWeb.Integration do
           # Public routes with optional user info (RECOMMENDED APPROACH)
           live_session :public,
             layout: {MyAppWeb.Layouts, :app},
-            on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}] do
+            on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
             live "/", PageLive
             live "/about", AboutLive
             live "/contact", ContactLive
@@ -237,7 +237,7 @@ defmodule PhoenixKitWeb.Integration do
           # Protected routes requiring authentication
           live_session :authenticated,
             layout: {MyAppWeb.Layouts, :app},
-            on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated_scope}] do
+            on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}] do
             live "/dashboard", DashboardLive
             live "/profile", ProfileLive
             live "/settings", AppSettingsLive
@@ -246,7 +246,7 @@ defmodule PhoenixKitWeb.Integration do
           # Routes that redirect authenticated users (login/register pages)
           live_session :redirect_if_authenticated,
             layout: {MyAppWeb.Layouts, :app},
-            on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_authenticated_scope}] do
+            on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_authenticated_scope}] do
             live "/welcome", WelcomeLive
             live "/pricing", PricingLive
           end
@@ -261,14 +261,14 @@ defmodule PhoenixKitWeb.Integration do
       # Step 1: Current working setup
       live_session :default,
         layout: {MyAppWeb.Layouts, :app},
-        on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
+        on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}] do
         # ... routes
       end
 
       # Step 2: Upgrade to scope (adds both user and scope)
       live_session :default,
         layout: {MyAppWeb.Layouts, :app},
-        on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}] do
+        on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
         # ... same routes, now you have access to both:
         # @phoenix_kit_current_user (backwards compatible)
         # @phoenix_kit_current_scope (new, better encapsulation)
@@ -308,18 +308,18 @@ defmodule PhoenixKitWeb.Integration do
   ### Scope-based Access (Recommended)
   ```heex
   <!-- Check authentication status -->
-  <%%= if PhoenixKit.Accounts.Scope.authenticated?(@phoenix_kit_current_scope) do %>
-    <p>Welcome, {PhoenixKit.Accounts.Scope.user_email(@phoenix_kit_current_scope)}!</p>
+  <%%= if PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
+    <p>Welcome, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!</p>
   <%% end %>
 
   <!-- Safe property access -->
-  <%%= if user_id = PhoenixKit.Accounts.Scope.user_id(@phoenix_kit_current_scope) do %>
+  <%%= if user_id = PhoenixKit.Users.Auth.Scope.user_id(@phoenix_kit_current_scope) do %>
     <.link href={"/profile/\#{user_id}"}>View Profile</.link>
   <%% end %>
 
   <!-- Check if anonymous -->
-  <%%= if PhoenixKit.Accounts.Scope.anonymous?(@phoenix_kit_current_scope) do %>
-    <.link href="/phoenix_kit/register">Create Account</.link>
+  <%%= if PhoenixKit.Users.Auth.Scope.anonymous?(@phoenix_kit_current_scope) do %>
+    <.link href="/phoenix_kit/users/register">Create Account</.link>
   <%% end %>
   ```
 
@@ -327,19 +327,19 @@ defmodule PhoenixKitWeb.Integration do
 
   The following routes will be available under /phoenix_kit prefix (or your custom prefix):
 
-  - GET /phoenix_kit/register - User registration page
-  - GET /phoenix_kit/log_in - User login page  
-  - GET /phoenix_kit/magic_link - Magic link login page
-  - POST /phoenix_kit/log_in - User login form submission
-  - DELETE /phoenix_kit/log_out - User logout
-  - GET /phoenix_kit/log_out - User logout (direct URL access)
-  - GET /phoenix_kit/reset_password - Password reset request page
-  - GET /phoenix_kit/reset_password/:token - Password reset form
-  - GET /phoenix_kit/settings - User settings page
-  - GET /phoenix_kit/settings/confirm_email/:token - Email confirmation
-  - GET /phoenix_kit/confirm/:token - Account confirmation
-  - GET /phoenix_kit/confirm - Resend confirmation instructions
-  - GET /phoenix_kit/magic_link/:token - Magic link verification
+  - GET /phoenix_kit/users/register - User registration page
+  - GET /phoenix_kit/users/log_in - User login page  
+  - GET /phoenix_kit/users/magic_link - Magic link login page
+  - POST /phoenix_kit/users/log_in - User login form submission
+  - DELETE /phoenix_kit/users/log_out - User logout
+  - GET /phoenix_kit/users/log_out - User logout (direct URL access)
+  - GET /phoenix_kit/users/reset_password - Password reset request page
+  - GET /phoenix_kit/users/reset_password/:token - Password reset form
+  - GET /phoenix_kit/users/settings - User settings page
+  - GET /phoenix_kit/users/settings/confirm_email/:token - Email confirmation
+  - GET /phoenix_kit/users/confirm/:token - Account confirmation
+  - GET /phoenix_kit/users/confirm - Resend confirmation instructions
+  - GET /phoenix_kit/users/magic_link/:token - Magic link verification
 
   ## Configuration
 
@@ -360,26 +360,28 @@ defmodule PhoenixKitWeb.Integration do
       end
 
       pipeline :phoenix_kit_redirect_if_authenticated do
-        plug PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated
+        plug PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_user_is_authenticated
       end
 
       pipeline :phoenix_kit_require_authenticated do
-        plug PhoenixKitWeb.UserAuth, :fetch_phoenix_kit_current_user
-        plug PhoenixKitWeb.UserAuth, :phoenix_kit_require_authenticated_user
+        plug PhoenixKitWeb.Users.Auth, :fetch_phoenix_kit_current_user
+        plug PhoenixKitWeb.Users.Auth, :phoenix_kit_require_authenticated_user
       end
 
       scope unquote(prefix), PhoenixKitWeb do
         pipe_through [:browser, :phoenix_kit_auto_setup, :phoenix_kit_redirect_if_authenticated]
 
-        post "/log_in", UserSessionController, :create
+        post "/users/log_in", Users.SessionController, :create
       end
 
       scope unquote(prefix), PhoenixKitWeb do
         pipe_through [:browser, :phoenix_kit_auto_setup]
 
-        delete "/log_out", UserSessionController, :delete
-        get "/log_out", UserSessionController, :get_logout
-        get "/magic_link/:token", UserMagicLinkController, :verify
+        delete "/users/log_out", Users.SessionController, :delete
+        get "/users/log_out", Users.SessionController, :get_logout
+        get "/users/log-out", Users.SessionController, :get_logout
+        get "/users/magic_link/:token", Users.MagicLinkController, :verify
+        get "/users/magic-link/:token", Users.MagicLinkController, :verify
       end
 
       # LiveView routes with proper authentication
@@ -387,26 +389,31 @@ defmodule PhoenixKitWeb.Integration do
         pipe_through [:browser, :phoenix_kit_auto_setup]
 
         live_session :phoenix_kit_redirect_if_user_is_authenticated,
-          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}] do
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_user_is_authenticated}] do
           # live "/test", TestLive, :index  # Moved to require_authenticated section
-          live "/register", UserRegistrationLive, :new
-          live "/log_in", UserLoginLive, :new
-          live "/magic_link", UserMagicLinkLive, :new
-          live "/reset_password", UserForgotPasswordLive, :new
-          live "/reset_password/:token", UserResetPasswordLive, :edit
+          live "/users/register", Users.RegistrationLive, :new
+          live "/users/log_in", Users.LoginLive, :new
+          live "/users/log-in", Users.LoginLive, :new
+          live "/users/magic_link", Users.MagicLinkLive, :new
+          live "/users/magic-link", Users.MagicLinkLive, :new
+          live "/users/reset_password", Users.ForgotPasswordLive, :new
+          live "/users/reset-password", Users.ForgotPasswordLive, :new
+          live "/users/reset_password/:token", Users.ResetPasswordLive, :edit
+          live "/users/reset-password/:token", Users.ResetPasswordLive, :edit
         end
 
         live_session :phoenix_kit_current_user,
-          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
-          live "/confirm/:token", UserConfirmationLive, :edit
-          live "/confirm", UserConfirmationInstructionsLive, :new
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}] do
+          live "/users/confirm/:token", Users.ConfirmationLive, :edit
+          live "/users/confirm", Users.ConfirmationInstructionsLive, :new
         end
 
         live_session :phoenix_kit_require_authenticated_user,
-          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated}] do
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated}] do
           # live "/test", TestLive, :index
-          live "/settings", UserSettingsLive, :edit
-          live "/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+          live "/users/settings", Users.SettingsLive, :edit
+          live "/users/settings/confirm_email/:token", Users.SettingsLive, :confirm_email
+          live "/users/settings/confirm-email/:token", Users.SettingsLive, :confirm_email
         end
       end
     end

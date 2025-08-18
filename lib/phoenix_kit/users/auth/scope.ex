@@ -1,4 +1,4 @@
-defmodule PhoenixKit.Accounts.Scope do
+defmodule PhoenixKit.Users.Auth.Scope do
   @moduledoc """
   Scope module for encapsulating PhoenixKit authentication state.
 
@@ -28,7 +28,7 @@ defmodule PhoenixKit.Accounts.Scope do
   - `:authenticated?` - Boolean indicating if user is authenticated
   """
 
-  alias PhoenixKit.Accounts.User
+  alias PhoenixKit.Users.Auth.User
 
   @type t :: %__MODULE__{
           user: User.t() | nil,
@@ -42,14 +42,14 @@ defmodule PhoenixKit.Accounts.Scope do
 
   ## Examples
 
-      iex> user = %PhoenixKit.Accounts.User{id: 1, email: "user@example.com"}
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(user)
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1, email: "user@example.com"}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
       iex> scope.authenticated?
       true
       iex> scope.user.email
       "user@example.com"
 
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(nil)
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
       iex> scope.authenticated?
       false
       iex> scope.user
@@ -75,13 +75,13 @@ defmodule PhoenixKit.Accounts.Scope do
 
   ## Examples
 
-      iex> user = %PhoenixKit.Accounts.User{id: 1}
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(user)
-      iex> PhoenixKit.Accounts.Scope.authenticated?(scope)
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.authenticated?(scope)
       true
 
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(nil)
-      iex> PhoenixKit.Accounts.Scope.authenticated?(scope)
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.authenticated?(scope)
       false
   """
   @spec authenticated?(t()) :: boolean()
@@ -92,13 +92,13 @@ defmodule PhoenixKit.Accounts.Scope do
 
   ## Examples
 
-      iex> user = %PhoenixKit.Accounts.User{id: 1, email: "user@example.com"}
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(user)
-      iex> PhoenixKit.Accounts.Scope.user(scope)
-      %PhoenixKit.Accounts.User{id: 1, email: "user@example.com"}
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1, email: "user@example.com"}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.user(scope)
+      %PhoenixKit.Users.Auth.User{id: 1, email: "user@example.com"}
 
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(nil)
-      iex> PhoenixKit.Accounts.Scope.user(scope)
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.user(scope)
       nil
   """
   @spec user(t()) :: User.t() | nil
@@ -109,13 +109,13 @@ defmodule PhoenixKit.Accounts.Scope do
 
   ## Examples
 
-      iex> user = %PhoenixKit.Accounts.User{id: 123}
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(user)
-      iex> PhoenixKit.Accounts.Scope.user_id(scope)
+      iex> user = %PhoenixKit.Users.Auth.User{id: 123}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.user_id(scope)
       123
 
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(nil)
-      iex> PhoenixKit.Accounts.Scope.user_id(scope)
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.user_id(scope)
       nil
   """
   @spec user_id(t()) :: integer() | nil
@@ -127,13 +127,13 @@ defmodule PhoenixKit.Accounts.Scope do
 
   ## Examples
 
-      iex> user = %PhoenixKit.Accounts.User{id: 1, email: "user@example.com"}
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(user)
-      iex> PhoenixKit.Accounts.Scope.user_email(scope)
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1, email: "user@example.com"}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.user_email(scope)
       "user@example.com"
 
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(nil)
-      iex> PhoenixKit.Accounts.Scope.user_email(scope)
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.user_email(scope)
       nil
   """
   @spec user_email(t()) :: String.t() | nil
@@ -145,13 +145,13 @@ defmodule PhoenixKit.Accounts.Scope do
 
   ## Examples
 
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(nil)
-      iex> PhoenixKit.Accounts.Scope.anonymous?(scope)
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.anonymous?(scope)
       true
 
-      iex> user = %PhoenixKit.Accounts.User{id: 1}
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(user)
-      iex> PhoenixKit.Accounts.Scope.anonymous?(scope)
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.anonymous?(scope)
       false
   """
   @spec anonymous?(t()) :: boolean()
@@ -162,9 +162,9 @@ defmodule PhoenixKit.Accounts.Scope do
 
   ## Examples
 
-      iex> user = %PhoenixKit.Accounts.User{id: 1, email: "user@example.com"}
-      iex> scope = PhoenixKit.Accounts.Scope.for_user(user)
-      iex> PhoenixKit.Accounts.Scope.to_map(scope)
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1, email: "user@example.com"}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.to_map(scope)
       %{
         authenticated?: true,
         user_id: 1,

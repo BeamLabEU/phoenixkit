@@ -2,7 +2,7 @@ defmodule PhoenixKitWeb.UserLoginLiveTest do
   use PhoenixKitWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import PhoenixKit.AccountsFixtures
+  import PhoenixKit.UsersFixtures
 
   describe "Log in page" do
     test "renders log in page", %{conn: conn} do

@@ -2,10 +2,10 @@ defmodule PhoenixKitWeb.UserConfirmationLiveTest do
   use PhoenixKitWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import PhoenixKit.AccountsFixtures
+  import PhoenixKit.UsersFixtures
 
-  alias PhoenixKit.Accounts
   alias PhoenixKit.Repo
+  alias PhoenixKit.Users.Auth
 
   setup do
     %{user: user_fixture()}
@@ -20,7 +20,7 @@ defmodule PhoenixKitWeb.UserConfirmationLiveTest do
     test "confirms the given token once", %{conn: conn, user: user} do
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_user_confirmation_instructions(user, url)
+          Auth.deliver_user_confirmation_instructions(user, url)
         end)
 
       {:ok, lv, _html} = live(conn, "/phoenix_kit/confirm/#{token}")
@@ -36,9 +36,9 @@ defmodule PhoenixKitWeb.UserConfirmationLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "User confirmed successfully"
 
-      assert Accounts.get_user!(user.id).confirmed_at
+      assert Auth.get_user!(user.id).confirmed_at
       refute get_session(conn, :user_token)
-      assert Repo.all(Accounts.UserToken) == []
+      assert Repo.all(Auth.UserToken) == []
 
       # when not logged in
       {:ok, lv, _html} = live(conn, "/phoenix_kit/confirm/#{token}")
@@ -83,7 +83,7 @@ defmodule PhoenixKitWeb.UserConfirmationLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "User confirmation link is invalid or it has expired"
 
-      refute Accounts.get_user!(user.id).confirmed_at
+      refute Auth.get_user!(user.id).confirmed_at
     end
   end
 end

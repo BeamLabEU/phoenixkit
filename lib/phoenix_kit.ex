@@ -45,15 +45,15 @@ defmodule PhoenixKit do
 
   ### Authentication Context
 
-  - `PhoenixKit.Accounts` - Main authentication context with user management functions
-  - `PhoenixKit.Accounts.User` - User schema with email-based authentication
-  - `PhoenixKit.Accounts.UserToken` - Token management for email confirmation and password reset
-  - `PhoenixKit.Accounts.MagicLink` - Optional passwordless authentication system
+  - `PhoenixKit.Users.Auth` - Main authentication context with user management functions
+  - `PhoenixKit.Users.Auth.User` - User schema with email-based authentication
+  - `PhoenixKit.Users.Auth.UserToken` - Token management for email confirmation and password reset
+  - `PhoenixKit.Users.Auth.MagicLink` - Optional passwordless authentication system
 
   ### Web Integration  
 
   - `PhoenixKitWeb.Integration` - Router integration macros and helpers
-  - `PhoenixKitWeb.UserAuth` - Plugs and authentication helpers
+  - `PhoenixKitWeb.Users.Auth` - Plugs and authentication helpers
   - `PhoenixKit.LayoutConfig` - Layout integration with parent applications
 
   ### Database Management
@@ -111,7 +111,7 @@ defmodule PhoenixKit do
       <%= if assigns[:phoenix_kit_current_user] do %>
         <p>Welcome, <%= @phoenix_kit_current_user.email %>!</p>
       <% else %>
-        <%= link "Sign in", to: ~p"/phoenix_kit/log_in" %>
+        <%= link "Sign in", to: ~p"/phoenix_kit/users/log_in" %>
       <% end %>
 
   ## Authentication Routes
@@ -178,14 +178,14 @@ defmodule PhoenixKit do
 
   ### Creating a User
 
-      {:ok, user} = PhoenixKit.Accounts.register_user(%{
+      {:ok, user} = PhoenixKit.Users.Auth.register_user(%{
         email: "user@example.com", 
         password: "secure_password123"
       })
 
   ### Authenticating
 
-      case PhoenixKit.Accounts.get_user_by_email_and_password(email, password) do
+      case PhoenixKit.Users.Auth.get_user_by_email_and_password(email, password) do
         %User{} = user -> {:ok, user}
         nil -> {:error, :invalid_credentials}
       end
@@ -193,7 +193,7 @@ defmodule PhoenixKit do
   ### Magic Link Authentication
 
       # Generate magic link
-      {:ok, link} = PhoenixKit.Accounts.MagicLink.generate_magic_link(user)
+      {:ok, link} = PhoenixKit.Users.Auth.MagicLink.generate_magic_link(user)
       
       # Send via email
       PhoenixKit.Mailer.deliver_magic_link_email(user, link)

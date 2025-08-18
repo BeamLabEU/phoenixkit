@@ -87,8 +87,281 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     |> add_theme_configuration(opts[:theme_enabled])
     |> copy_test_demo_files()
     |> add_router_integration(opts[:router_path])
-    |> create_or_upgrade_phoenix_kit_migration(opts)
+    |> create_phoenix_kit_migration_only(opts)
     |> add_completion_notice()
+  end
+
+  # Override run/1 to handle post-igniter interactive migration
+  def run(argv) do
+    # Store options in process dictionary for later use
+    opts =
+      OptionParser.parse(argv,
+        switches: [
+          router_path: :string,
+          repo: :string,
+          prefix: :string,
+          create_schema: :boolean,
+          theme_enabled: :boolean
+        ],
+        aliases: [
+          r: :router_path,
+          repo: :repo,
+          p: :prefix
+        ]
+      )
+
+    Process.put(:phoenix_kit_install_opts, elem(opts, 1))
+
+    # Run standard igniter process
+    result = super(argv)
+
+    # After igniter is done, handle interactive migration
+    handle_interactive_migration_after_config()
+
+    result
+  end
+
+  # Handle interactive migration after all config changes are shown
+  defp handle_interactive_migration_after_config do
+    opts = Process.get(:phoenix_kit_install_opts, [])
+
+    # Check if this is a new installation that needs migration
+    case determine_migration_strategy_simple(opts) do
+      {:new_install, migration_file} ->
+        # Check if we can run migrations safely
+        case check_migration_conditions_simple() do
+          :ok ->
+            run_interactive_migration_prompt_simple(migration_file)
+
+          {:error, reason} ->
+            fallback_migration_notice_simple(reason)
+        end
+
+      {:upgrade_needed, current_version, target_version} ->
+        show_upgrade_needed_notice(opts, current_version, target_version)
+
+      {:up_to_date} ->
+        show_up_to_date_notice(opts)
+
+      {:no_migration_needed} ->
+        # Migration already handled or not needed
+        :ok
+    end
+  end
+
+  # Determine migration strategy outside of igniter context
+  defp determine_migration_strategy_simple(opts) do
+    prefix = opts[:prefix] || "public"
+    migrations_dir = Path.join(["priv", "repo", "migrations"])
+
+    case find_phoenix_kit_migrations(migrations_dir) do
+      [] ->
+        check_for_new_migration_file(migrations_dir)
+
+      existing_migrations ->
+        check_existing_migrations(existing_migrations, prefix)
+    end
+  rescue
+    _ ->
+      {:no_migration_needed}
+  end
+
+  # Check if a new migration file was created during igniter process
+  defp check_for_new_migration_file(migrations_dir) do
+    migrations_dir
+    |> File.ls!()
+    |> Enum.find(&new_install_migration?/1)
+    |> case do
+      nil -> {:no_migration_needed}
+      migration_file -> {:new_install, migration_file}
+    end
+  end
+
+  # Check existing migrations for new install or upgrade scenario
+  defp check_existing_migrations(existing_migrations, prefix) do
+    case find_new_install_migration(existing_migrations) do
+      {:found, filename} ->
+        {:new_install, filename}
+
+      :not_found ->
+        check_version_upgrade_needed(prefix)
+    end
+  end
+
+  # Find newly created install migration among existing migrations
+  defp find_new_install_migration(existing_migrations) do
+    new_migration =
+      Enum.find(existing_migrations, fn migration_path ->
+        filename = Path.basename(migration_path)
+        new_install_migration?(filename)
+      end)
+
+    case new_migration do
+      nil -> :not_found
+      migration -> {:found, Path.basename(migration)}
+    end
+  end
+
+  # Check if filename matches new install migration pattern
+  defp new_install_migration?(filename) do
+    String.contains?(filename, "add_phoenix_kit_auth_tables") &&
+      String.ends_with?(filename, ".exs")
+  end
+
+  # Check if version upgrade is needed by comparing DB version with target
+  defp check_version_upgrade_needed(prefix) do
+    opts_map = %{prefix: prefix, escaped_prefix: String.replace(prefix, "'", "\\'")}
+
+    current_version = Postgres.migrated_version(opts_map)
+    target_version = Postgres.current_version()
+
+    cond do
+      current_version < target_version ->
+        {:upgrade_needed, current_version, target_version}
+
+      current_version >= target_version ->
+        {:up_to_date}
+    end
+  rescue
+    _ ->
+      # If DB not accessible but migration files exist, this is probably upgrade case
+      current_version = 0
+      target_version = Postgres.current_version()
+      {:upgrade_needed, current_version, target_version}
+  end
+
+  # Simplified migration conditions check (without igniter)
+  defp check_migration_conditions_simple do
+    # Check if we have an app name
+    case Mix.Project.config()[:app] do
+      nil ->
+        {:error, "No app name found"}
+
+      _app ->
+        # Check if we're in interactive environment
+        if System.get_env("CI") || !System.get_env("TERM") do
+          {:error, "Non-interactive environment"}
+        else
+          :ok
+        end
+    end
+  rescue
+    _ -> {:error, "Error checking conditions"}
+  end
+
+  # Simplified interactive prompt (without igniter)
+  defp run_interactive_migration_prompt_simple(_migration_file) do
+    prompt = """
+
+    🚀 Would you like to run the database migration now?
+    This will create the PhoenixKit authentication tables.
+
+    Options:
+    - y/yes: Run 'mix ecto.migrate' now
+    - n/no:  Skip migration (you can run it manually later)
+    """
+
+    IO.puts(prompt)
+
+    case Mix.shell().prompt("Run migration? [Y/n]") |> String.trim() |> String.downcase() do
+      response when response in ["", "y", "yes"] ->
+        run_migration_with_feedback_simple()
+
+      _ ->
+        manual_migration_notice_simple()
+    end
+  end
+
+  # Simplified migration execution
+  defp run_migration_with_feedback_simple do
+    IO.puts("\n⏳ Running database migration...")
+
+    try do
+      case System.cmd("mix", ["ecto.migrate"], stderr_to_stdout: true) do
+        {output, 0} ->
+          IO.puts("\n✅ Migration completed successfully!\n")
+          IO.puts(output)
+          show_success_notice()
+
+        {output, _} ->
+          IO.puts("\n❌ Migration failed:")
+          IO.puts(output)
+          show_manual_migration_instructions()
+      end
+    rescue
+      error ->
+        IO.puts("\n⚠️  Migration execution failed: #{inspect(error)}")
+        show_manual_migration_instructions()
+    end
+  end
+
+  # Simplified notices
+  defp manual_migration_notice_simple do
+    IO.puts("""
+
+    ⚠️  Migration skipped. To run it manually later:
+      mix ecto.migrate
+    """)
+  end
+
+  defp fallback_migration_notice_simple(reason) do
+    IO.puts("""
+
+    💡 Migration not run automatically (#{reason}).
+    To run migration manually:
+      mix ecto.migrate
+    """)
+  end
+
+  defp show_success_notice do
+    IO.puts("""
+    🎉 PhoenixKit is now ready to use!
+    📖 Check the demo pages at: /test-current-user, /test-ensure-auth
+    """)
+  end
+
+  defp show_manual_migration_instructions do
+    IO.puts("""
+    Please run the migration manually:
+      mix ecto.migrate
+
+    Then start your server:
+      mix phx.server
+    """)
+  end
+
+  # Show upgrade needed notice (simple version)
+  defp show_upgrade_needed_notice(opts, current_version, target_version) do
+    prefix = opts[:prefix] || "public"
+    prefix_option = if prefix != "public", do: " --prefix=#{prefix}", else: ""
+
+    IO.puts("""
+
+    📦 PhoenixKit is already installed (V#{pad_version(current_version)}).
+
+    To update to the latest version (V#{pad_version(target_version)}), please use:
+      mix phoenix_kit.update#{prefix_option}
+
+    To check current status:
+      mix phoenix_kit.update --status#{prefix_option}
+    """)
+  end
+
+  # Show up to date notice (simple version)
+  defp show_up_to_date_notice(opts) do
+    prefix = opts[:prefix] || "public"
+    prefix_option = if prefix != "public", do: " --prefix=#{prefix}", else: ""
+
+    IO.puts("""
+
+    ✅ PhoenixKit is already installed and up to date.
+
+    To check current status:
+      mix phoenix_kit.update --status#{prefix_option}
+
+    To force reinstall:
+      mix phoenix_kit.update --force#{prefix_option}
+    """)
   end
 
   # Add PhoenixKit configuration to config files
@@ -233,7 +506,15 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     if File.exists?("config/prod.exs") do
       # Append template to existing prod.exs
       Igniter.update_file(igniter, "config/prod.exs", fn source ->
-        source <> "\n" <> prod_config_template
+        try do
+          current_content = Rewrite.Source.get(source, :content)
+          updated_content = current_content <> "\n" <> prod_config_template
+          Rewrite.Source.update(source, :content, updated_content)
+        rescue
+          _ ->
+            # Fallback: just return original source if there's an error
+            source
+        end
       end)
     else
       # Create prod.exs with import Config and template
@@ -789,17 +1070,17 @@ defmodule Mix.Tasks.PhoenixKit.Install do
         pipe_through :browser
 
         live_session :phoenix_kit_demo_current_user,
-          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}] do
           live "/test-current-user", #{app_web_module_name}.PhoenixKitLive.TestRequireAuthLive, :index
         end
 
         live_session :phoenix_kit_demo_redirect_if_auth,
-          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}] do
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_user_is_authenticated}] do
           live "/test-redirect-if-auth", #{app_web_module_name}.PhoenixKitLive.TestRedirectIfAuthLive, :index
         end
 
         live_session :phoenix_kit_demo_ensure_auth,
-          on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated}] do
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated}] do
           live "/test-ensure-auth", #{app_web_module_name}.PhoenixKitLive.TestEnsureAuthLive, :index
         end
       end
@@ -811,15 +1092,15 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     end)
   end
 
-  # Create or upgrade PhoenixKit migration file using Igniter best practices
-  defp create_or_upgrade_phoenix_kit_migration(igniter, opts) do
+  # Create migration file without interactive prompts (used by igniter/1)
+  defp create_phoenix_kit_migration_only(igniter, opts) do
     prefix = opts[:prefix] || "public"
     create_schema = opts[:create_schema] != false && prefix != "public"
 
     # Check if this is a new installation or existing installation
     case determine_migration_strategy(igniter, prefix) do
       {:new_install, igniter} ->
-        create_initial_migration(igniter, prefix, create_schema)
+        create_initial_migration_silent(igniter, prefix, create_schema)
 
       {:upgrade_needed, igniter, current_version, target_version} ->
         handle_upgrade_needed(igniter, prefix, current_version, target_version)
@@ -923,8 +1204,8 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     end
   end
 
-  # Create initial migration for new installation
-  defp create_initial_migration(igniter, prefix, create_schema) do
+  # Silent version for use during igniter process
+  defp create_initial_migration_silent(igniter, prefix, create_schema) do
     case Application.app_name(igniter) do
       nil ->
         Igniter.add_warning(igniter, "Could not determine app name for migration")
@@ -949,164 +1230,17 @@ defmodule Mix.Tasks.PhoenixKit.Install do
         end
         """
 
-        igniter
-        |> Igniter.create_new_file(migration_path, migration_content)
-        |> maybe_run_migrations_interactively(migration_file)
-    end
-  end
+        initial_notice = """
 
-  # Interactive migration runner with smart conditions
-  defp maybe_run_migrations_interactively(igniter, migration_file) do
-    initial_notice = """
-
-    📦 PhoenixKit Initial Installation Created:
-    - Migration: #{migration_file}
-    - This will install PhoenixKit version #{Postgres.current_version()} (latest)
-    """
-
-    igniter = Igniter.add_notice(igniter, initial_notice)
-
-    # Check if we can run migrations safely
-    case check_migration_conditions(igniter) do
-      {:ok, igniter} ->
-        run_interactive_migration_prompt(igniter)
-
-      {:error, igniter, reason} ->
-        fallback_migration_notice(igniter, reason)
-    end
-  end
-
-  # Check if conditions are met for running migrations
-  defp check_migration_conditions(igniter) do
-    with {:ok, _app_name} <- get_app_name(igniter),
-         {:ok, _repo} <- get_repo_config() do
-      check_interactive_mode(igniter)
-    end
-  rescue
-    _ ->
-      {:error, igniter, "Unknown error checking migration conditions"}
-  end
-
-  defp get_app_name(igniter) do
-    case Application.app_name(igniter) do
-      nil -> {:error, igniter, "Cannot determine application name"}
-      app_name -> {:ok, app_name}
-    end
-  end
-
-  defp get_repo_config do
-    case Elixir.Application.get_env(:phoenix_kit, :repo) do
-      nil -> {:error, "PhoenixKit repo not configured yet"}
-      repo -> {:ok, repo}
-    end
-  end
-
-  defp check_interactive_mode(igniter) do
-    if System.get_env("CI") || !System.get_env("TERM") do
-      {:error, igniter, "Non-interactive environment (CI or no TTY)"}
-    else
-      {:ok, igniter}
-    end
-  end
-
-  # Run interactive migration prompt
-  defp run_interactive_migration_prompt(igniter) do
-    prompt = """
-
-    🚀 Would you like to run the database migration now?
-    This will create the PhoenixKit authentication tables.
-
-    Options:
-    - y/yes: Run 'mix ecto.migrate' now
-    - n/no:  Skip migration (you can run it manually later)
-    """
-
-    IO.puts(prompt)
-
-    case Mix.shell().prompt("Run migration? [Y/n]") |> String.trim() |> String.downcase() do
-      response when response in ["", "y", "yes"] ->
-        run_migration_with_feedback(igniter)
-
-      _ ->
-        manual_migration_notice(igniter)
-    end
-  end
-
-  # Actually run the migration and provide feedback
-  defp run_migration_with_feedback(igniter) do
-    IO.puts("\n⏳ Running database migration...")
-
-    try do
-      # Use System.cmd instead of Mix.Task to avoid state conflicts
-      case System.cmd("mix", ["ecto.migrate"], stderr_to_stdout: true) do
-        {output, 0} ->
-          success_notice = """
-
-          ✅ Migration completed successfully!
-
-          #{String.trim(output)}
-
-          🎉 PhoenixKit is now ready to use!
-          📖 Check the demo pages at: /test-current-user, /test-ensure-auth
-          """
-
-          Igniter.add_notice(igniter, success_notice)
-
-        {error_output, _exit_code} ->
-          failure_notice = """
-
-          ❌ Migration failed. Output:
-
-          #{String.trim(error_output)}
-
-          💡 Please run 'mix ecto.migrate' manually to complete the installation.
-          """
-
-          Igniter.add_warning(igniter, failure_notice)
-      end
-    rescue
-      error ->
-        exception_notice = """
-
-        ⚠️  Could not run migration automatically: #{inspect(error)}
-
-        💡 Please run 'mix ecto.migrate' manually to complete the installation.
+        📦 PhoenixKit Initial Installation Created:
+        - Migration: #{migration_file}
+        - This will install PhoenixKit version #{Postgres.current_version()} (latest)
         """
 
-        Igniter.add_warning(igniter, exception_notice)
+        igniter
+        |> Igniter.create_new_file(migration_path, migration_content)
+        |> Igniter.add_notice(initial_notice)
     end
-  end
-
-  # Fallback notice when conditions aren't met
-  defp fallback_migration_notice(igniter, reason) do
-    notice = """
-
-    📝 Automatic migration skipped: #{reason}
-
-    Next steps:
-      1. Run: mix ecto.migrate
-      2. PhoenixKit will be ready to use!
-
-    💡 Tip: For automatic migrations, ensure you're in an interactive terminal.
-    """
-
-    Igniter.add_notice(igniter, notice)
-  end
-
-  # Manual migration notice when user declines
-  defp manual_migration_notice(igniter) do
-    notice = """
-
-    📝 Migration skipped by user choice.
-
-    Next steps:
-      1. Run: mix ecto.migrate
-      2. PhoenixKit will be ready to use!
-
-    💡 You can run migrations anytime with 'mix ecto.migrate'
-    """
-
-    Igniter.add_notice(igniter, notice)
   end
 
   # Find all existing PhoenixKit migrations

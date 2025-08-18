@@ -1,7 +1,7 @@
-defmodule PhoenixKitWeb.UserResetPasswordLive do
+defmodule PhoenixKitWeb.Users.ResetPasswordLive do
   use PhoenixKitWeb, :live_view
 
-  alias PhoenixKit.Accounts
+  alias PhoenixKit.Users.Auth
 
   def render(assigns) do
     ~H"""
@@ -31,8 +31,8 @@ defmodule PhoenixKitWeb.UserResetPasswordLive do
       </.simple_form>
 
       <p class="text-center text-sm mt-4">
-        <.link href="/phoenix_kit/register">Register</.link>
-        | <.link href="/phoenix_kit/log_in">Log in</.link>
+        <.link href="/phoenix_kit/users/register">Register</.link>
+        | <.link href="/phoenix_kit/users/log_in">Log in</.link>
       </p>
     </div>
     """
@@ -44,7 +44,7 @@ defmodule PhoenixKitWeb.UserResetPasswordLive do
     form_source =
       case socket.assigns do
         %{user: user} ->
-          Accounts.change_user_password(user)
+          Auth.change_user_password(user)
 
         _ ->
           %{}
@@ -56,12 +56,12 @@ defmodule PhoenixKitWeb.UserResetPasswordLive do
   # Do not log in the user after reset password to avoid a
   # leaked token giving the user access to the account.
   def handle_event("reset_password", %{"user" => user_params}, socket) do
-    case Accounts.reset_user_password(socket.assigns.user, user_params) do
+    case Auth.reset_user_password(socket.assigns.user, user_params) do
       {:ok, _} ->
         {:noreply,
          socket
          |> put_flash(:info, "Password reset successfully.")
-         |> redirect(to: "/phoenix_kit/log_in")}
+         |> redirect(to: "/phoenix_kit/users/log_in")}
 
       {:error, changeset} ->
         {:noreply, assign_form(socket, Map.put(changeset, :action, :insert))}
@@ -69,12 +69,12 @@ defmodule PhoenixKitWeb.UserResetPasswordLive do
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do
-    changeset = Accounts.change_user_password(socket.assigns.user, user_params)
+    changeset = Auth.change_user_password(socket.assigns.user, user_params)
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 
   defp assign_user_and_token(socket, %{"token" => token}) do
-    if user = Accounts.get_user_by_reset_password_token(token) do
+    if user = Auth.get_user_by_reset_password_token(token) do
       assign(socket, user: user, token: token)
     else
       socket

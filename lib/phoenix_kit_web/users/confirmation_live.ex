@@ -1,7 +1,7 @@
-defmodule PhoenixKitWeb.UserConfirmationLive do
+defmodule PhoenixKitWeb.Users.ConfirmationLive do
   use PhoenixKitWeb, :live_view
 
-  alias PhoenixKit.Accounts
+  alias PhoenixKit.Users.Auth
 
   def render(%{live_action: :edit} = assigns) do
     ~H"""
@@ -16,8 +16,8 @@ defmodule PhoenixKitWeb.UserConfirmationLive do
       </.simple_form>
 
       <p class="text-center mt-4">
-        <.link href="/phoenix_kit/register">Register</.link>
-        | <.link href="/phoenix_kit/log_in">Log in</.link>
+        <.link href="/phoenix_kit/users/register">Register</.link>
+        | <.link href="/phoenix_kit/users/log_in">Log in</.link>
       </p>
     </div>
     """
@@ -31,7 +31,7 @@ defmodule PhoenixKitWeb.UserConfirmationLive do
   # Do not log in the user after confirmation to avoid a
   # leaked token giving the user access to the account.
   def handle_event("confirm_account", %{"user" => %{"token" => token}}, socket) do
-    case Accounts.confirm_user(token) do
+    case Auth.confirm_user(token) do
       {:ok, _} ->
         {:noreply,
          socket

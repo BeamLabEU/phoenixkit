@@ -1,7 +1,7 @@
-defmodule PhoenixKitWeb.UserConfirmationInstructionsLive do
+defmodule PhoenixKitWeb.Users.ConfirmationInstructionsLive do
   use PhoenixKitWeb, :live_view
 
-  alias PhoenixKit.Accounts
+  alias PhoenixKit.Users.Auth
 
   def render(assigns) do
     ~H"""
@@ -21,8 +21,8 @@ defmodule PhoenixKitWeb.UserConfirmationInstructionsLive do
       </.simple_form>
 
       <p class="text-center mt-4">
-        <.link href="/phoenix_kit/register">Register</.link>
-        | <.link href="/phoenix_kit/log_in">Log in</.link>
+        <.link href="/phoenix_kit/users/register">Register</.link>
+        | <.link href="/phoenix_kit/users/log_in">Log in</.link>
       </p>
     </div>
     """
@@ -33,10 +33,10 @@ defmodule PhoenixKitWeb.UserConfirmationInstructionsLive do
   end
 
   def handle_event("send_instructions", %{"user" => %{"email" => email}}, socket) do
-    if user = Accounts.get_user_by_email(email) do
-      Accounts.deliver_user_confirmation_instructions(
+    if user = Auth.get_user_by_email(email) do
+      Auth.deliver_user_confirmation_instructions(
         user,
-        &"/phoenix_kit/confirm/#{&1}"
+        &"/phoenix_kit/users/confirm/#{&1}"
       )
     end
 

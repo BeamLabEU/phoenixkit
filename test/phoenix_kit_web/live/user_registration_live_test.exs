@@ -2,7 +2,7 @@ defmodule PhoenixKitWeb.UserRegistrationLiveTest do
   use PhoenixKitWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import PhoenixKit.AccountsFixtures
+  import PhoenixKit.UsersFixtures
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do

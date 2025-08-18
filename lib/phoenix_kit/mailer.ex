@@ -10,7 +10,7 @@ defmodule PhoenixKit.Mailer do
 
   import Swoosh.Email
 
-  alias PhoenixKit.Accounts.User
+  alias PhoenixKit.Users.Auth.User
 
   @doc """
   Sends a magic link email to the user.

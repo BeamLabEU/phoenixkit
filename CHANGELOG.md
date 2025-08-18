@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **MIT LICENSE file** - Required for hex.pm publication with proper copyright attribution
 - **Comprehensive API documentation** - Complete PhoenixKit main module documentation with usage examples
-- **Enhanced module documentation** - Detailed documentation for PhoenixKit.Accounts with security features
+- **Enhanced module documentation** - Detailed documentation for PhoenixKit.Users.Auth with security features
 - **Professional ExDoc configuration** - Organized module groups for better documentation navigation
 
 ### Changed
@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Module organization** - Added logical grouping: Authentication, Web Integration, Database, Configuration, Mix Tasks
 
 ### Fixed
-- **ExDoc warnings** - Added missing @type definition for PhoenixKit.Accounts.User.t()
+- **ExDoc warnings** - Added missing @type definition for PhoenixKit.Users.Auth.User.t()
 - **Test warnings** - Removed duplicate function definitions in test/support/conn_case.ex
 - **LICENSE references** - Updated README.md links to GitHub LICENSE URL for consistency
 - **Documentation generation** - Fixed empty documentation issue with proper ExDoc main page configuration
@@ -52,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **PhoenixKit Scope System** - New structured authentication state management
-  - `PhoenixKit.Accounts.Scope` module for better encapsulation of user authentication state
+  - `PhoenixKit.Users.Auth.Scope` module for better encapsulation of user authentication state
   - New plugs: `fetch_phoenix_kit_current_scope`, `require_authenticated_scope`
   - Enhanced on_mount callbacks: `:phoenix_kit_mount_current_scope`, `:phoenix_kit_ensure_authenticated_scope`, `:phoenix_kit_redirect_if_authenticated_scope`
   - Comprehensive router integration examples in `PhoenixKitWeb.Integration` documentation

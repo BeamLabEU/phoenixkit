@@ -430,16 +430,16 @@ phoenix_kit_current_user = conn.assigns[:phoenix_kit_current_user]
 
 ```elixir
 # Get user by email
-user = PhoenixKit.Accounts.get_user_by_email("user@example.com")
+user = PhoenixKit.Users.Auth.get_user_by_email("user@example.com")
 
 # Register new user
-{:ok, user} = PhoenixKit.Accounts.register_user(%{
+{:ok, user} = PhoenixKit.Users.Auth.register_user(%{
   email: "user@example.com",
   password: "secure_password"
 })
 
 # Authenticate user
-{:ok, user} = PhoenixKit.Accounts.get_user_by_email_and_password(
+{:ok, user} = PhoenixKit.Users.Auth.get_user_by_email_and_password(
   "user@example.com",
   "password"
 )
@@ -449,7 +449,7 @@ user = PhoenixKit.Accounts.get_user_by_email("user@example.com")
 
 ```elixir
 # In your controllers
-import PhoenixKitWeb.UserAuth
+import PhoenixKitWeb.Users.Auth
 
 # Require authentication
 plug :phoenix_kit_require_authenticated_user
@@ -493,7 +493,7 @@ defmodule YourAppWeb.Router do
     # Public routes with optional authentication info
     live_session :public,
       layout: {YourAppWeb.Layouts, :app},
-      on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}] do
+      on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
       live "/", PageLive
       live "/about", AboutLive
     end
@@ -501,7 +501,7 @@ defmodule YourAppWeb.Router do
     # Protected routes requiring authentication
     live_session :authenticated,
       layout: {YourAppWeb.Layouts, :app},
-      on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated_scope}] do
+      on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}] do
       live "/dashboard", DashboardLive
       live "/profile", ProfileLive
     end
@@ -517,9 +517,9 @@ Access authentication data in your layout templates:
 <!-- lib/your_app_web/components/layouts/app.html.heex -->
 <header>
   <div class="user-info">
-    <%= if PhoenixKit.Accounts.Scope.authenticated?(@phoenix_kit_current_scope) do %>
+    <%= if PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
       <div class="user-menu">
-        Welcome, {PhoenixKit.Accounts.Scope.user_email(@phoenix_kit_current_scope)}!
+        Welcome, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!
         <.link href="/phoenix_kit/settings">Settings</.link>
         <.link href="/phoenix_kit/log_out" method="delete">Logout</.link>
       </div>
@@ -537,24 +537,24 @@ Access authentication data in your layout templates:
 
 ```elixir
 # Check if user is authenticated
-PhoenixKit.Accounts.Scope.authenticated?(@phoenix_kit_current_scope)
+PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope)
 # => true | false
 
 # Check if user is anonymous (not authenticated)
-PhoenixKit.Accounts.Scope.anonymous?(@phoenix_kit_current_scope)
+PhoenixKit.Users.Auth.Scope.anonymous?(@phoenix_kit_current_scope)
 # => true | false
 
 # Get user email (safe - returns nil if not authenticated)
-PhoenixKit.Accounts.Scope.user_email(@phoenix_kit_current_scope)
+PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)
 # => "user@example.com" | nil
 
 # Get user ID (safe - returns nil if not authenticated)
-PhoenixKit.Accounts.Scope.user_id(@phoenix_kit_current_scope)
+PhoenixKit.Users.Auth.Scope.user_id(@phoenix_kit_current_scope)
 # => 123 | nil
 
 # Get user struct (for advanced usage)
-PhoenixKit.Accounts.Scope.user(@phoenix_kit_current_scope)
-# => %PhoenixKit.Accounts.User{} | nil
+PhoenixKit.Users.Auth.Scope.user(@phoenix_kit_current_scope)
+# => %PhoenixKit.Users.Auth.User{} | nil
 ```
 
 ### Available on_mount Callbacks
@@ -565,26 +565,26 @@ PhoenixKit provides multiple authentication levels:
 
 ```elixir
 # Mount scope - always accessible, provides authentication context
-on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}]
+on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}]
 
 # Require authentication via scope - redirects to login if not authenticated
-on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated_scope}]
+on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}]
 
 # Redirect if authenticated - useful for login/register pages
-on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_authenticated_scope}]
+on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_authenticated_scope}]
 ```
 
 #### Traditional User-Based Callbacks (Backward Compatibility)
 
 ```elixir
 # Mount user - provides @phoenix_kit_current_user
-on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}]
+on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}]
 
 # Require authentication - redirects if not authenticated
-on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated}]
+on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated}]
 
 # Redirect if authenticated
-on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_user_is_authenticated}]
+on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_user_is_authenticated}]
 ```
 
 ### Migration from Traditional Approach
@@ -596,7 +596,7 @@ If you're already using `@phoenix_kit_current_user`, you can gradually migrate:
 # Your current working setup
 live_session :default,
   layout: {YourAppWeb.Layouts, :app},
-  on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}] do
+  on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}] do
   # ... your routes
 end
 ```
@@ -606,7 +606,7 @@ end
 # Upgrade to scope - adds both user and scope assigns
 live_session :default,
   layout: {YourAppWeb.Layouts, :app},
-  on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}] do
+  on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
   # ... same routes, now you have access to both:
   # @phoenix_kit_current_user (continues working)
   # @phoenix_kit_current_scope (new, better structure)
@@ -621,8 +621,8 @@ end
 <% end %>
 
 <!-- New scope approach (better structure) -->
-<%= if PhoenixKit.Accounts.Scope.authenticated?(@phoenix_kit_current_scope) do %>
-  <span>Welcome, {PhoenixKit.Accounts.Scope.user_email(@phoenix_kit_current_scope)}!</span>
+<%= if PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
+  <span>Welcome, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!</span>
 <% end %>
 ```
 
@@ -639,8 +639,8 @@ end
 #### Scope-Based Access (Recommended)
 ```elixir
 # Structured access with explicit authentication checking
-<%= if PhoenixKit.Accounts.Scope.authenticated?(@phoenix_kit_current_scope) do %>
-  <p>User: {PhoenixKit.Accounts.Scope.user_email(@phoenix_kit_current_scope)}</p>
+<%= if PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
+  <p>User: {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}</p>
 <% end %>
 ```
 
@@ -689,7 +689,7 @@ defmodule YourAppWeb.Router do
     # Public routes with authentication context
     live_session :public,
       layout: {YourAppWeb.Layouts, :app},
-      on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}] do
+      on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
       live "/", PageLive
       live "/about", AboutLive
       live "/pricing", PricingLive
@@ -698,7 +698,7 @@ defmodule YourAppWeb.Router do
     # Protected routes
     live_session :authenticated,
       layout: {YourAppWeb.Layouts, :app},
-      on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated_scope}] do
+      on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}] do
       live "/dashboard", DashboardLive
       live "/profile", ProfileLive
     end
@@ -706,7 +706,7 @@ defmodule YourAppWeb.Router do
     # Routes that redirect authenticated users away
     live_session :redirect_if_authenticated,
       layout: {YourAppWeb.Layouts, :app},
-      on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_redirect_if_authenticated_scope}] do
+      on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_authenticated_scope}] do
       live "/welcome", WelcomeLive
     end
   end
@@ -998,7 +998,7 @@ defmodule YourAppWeb.UserAuth do
   def require_role(conn, required_role) do
     user = conn.assigns.phoenix_kit_current_user
     
-    if user && PhoenixKit.Accounts.User.has_role_level?(user, required_role) do
+    if user && PhoenixKit.Users.Auth.User.has_role_level?(user, required_role) do
       conn
     else
       conn
@@ -1047,15 +1047,15 @@ end
 #### New Role Helper Functions:
 
 ```elixir
-user = PhoenixKit.Accounts.get_user_by_email("user@example.com")
+user = PhoenixKit.Users.Auth.get_user_by_email("user@example.com")
 
 # Check specific roles
-PhoenixKit.Accounts.User.admin?(user)        # true/false
-PhoenixKit.Accounts.User.moderator?(user)    # true/false  
-PhoenixKit.Accounts.User.can_moderate?(user) # true for moderator or admin
+PhoenixKit.Users.Auth.User.admin?(user)        # true/false
+PhoenixKit.Users.Auth.User.moderator?(user)    # true/false  
+PhoenixKit.Users.Auth.User.can_moderate?(user) # true for moderator or admin
 
 # Check minimum role level
-PhoenixKit.Accounts.User.has_role_level?(user, :moderator)
+PhoenixKit.Users.Auth.User.has_role_level?(user, :moderator)
 ```
 
 #### Database Schema Changes:

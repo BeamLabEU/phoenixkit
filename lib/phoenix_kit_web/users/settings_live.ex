@@ -1,7 +1,7 @@
-defmodule PhoenixKitWeb.UserSettingsLive do
+defmodule PhoenixKitWeb.Users.SettingsLive do
   use PhoenixKitWeb, :live_view
 
-  alias PhoenixKit.Accounts
+  alias PhoenixKit.Users.Auth
 
   def render(assigns) do
     ~H"""
@@ -51,7 +51,7 @@ defmodule PhoenixKitWeb.UserSettingsLive do
               <.simple_form
                 for={@password_form}
                 id="password_form"
-                action="/phoenix_kit/log_in?_action=password_updated"
+                action="/phoenix_kit/users/log_in?_action=password_updated"
                 method="post"
                 phx-change="validate_password"
                 phx-submit="update_password"
@@ -121,7 +121,7 @@ defmodule PhoenixKitWeb.UserSettingsLive do
 
   def mount(%{"token" => token}, _session, socket) do
     socket =
-      case Accounts.update_user_email(socket.assigns.phoenix_kit_current_user, token) do
+      case Auth.update_user_email(socket.assigns.phoenix_kit_current_user, token) do
         :ok ->
           put_flash(socket, :info, "Email changed successfully.")
 
@@ -129,13 +129,13 @@ defmodule PhoenixKitWeb.UserSettingsLive do
           put_flash(socket, :error, "Email change link is invalid or it has expired.")
       end
 
-    {:ok, push_navigate(socket, to: "/phoenix_kit/settings")}
+    {:ok, push_navigate(socket, to: "/phoenix_kit/users/settings")}
   end
 
   def mount(_params, _session, socket) do
     user = socket.assigns.phoenix_kit_current_user
-    email_changeset = Accounts.change_user_email(user)
-    password_changeset = Accounts.change_user_password(user)
+    email_changeset = Auth.change_user_email(user)
+    password_changeset = Auth.change_user_password(user)
 
     socket =
       socket
@@ -154,7 +154,7 @@ defmodule PhoenixKitWeb.UserSettingsLive do
 
     email_form =
       socket.assigns.phoenix_kit_current_user
-      |> Accounts.change_user_email(user_params)
+      |> Auth.change_user_email(user_params)
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -165,12 +165,12 @@ defmodule PhoenixKitWeb.UserSettingsLive do
     %{"current_password" => password, "user" => user_params} = params
     user = socket.assigns.phoenix_kit_current_user
 
-    case Accounts.apply_user_email(user, password, user_params) do
+    case Auth.apply_user_email(user, password, user_params) do
       {:ok, applied_user} ->
-        Accounts.deliver_user_update_email_instructions(
+        Auth.deliver_user_update_email_instructions(
           applied_user,
           user.email,
-          &url(~p"/phoenix_kit/settings/confirm_email/#{&1}")
+          &url(~p"/phoenix_kit/users/settings/confirm_email/#{&1}")
         )
 
         info = "A link to confirm your email change has been sent to the new address."
@@ -186,7 +186,7 @@ defmodule PhoenixKitWeb.UserSettingsLive do
 
     password_form =
       socket.assigns.phoenix_kit_current_user
-      |> Accounts.change_user_password(user_params)
+      |> Auth.change_user_password(user_params)
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -197,11 +197,11 @@ defmodule PhoenixKitWeb.UserSettingsLive do
     %{"current_password" => password, "user" => user_params} = params
     user = socket.assigns.phoenix_kit_current_user
 
-    case Accounts.update_user_password(user, password, user_params) do
+    case Auth.update_user_password(user, password, user_params) do
       {:ok, user} ->
         password_form =
           user
-          |> Accounts.change_user_password(user_params)
+          |> Auth.change_user_password(user_params)
           |> to_form()
 
         {:noreply, assign(socket, trigger_submit: true, password_form: password_form)}

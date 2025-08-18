@@ -1,4 +1,4 @@
-defmodule PhoenixKitWeb.UserAuth do
+defmodule PhoenixKitWeb.Users.Auth do
   @moduledoc """
   Authentication and authorization plugs for PhoenixKit user management.
 
@@ -23,8 +23,8 @@ defmodule PhoenixKitWeb.UserAuth do
   import Plug.Conn
   import Phoenix.Controller
 
-  alias PhoenixKit.Accounts
-  alias PhoenixKit.Accounts.Scope
+  alias PhoenixKit.Users.Auth
+  alias PhoenixKit.Users.Auth.Scope
 
   # Make the remember me cookie valid for 60 days.
   # If you want bump or reduce this value, also change
@@ -46,7 +46,7 @@ defmodule PhoenixKitWeb.UserAuth do
   if you are not using LiveView.
   """
   def log_in_user(conn, user, params \\ %{}) do
-    token = Accounts.generate_user_session_token(user)
+    token = Auth.generate_user_session_token(user)
     user_return_to = get_session(conn, :user_return_to)
 
     conn
@@ -94,7 +94,7 @@ defmodule PhoenixKitWeb.UserAuth do
   """
   def log_out_user(conn) do
     user_token = get_session(conn, :user_token)
-    user_token && Accounts.delete_user_session_token(user_token)
+    user_token && Auth.delete_user_session_token(user_token)
 
     if live_socket_id = get_session(conn, :live_socket_id) do
       broadcast_disconnect(live_socket_id)
@@ -112,7 +112,7 @@ defmodule PhoenixKitWeb.UserAuth do
   """
   def fetch_phoenix_kit_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
-    user = user_token && Accounts.get_user_by_session_token(user_token)
+    user = user_token && Auth.get_user_by_session_token(user_token)
     assign(conn, :phoenix_kit_current_user, user)
   end
 
@@ -127,7 +127,7 @@ defmodule PhoenixKitWeb.UserAuth do
   """
   def fetch_phoenix_kit_current_scope(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
-    user = user_token && Accounts.get_user_by_session_token(user_token)
+    user = user_token && Auth.get_user_by_session_token(user_token)
     scope = Scope.for_user(user)
 
     conn
@@ -185,7 +185,7 @@ defmodule PhoenixKitWeb.UserAuth do
       defmodule PhoenixKitWeb.PageLive do
         use PhoenixKitWeb, :live_view
 
-        on_mount {PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_user}
+        on_mount {PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}
         ...
       end
 
@@ -194,13 +194,13 @@ defmodule PhoenixKitWeb.UserAuth do
       defmodule PhoenixKitWeb.PageLive do
         use PhoenixKitWeb, :live_view
 
-        on_mount {PhoenixKitWeb.UserAuth, :phoenix_kit_mount_current_scope}
+        on_mount {PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}
         ...
       end
 
   Or use the `live_session` of your router to invoke the on_mount callback:
 
-      live_session :authenticated, on_mount: [{PhoenixKitWeb.UserAuth, :phoenix_kit_ensure_authenticated_scope}] do
+      live_session :authenticated, on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}] do
         live "/profile", ProfileLive, :index
       end
   """
@@ -221,7 +221,7 @@ defmodule PhoenixKitWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: "/phoenix_kit/log_in")
+        |> Phoenix.LiveView.redirect(to: "/phoenix_kit/users/log_in")
 
       {:halt, socket}
     end
@@ -236,7 +236,7 @@ defmodule PhoenixKitWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: "/phoenix_kit/log_in")
+        |> Phoenix.LiveView.redirect(to: "/phoenix_kit/users/log_in")
 
       {:halt, socket}
     end
@@ -265,7 +265,7 @@ defmodule PhoenixKitWeb.UserAuth do
   defp mount_phoenix_kit_current_user(socket, session) do
     Phoenix.Component.assign_new(socket, :phoenix_kit_current_user, fn ->
       if user_token = session["user_token"] do
-        Accounts.get_user_by_session_token(user_token)
+        Auth.get_user_by_session_token(user_token)
       end
     end)
   end
@@ -327,7 +327,7 @@ defmodule PhoenixKitWeb.UserAuth do
       conn
       |> put_flash(:error, "You must log in to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: "/phoenix_kit/log_in")
+      |> redirect(to: "/phoenix_kit/users/log_in")
       |> halt()
     end
   end
@@ -350,7 +350,7 @@ defmodule PhoenixKitWeb.UserAuth do
           conn
           |> put_flash(:error, "You must log in to access this page.")
           |> maybe_store_return_to()
-          |> redirect(to: "/phoenix_kit/log_in")
+          |> redirect(to: "/phoenix_kit/users/log_in")
           |> halt()
         end
 

@@ -1,7 +1,7 @@
-defmodule PhoenixKitWeb.UserForgotPasswordLive do
+defmodule PhoenixKitWeb.Users.ForgotPasswordLive do
   use PhoenixKitWeb, :live_view
 
-  alias PhoenixKit.Accounts
+  alias PhoenixKit.Users.Auth
 
   def render(assigns) do
     ~H"""
@@ -20,8 +20,8 @@ defmodule PhoenixKitWeb.UserForgotPasswordLive do
         </:actions>
       </.simple_form>
       <p class="text-center text-sm mt-4">
-        <.link href="/phoenix_kit/register">Register</.link>
-        | <.link href="/phoenix_kit/log_in">Log in</.link>
+        <.link href="/phoenix_kit/users/register">Register</.link>
+        | <.link href="/phoenix_kit/users/log_in">Log in</.link>
       </p>
     </div>
     """
@@ -32,10 +32,10 @@ defmodule PhoenixKitWeb.UserForgotPasswordLive do
   end
 
   def handle_event("send_email", %{"user" => %{"email" => email}}, socket) do
-    if user = Accounts.get_user_by_email(email) do
-      Accounts.deliver_user_reset_password_instructions(
+    if user = Auth.get_user_by_email(email) do
+      Auth.deliver_user_reset_password_instructions(
         user,
-        &"/phoenix_kit/reset_password/#{&1}"
+        &"/phoenix_kit/users/reset_password/#{&1}"
       )
     end
 

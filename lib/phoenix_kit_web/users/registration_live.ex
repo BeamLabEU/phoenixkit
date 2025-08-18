@@ -1,8 +1,8 @@
-defmodule PhoenixKitWeb.UserRegistrationLive do
+defmodule PhoenixKitWeb.Users.RegistrationLive do
   use PhoenixKitWeb, :live_view
 
-  alias PhoenixKit.Accounts
-  alias PhoenixKit.Accounts.User
+  alias PhoenixKit.Users.Auth
+  alias PhoenixKit.Users.Auth.User
 
   def render(assigns) do
     ~H"""
@@ -17,7 +17,10 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
           </p>
           <div class="text-sm opacity-75">
             Already have an account?
-            <.link navigate="/phoenix_kit/log_in" class="font-semibold text-primary hover:underline">
+            <.link
+              navigate="/phoenix_kit/users/log_in"
+              class="font-semibold text-primary hover:underline"
+            >
               Sign in here
             </.link>
           </div>
@@ -34,7 +37,7 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
               phx-submit="save"
               phx-change="validate"
               phx-trigger-action={@trigger_submit}
-              action="/phoenix_kit/log_in?_action=registered"
+              action="/phoenix_kit/users/log_in?_action=registered"
               method="post"
             >
               <fieldset class="fieldset">
@@ -124,7 +127,7 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
   end
 
   def mount(_params, _session, socket) do
-    changeset = Accounts.change_user_registration(%User{})
+    changeset = Auth.change_user_registration(%User{})
 
     socket =
       socket
@@ -135,15 +138,15 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
   end
 
   def handle_event("save", %{"user" => user_params}, socket) do
-    case Accounts.register_user(user_params) do
+    case Auth.register_user(user_params) do
       {:ok, user} ->
         {:ok, _} =
-          Accounts.deliver_user_confirmation_instructions(
+          Auth.deliver_user_confirmation_instructions(
             user,
-            &"/phoenix_kit/confirm/#{&1}"
+            &"/phoenix_kit/users/confirm/#{&1}"
           )
 
-        changeset = Accounts.change_user_registration(user)
+        changeset = Auth.change_user_registration(user)
         {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -152,7 +155,7 @@ defmodule PhoenixKitWeb.UserRegistrationLive do
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do
-    changeset = Accounts.change_user_registration(%User{}, user_params)
+    changeset = Auth.change_user_registration(%User{}, user_params)
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 

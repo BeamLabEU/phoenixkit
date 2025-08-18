@@ -2,10 +2,10 @@ defmodule PhoenixKitWeb.UserForgotPasswordLiveTest do
   use PhoenixKitWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import PhoenixKit.AccountsFixtures
+  import PhoenixKit.UsersFixtures
 
-  alias PhoenixKit.Accounts
   alias PhoenixKit.Repo
+  alias PhoenixKit.Users.Auth
 
   describe "Forgot password page" do
     test "renders email page", %{conn: conn} do
@@ -43,7 +43,7 @@ defmodule PhoenixKitWeb.UserForgotPasswordLiveTest do
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
 
-      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context ==
+      assert Repo.get_by!(Auth.UserToken, user_id: user.id).context ==
                "reset_password"
     end
 
@@ -57,7 +57,7 @@ defmodule PhoenixKitWeb.UserForgotPasswordLiveTest do
         |> follow_redirect(conn, "/")
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
-      assert Repo.all(Accounts.UserToken) == []
+      assert Repo.all(Auth.UserToken) == []
     end
   end
 end

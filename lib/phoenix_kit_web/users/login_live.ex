@@ -1,4 +1,4 @@
-defmodule PhoenixKitWeb.UserLoginLive do
+defmodule PhoenixKitWeb.Users.LoginLive do
   use PhoenixKitWeb, :live_view
 
   def render(assigns) do
@@ -14,7 +14,10 @@ defmodule PhoenixKitWeb.UserLoginLive do
           </p>
           <div class="text-sm opacity-75">
             Don't have an account?
-            <.link navigate="/phoenix_kit/register" class="font-semibold text-primary hover:underline">
+            <.link
+              navigate="/phoenix_kit/users/register"
+              class="font-semibold text-primary hover:underline"
+            >
               Sign up for free
             </.link>
           </div>
@@ -26,7 +29,7 @@ defmodule PhoenixKitWeb.UserLoginLive do
             <h2 class="card-title justify-center">Log in to account</h2>
             
     <!-- Traditional Password Login -->
-            <.form for={@form} id="login_form" action="/phoenix_kit/log_in" phx-update="ignore">
+            <.form for={@form} id="login_form" action="/phoenix_kit/users/log_in" phx-update="ignore">
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">Login with Password</legend>
 
@@ -71,7 +74,7 @@ defmodule PhoenixKitWeb.UserLoginLive do
 
                 <div class="text-center mt-2">
                   <.link
-                    href="/phoenix_kit/reset_password"
+                    href="/phoenix_kit/users/reset_password"
                     class="text-sm font-semibold text-primary hover:underline"
                   >
                     Forgot your password?
