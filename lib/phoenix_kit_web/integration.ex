@@ -15,26 +15,26 @@ defmodule PhoenixKitWeb.Integration do
 
       defmodule MyAppWeb.Router do
         use MyAppWeb, :router
-        
+
         # Add this line to import the helper
         import PhoenixKitWeb.Integration
-        
+
         # ... your existing pipelines ...
-        
+
         # Add PhoenixKit auth routes - they work independently of your :browser pipeline!
         phoenix_kit_routes()  # Uses /phoenix_kit prefix by default
-        
+
         # Or with custom prefix if needed
-        phoenix_kit_routes("/authentication")
+        phoenix_kit_routes("/pkit")
       end
 
-  **Note:** PhoenixKit routes work completely independently and don't require 
-  your application's :browser pipeline. They create their own pipeline with 
+  **Note:** PhoenixKit routes work completely independently and don't require
+  your application's :browser pipeline. They create their own pipeline with
   all necessary plugs for LiveView forms to work properly.
 
   ## Passing Current User to Your App's Layouts
 
-  To access the current user in your application's layouts, add PhoenixKit's 
+  To access the current user in your application's layouts, add PhoenixKit's
   on_mount callback to your live_session:
 
       # Basic approach - adds @phoenix_kit_current_user to assigns
@@ -93,7 +93,7 @@ defmodule PhoenixKitWeb.Integration do
   - `:phoenix_kit_mount_current_user` - Always accessible, mounts current user or nil
   - `:phoenix_kit_mount_current_scope` - Always accessible, mounts both user and scope
 
-  ### Protected Routes  
+  ### Protected Routes
   - `:phoenix_kit_ensure_authenticated` - Requires authentication, redirects to login if not logged in
   - `:phoenix_kit_ensure_authenticated_scope` - Same as above but using scope system
 
@@ -194,7 +194,7 @@ defmodule PhoenixKitWeb.Integration do
 
   ### Basic User Callbacks
   - `:phoenix_kit_mount_current_user` - Always accessible, mounts current user or nil
-  - `:phoenix_kit_ensure_authenticated` - Requires authentication, redirects to login if not logged in  
+  - `:phoenix_kit_ensure_authenticated` - Requires authentication, redirects to login if not logged in
   - `:phoenix_kit_redirect_if_user_is_authenticated` - Redirects away if already logged in (for login/register pages)
 
   ### Advanced Scope Callbacks (Recommended for New Projects)
@@ -328,7 +328,7 @@ defmodule PhoenixKitWeb.Integration do
   The following routes will be available under /phoenix_kit prefix (or your custom prefix):
 
   - GET /phoenix_kit/users/register - User registration page
-  - GET /phoenix_kit/users/log_in - User login page  
+  - GET /phoenix_kit/users/log_in - User login page
   - GET /phoenix_kit/users/magic_link - Magic link login page
   - POST /phoenix_kit/users/log_in - User login form submission
   - DELETE /phoenix_kit/users/log_out - User logout
@@ -348,8 +348,8 @@ defmodule PhoenixKitWeb.Integration do
       # config/config.exs
       config :phoenix_kit,
         repo: MyApp.Repo
-        
-      # Add to your deps in mix.exs  
+
+      # Add to your deps in mix.exs
       {:phoenix_kit, "~> 0.1.0"}
   """
   defmacro phoenix_kit_routes(prefix \\ "/phoenix_kit") do
@@ -458,10 +458,10 @@ defmodule PhoenixKitWeb.Integration do
           pipe_through :browser
           forward "/", PhoenixKitWeb.AuthRouter
         end
-        
+
     Or for a custom path:
-        
-        scope "/auth" do  
+
+        scope "/auth" do
           pipe_through :browser
           forward "/", PhoenixKitWeb.AuthRouter
         end

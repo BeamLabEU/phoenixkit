@@ -32,14 +32,14 @@
       </div>
       <div class="navbar-end">
         <div class="flex-none gap-2">
-          <!-- Theme Switcher -->
+          <%!-- Theme Switcher --%>
           <.theme_switcher size="small" />
 
           <%= if @phoenix_kit_current_user do %>
-            <!-- 
+            <%!-- 
             Example 1: Using @phoenix_kit_current_user directly (current approach)
             This works for basic user access and is backwards compatible
-            -->
+            --%>
             <div class="dropdown dropdown-end">
               <label tabindex="0" class="btn btn-ghost btn-circle avatar">
                 <div class="w-10 rounded-full">
@@ -101,26 +101,26 @@
       </div>
     </nav>
 
-    Example 3: Scope-based authentication checks in templates
+    Example 3: Scope-based authentication checks in templates -->
 
     <!-- Check if user is authenticated -->
-    <%= if assigns[:phoenix_kit_current_scope] && PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
+    <%!-- <%= if assigns[:phoenix_kit_current_scope] && PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
       <p>Welcome back, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!</p>
-    <% end %>
-    
-<!-- Access user ID for database queries or links -->
-    <%= if assigns[:phoenix_kit_current_scope] do %>
+    <% end %> --%>
+
+    <%!-- Access user ID for database queries or links --%>
+    <%!-- <%= if assigns[:phoenix_kit_current_scope] do %>
       <%= if user_id = PhoenixKit.Users.Auth.Scope.user_id(@phoenix_kit_current_scope) do %>
         <.link href={"/users/#{user_id}"}>View Profile</.link>
       <% end %>
-    <% end %>
-    
-<!-- Safe scope access with fallback -->
-    <%= if PhoenixKit.Users.Auth.Scope.anonymous?(assigns[:phoenix_kit_current_scope] || PhoenixKit.Users.Auth.Scope.for_user(nil)) do %>
+    <% end %> --%>
+
+    <%!-- Safe scope access with fallback --%>
+    <%!-- <%= if PhoenixKit.Users.Auth.Scope.anonymous?(assigns[:phoenix_kit_current_scope] || PhoenixKit.Users.Auth.Scope.for_user(nil)) do %>
       <p>You are browsing as a guest.</p>
       <.link href="/phoenix_kit/register">Create an account</.link>
-    <% end %>
-    -->
+    <% end %> --%>
+
     <main class="py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <.flash_group flash={@flash} />

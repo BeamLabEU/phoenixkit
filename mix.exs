@@ -1,16 +1,16 @@
 defmodule PhoenixKit.MixProject do
   use Mix.Project
 
-  @version "0.1.15"
+  @version "1.0.0"
   @description "Professional authentication library for Phoenix applications with zero-config setup"
-  @source_url "https://github.com/BeamLabEU/phoenixkit"
+  @source_url "https://github.com/BeamLabEU/phoenix_kit"
 
   def project do
     [
       app: :phoenix_kit,
       version: @version,
       description: @description,
-      elixir: "~> 1.15",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),

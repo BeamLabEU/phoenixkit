@@ -1,10 +1,10 @@
-<!-- 
+<%!-- 
   PhoenixKit App Layout Example
   
   This layout demonstrates how to access PhoenixKit authentication data
   within your application layouts. This example shows both traditional
   and scope-based approaches for accessing user information.
--->
+--%>
 <header class="px-4 sm:px-6 lg:px-8">
   <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
     <div class="flex items-center gap-4">
@@ -15,12 +15,12 @@
         v{Application.spec(:phoenix_kit, :vsn)}
       </p>
     </div>
-    
-<!-- User info display - shows how to access user data in layouts -->
+
+    <%!-- User info display - shows how to access user data in layouts --%>
     <div class="flex items-center gap-2 text-sm text-zinc-600">
-      <!-- Theme Switcher -->
+      <%!-- Theme Switcher --%>
       <.theme_switcher size="small" show_label={false} class="mr-2" />
-      <!-- Option 1: Basic user check (standard approach) -->
+      <%!-- Option 1: Basic user check (standard approach) --%>
       <%= if @phoenix_kit_current_user do %>
         <span class="bg-green-100 text-green-800 px-2 py-1 rounded">
           Logged in as: {@phoenix_kit_current_user.email}
@@ -30,8 +30,8 @@
           Not authenticated
         </span>
       <% end %>
-      
-<!-- 
+
+      <%!-- 
         Option 2: Scope-based approach (uncomment to use instead)
         
         This requires using :phoenix_kit_mount_current_scope in your router:
@@ -47,7 +47,7 @@
         - Explicit authentication checks
         - Ready for future extensions (roles, permissions, etc.)
         - Type safety with proper struct
-      -->
+      --%>
       <%!-- 
       <%= if assigns[:phoenix_kit_current_scope] && PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
         <span class="bg-green-100 text-green-800 px-2 py-1 rounded">
