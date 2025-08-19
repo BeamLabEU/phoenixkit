@@ -20,15 +20,17 @@ Update data in memory when discovering new components or changes in project arch
 
 ## Project Overview
 
-This is **Phoenix Module Template** - a professional library-first template for creating Phoenix modules with PostgreSQL support. It's designed as a reusable foundation that avoids circular dependencies and follows Phoenix best practices.
+This is **PhoenixKit** - a professional authentication library for Phoenix applications with PostgreSQL support and zero-configuration setup. It provides a complete authentication system that can be integrated into any Phoenix application without circular dependencies.
 
 **Key Characteristics:**
 
 - Library-first architecture (no OTP application)
-- Optional Phoenix dependencies to prevent circular imports
-- Professional testing framework with database integration
-- Ready for Hex.pm publishing
-- Template structure for easy customization
+- Zero-configuration setup with auto-detection
+- Complete authentication system with Magic Links
+- Theme system with light/dark mode support
+- Professional versioned migration system
+- Layout integration with parent applications
+- Ready for production use
 
 ## Development Commands
 
@@ -49,10 +51,28 @@ This is **Phoenix Module Template** - a professional library-first template for 
 - `mix phoenix_kit.install` - Install PhoenixKit using igniter (for new projects)
 - `mix phoenix_kit.update` - Update existing PhoenixKit installation to latest version
 - `mix phoenix_kit.update --status` - Check current version and available updates
+- `mix phoenix_kit.gen.migration` - Generate custom migration files
 - **Professional versioned migrations** - Oban-style migration system with version tracking
 - **Prefix support** - Isolate PhoenixKit tables using PostgreSQL schemas
 - **Idempotent operations** - Safe to run migrations multiple times
 - **Multi-version upgrades** - Automatically handles upgrades across multiple versions
+
+### Theme System Features
+
+- `mix phoenix_kit.install --theme-enabled` - Enable theme system during installation
+- **Light/Dark/Auto modes** - Complete theme switching with system preference detection
+- **DaisyUI integration** - Professional UI components with theme support
+- **CSS Variables** - Dynamic theme switching without page reload
+- **Local Storage persistence** - User theme preferences saved automatically
+- **Keyboard shortcuts** - Alt+T for quick theme toggling
+
+### Magic Link Authentication
+
+- **Passwordless login** - Secure authentication via email links
+- **15-minute expiry** - Configurable token lifetime for security
+- **One-time use tokens** - Prevents token reuse attacks
+- **Parallel to password auth** - Works alongside traditional authentication
+- **Configurable mailer** - Supports all Swoosh adapters
 
 **Recent Installation Enhancements:**
 - **PostgreSQL Validation** - Automatic database adapter detection with warnings for non-PostgreSQL setups
@@ -137,23 +157,23 @@ When creating a new version release:
 - **PATCH**: Bug fixes, backward compatible
 
 **Examples:**
-- `0.1.13` → `0.1.14` (patch: bug fixes)
-- `0.1.14` → `0.2.0` (minor: new features)
-- `0.2.x` → `1.0.0` (major: breaking changes)
+- `1.0.0` → `1.0.1` (patch: bug fixes)
+- `1.0.1` → `1.1.0` (minor: new features)
+- `1.x.x` → `2.0.0` (major: breaking changes)
 
 #### 3. Update Process Checklist
 
 **Step 1: Update mix.exs**
 ```elixir
 # In mix.exs, update @version constant
-@version "0.1.14"  # Increment from current version
+@version "1.0.1"  # Increment from current version
 ```
 
 **Step 2: Update CHANGELOG.md**
 ```markdown
 ## [Unreleased]
 
-## [0.1.14] - 2025-08-15
+## [1.0.1] - 2025-08-20
 
 ### Added
 - Description of new features
@@ -171,17 +191,17 @@ When creating a new version release:
 **Step 3: Update README.md (if needed)**
 ```markdown
 # Update any version references in examples
-{:phoenix_kit, "~> 0.1.14"}
+{:phoenix_kit, "~> 1.0"}
 ```
 
 **Step 4: Commit Version Changes**
 ```bash
 git add mix.exs CHANGELOG.md README.md
-git commit -m "Update version to 0.1.14 with comprehensive changelog
+git commit -m "Update version to 1.0.1 with comprehensive changelog
 
 Version Changes:
-- Bump version from 0.1.13 to 0.1.14 in mix.exs
-- Add comprehensive CHANGELOG.md entry for v0.1.14 release
+- Bump version from 1.0.0 to 1.0.1 in mix.exs
+- Add comprehensive CHANGELOG.md entry for v1.0.1 release
 - Update documentation with new version references
 
 Release includes: [brief description of main changes]"
@@ -207,7 +227,7 @@ Release includes: [brief description of main changes]"
 
 **Example CHANGELOG.md entry:**
 ```markdown
-## [0.1.14] - 2025-08-15
+## [1.0.1] - 2025-08-20
 
 ### Added
 - New PhoenixKit Scope system for structured authentication
@@ -242,9 +262,9 @@ Release includes: [brief description of main changes]"
 
 ### Version Management
 
-- **Current Version**: 0.1.3 (in mix.exs)
+- **Current Version**: 1.0.0 (in mix.exs)
 - **Version Strategy**: Semantic versioning (MAJOR.MINOR.PATCH)
-- **Migration Version**: V04 (includes user roles and secondary role systems)
+- **Migration Version**: V02 (includes basic authentication and AI settings)
 - **Database Versioning**: Professional system with version tracking in table comments
 
 ### 🚀 Pre-Release Checklist
@@ -278,27 +298,29 @@ Release includes: [brief description of main changes]"
 
 ## Architecture
 
-### Library Structure
+### Authentication Structure
 
-- **PhoenixModuleTemplate** - Main API module with public interface
-- **PhoenixModuleTemplate.Context** - Business logic following Phoenix Context pattern
-- **PhoenixModuleTemplate.Schema.Example** - Ecto schema with validations
-- **PhoenixModuleTemplate.Repo** - Database repository configuration
+- **PhoenixKit.Users.Auth** - Main authentication context with public interface
+- **PhoenixKit.Users.Auth.User** - User schema with validations and authentication
+- **PhoenixKit.Users.Auth.UserToken** - Token management for email confirmation and password reset
+- **PhoenixKit.Users.MagicLink** - Magic link authentication system
+- **PhoenixKit.Users.Auth.Scope** - Authentication scope management
 
 ### Migration Architecture
 
-
-- **PhoenixKit.Migrations.Postgres** - PostgreSQL-specific migrator
-- **PhoenixKit.Migrations.Postgres.V01** - Version 1 auth tables migration
-- **Mix.Tasks.PhoenixKit.Install** - Igniter-based installation task
-- **Versioned system** - Oban-style architecture for professional database management
+- **PhoenixKit.Migrations.Postgres** - PostgreSQL-specific migrator with Oban-style versioning
+- **PhoenixKit.Migrations.Postgres.V01** - Version 1: Basic authentication tables
+- **PhoenixKit.Migrations.Postgres.V02** - Version 2: AI settings and extensions
+- **Mix.Tasks.PhoenixKit.Install** - Igniter-based installation for new projects
+- **Mix.Tasks.PhoenixKit.Update** - Versioned updates for existing installations
+- **Mix.Tasks.PhoenixKit.Gen.Migration** - Custom migration generator
 
 ### Key Design Principles
 
 - **No Circular Dependencies** - Optional Phoenix deps prevent import cycles
 - **Library-First** - No OTP application, can be used as dependency
 - **Professional Testing** - DataCase pattern with database sandbox
-- **Template Ready** - Easy to customize and rebrand
+- **Production Ready** - Complete authentication system with security best practices
 
 ### Database Integration
 
@@ -314,16 +336,16 @@ Release includes: [brief description of main changes]"
 - **Quality Tools** - Credo, Dialyzer, code formatting configured
 - **Testing Framework** - Complete test suite with fixtures
 
-## Usage as Template
+## PhoenixKit Integration
 
-### Customization Steps
+### Setup Steps
 
-1. **Rename Module**: Replace `PhoenixModuleTemplate` → `YourModuleName`
-2. **Update Package**: Modify `mix.exs` with your package details
-3. **Customize Schema**: Adapt `lib/phoenix_module_template/schema/example.ex`
-4. **Implement Logic**: Update `lib/phoenix_module_template/context.ex`
-5. **Update Tests**: Modify test files for your domain
-6. **Documentation**: Replace README.md with your content
+1. **Install PhoenixKit**: Run `mix phoenix_kit.install --repo YourApp.Repo`
+2. **Configure Layout**: Optionally set custom layouts in `config/config.exs`
+3. **Add Routes**: Use `phoenix_kit_routes()` macro in your router
+4. **Configure Mailer**: Set up email delivery in `config/config.exs`
+5. **Run Migrations**: Database tables created automatically
+6. **Theme Support**: Optionally enable with `--theme-enabled` flag
 
 ### Integration Pattern
 
@@ -341,34 +363,62 @@ config :phoenix_kit,
   root_layout: {MyAppWeb.Layouts, :root},  # Optional: custom root layout
   page_title_prefix: "Auth"                # Optional: page title prefix
 
+# Configure Theme System (optional)
+config :phoenix_kit,
+  theme_enabled: true,
+  theme: %{
+    mode: :auto,                    # :light, :dark, :auto
+    primary_color: "#3b82f6",      # Primary brand color
+    storage: :local_storage         # :local_storage, :session, :cookie
+  }
+
 # In your Phoenix app's mix.exs
 def deps do
   [
-    {:phoenix_kit, "~> 0.1.0"}
+    {:phoenix_kit, "~> 1.0"}
   ]
 end
 ```
 
 ## File Structure
 
-### Core Library Files
+### Core Authentication Files
 
-- `lib/phoenix_module_template.ex` - Main API module
-- `lib/phoenix_module_template/context.ex` - Business logic context
-- `lib/phoenix_module_template/schema/example.ex` - Ecto schema
-- `lib/phoenix_module_template/repo.ex` - Repository configuration
+- `lib/phoenix_kit.ex` - Main API module and public interface
+- `lib/phoenix_kit/users/auth.ex` - Authentication context (main business logic)
+- `lib/phoenix_kit/users/auth/user.ex` - User schema with authentication
+- `lib/phoenix_kit/users/auth/user_token.ex` - Token management system
+- `lib/phoenix_kit/users/magic_link.ex` - Magic link authentication
+- `lib/phoenix_kit/theme_config.ex` - Theme system configuration
+
+### Web Integration Files
+
+- `lib/phoenix_kit_web/integration.ex` - Router integration macro
+- `lib/phoenix_kit_web/users/auth.ex` - Web authentication plugs and helpers
+- `lib/phoenix_kit_web/users/login_live.ex` - Login LiveView component
+- `lib/phoenix_kit_web/users/registration_live.ex` - Registration LiveView component
+- `lib/phoenix_kit_web/users/settings_live.ex` - User settings LiveView component
+- `lib/phoenix_kit_web/users/magic_link_live.ex` - Magic link request page
+- `lib/phoenix_kit_web/users/magic_link_controller.ex` - Magic link verification
+- `lib/phoenix_kit_web/components/core_components.ex` - UI components with theme support
+
+### Theme Assets
+
+- `priv/static/assets/phoenix_kit_theme.css` - Theme system styles
+- `priv/static/assets/phoenix_kit_theme.js` - Theme switching JavaScript
 
 ### Database Files
 
-- `priv/repo/migrations/` - Database migration files
-- `config/dev.exs` - Development database configuration
-- `config/test.exs` - Test database configuration
+- `lib/phoenix_kit/migrations/postgres.ex` - Main migration controller
+- `lib/phoenix_kit/migrations/postgres/v01.ex` - V01: Basic auth tables
+- `lib/phoenix_kit/migrations/postgres/v02.ex` - V02: AI settings table
+- `config/config.exs` - Library configuration
 
 ### Testing Files
 
-- `test/support/data_case.ex` - Database testing utilities
-- `test/phoenix_module_template/` - Test modules
 - `test/test_helper.exs` - Test configuration
+- `test/phoenix_kit_test.exs` - Main API tests
+- `test/phoenix_kit/users_test.exs` - Authentication system tests
 
 ### Configuration Files
 
@@ -385,7 +435,7 @@ end
 
 ## Development Workflow
 
-This template supports a complete professional development workflow:
+PhoenixKit supports a complete professional development workflow:
 
 1. **Development** - Local development with PostgreSQL
 2. **Testing** - Comprehensive test suite with database integration

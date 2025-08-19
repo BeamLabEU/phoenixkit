@@ -36,7 +36,7 @@ Add both `phoenix_kit` and `igniter` to your project dependencies:
 # mix.exs
 def deps do
   [
-    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"},
+    {:phoenix_kit, "~> 1.0"},
     {:igniter, "~> 0.6.0", only: [:dev]}
   ]
 end
@@ -100,7 +100,7 @@ mix phoenix_kit.install --repo MyApp.Repo
 # mix.exs
 def deps do
   [
-    {:phoenix_kit, git: "https://github.com/BeamLabEU/phoenixkit.git"}
+    {:phoenix_kit, "~> 1.0"}
   ]
 end
 ```
@@ -160,8 +160,8 @@ mix phx.server
 
 Visit these URLs to verify PhoenixKit is working:
 
-- `http://localhost:4000/phoenix_kit/register` - User registration
-- `http://localhost:4000/phoenix_kit/login` - User login
+- `http://localhost:4000/phoenix_kit/users/register` - User registration
+- `http://localhost:4000/phoenix_kit/users/log_in` - User login
 
 ## Production Setup
 
@@ -228,7 +228,7 @@ If you have multiple repos, PhoenixKit will auto-detect the first one, or specif
 
 ```elixir
 # config/config.exs
-![alt text](image.png) # Use specific repo for auth
+config :phoenix_kit, repo: MyApp.CustomRepo
 ```
 
 ## Configuration
@@ -319,17 +319,19 @@ If you're upgrading your Phoenix app from 1.7 to 1.8, PhoenixKit will automatica
 
 PhoenixKit provides these LiveView routes under your chosen prefix:
 
-- `GET /phoenix_kit/register` - User registration form (LiveView)
-- `GET /phoenix_kit/log_in` - Login form (LiveView)
-- `POST /phoenix_kit/log_in` - User login
-- `DELETE /phoenix_kit/log_out` - User logout
-- `GET /phoenix_kit/log_out` - User logout (direct URL access)
-- `GET /phoenix_kit/reset_password` - Password reset request (LiveView)
-- `GET /phoenix_kit/reset_password/:token` - Password reset form (LiveView)
-- `GET /phoenix_kit/settings` - User settings (LiveView, requires login)
-- `GET /phoenix_kit/settings/confirm_email/:token` - Email confirmation
-- `GET /phoenix_kit/confirm/:token` - Account confirmation (LiveView)
-- `GET /phoenix_kit/confirm` - Resend confirmation (LiveView)
+- `GET /phoenix_kit/users/register` - User registration form (LiveView)
+- `GET /phoenix_kit/users/log_in` - Login form (LiveView)
+- `POST /phoenix_kit/users/log_in` - User login
+- `DELETE /phoenix_kit/users/log_out` - User logout
+- `GET /phoenix_kit/users/log_out` - User logout (direct URL access)
+- `GET /phoenix_kit/users/magic_link` - Magic link login page
+- `GET /phoenix_kit/users/magic_link/:token` - Magic link verification
+- `GET /phoenix_kit/users/reset_password` - Password reset request (LiveView)
+- `GET /phoenix_kit/users/reset_password/:token` - Password reset form (LiveView)
+- `GET /phoenix_kit/users/settings` - User settings (LiveView, requires login)
+- `GET /phoenix_kit/users/settings/confirm_email/:token` - Email confirmation
+- `GET /phoenix_kit/users/confirm/:token` - Account confirmation (LiveView)
+- `GET /phoenix_kit/users/confirm` - Resend confirmation (LiveView)
 
 ## Database Schema
 
@@ -341,7 +343,6 @@ PhoenixKit creates these tables:
 - `email` - Email address (citext, unique)
 - `hashed_password` - Bcrypt hashed password
 - `confirmed_at` - Email confirmation timestamp
-- `role` - User role (user, moderator, admin) - *Added in v0.3.x*
 - `inserted_at`, `updated_at` - Timestamps
 
 ### `phoenix_kit_users_tokens` (Authentication Tokens)
@@ -357,7 +358,7 @@ PhoenixKit creates these tables:
 
 - Professional versioning system tracks schema changes
 - Enables safe upgrades and rollbacks
-- Current version: 1.0.0
+- Current version: V02
 
 ## Requirements & Configuration
 
@@ -462,7 +463,7 @@ plug :phoenix_kit_redirect_if_user_is_authenticated
 
 ## PhoenixKit Scope System
 
-PhoenixKit v0.1.14+ introduces an advanced **Scope System** for better authentication state management in your application layouts and LiveViews. This system provides structured access to authentication data with improved encapsulation and type safety.
+PhoenixKit introduces an advanced **Scope System** for better authentication state management in your application layouts and LiveViews. This system provides structured access to authentication data with improved encapsulation and type safety.
 
 ### What is the Scope System?
 
@@ -522,13 +523,13 @@ Access authentication data in your layout templates:
     <%= if PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
       <div class="user-menu">
         Welcome, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!
-        <.link href="/phoenix_kit/settings">Settings</.link>
-        <.link href="/phoenix_kit/log_out" method="delete">Logout</.link>
+        <.link href="/phoenix_kit/users/settings">Settings</.link>
+        <.link href="/phoenix_kit/users/log_out" method="delete">Logout</.link>
       </div>
     <% else %>
       <div class="auth-links">
-        <.link href="/phoenix_kit/log_in">Login</.link>
-        <.link href="/phoenix_kit/register">Sign Up</.link>
+        <.link href="/phoenix_kit/users/log_in">Login</.link>
+        <.link href="/phoenix_kit/users/register">Sign Up</.link>
       </div>
     <% end %>
   </div>
@@ -734,7 +735,7 @@ PhoenixKit uses a professional versioned migration system:
 
 ```bash
 # Check migration status and version information
-mix phoenix_kit.migrate --status
+mix phoenix_kit.update --status
 ```
 
 ```elixir
@@ -918,10 +919,10 @@ Solution: Always specify `--repo` parameter: `mix phoenix_kit.install --repo MyA
 
 ```
 ERROR: Schema migration failed
-ERROR: could not find migration runner process
+ERROR: Migration system validation failed
 ```
 
-Solution: Check database connection and permissions. Auto-setup migration system has been improved in v0.1.7+ to handle runtime migration contexts correctly.
+Solution: Check database connection and permissions. Run `mix phoenix_kit.update --status` to verify migration state.
 
 **URL not found**
 
@@ -949,136 +950,6 @@ config :logger, level: :debug
 5. Run quality checks: `mix quality`
 6. Submit a pull request
 
-## Upgrade Guide
-
-### From 0.1.x to 0.2.x
-
-PhoenixKit will automatically detect and run schema migrations. No manual intervention required.
-
-**Important:** Table names have been updated from `phoenix_kit`/`phoenix_kit_tokens` to `phoenix_kit_users`/`phoenix_kit_users_tokens`. Fresh installations will use the new names automatically.
-
-### From 0.2.x to 0.3.x - User Role System
-
-PhoenixKit v0.3.x introduces a user role system with support for `user`, `moderator`, and `admin` roles.
-
-#### What's New in v0.3.x:
-
-- 🔐 **User Roles**: Built-in support for user, moderator, and admin roles
-- 📊 **Role-based Authorization**: Helper functions for permission checking
-- 🛡️ **Backward Compatibility**: Existing users automatically get `user` role
-- 🚀 **Simple Integration**: Works with existing Phoenix plug-based authorization
-
-#### Upgrading to v0.3.x:
-
-**Step 1: Update PhoenixKit**
-
-```bash
-# Update your dependency
-mix deps.update phoenix_kit
-```
-
-**Step 2: Run Database Migration**
-
-```bash
-# Migrate to v0.3.x with role support
-mix phoenix_kit.migrate --version 3
-
-# Or check current version first
-mix phoenix_kit.migrate --status
-```
-
-**Step 3: Optional - Use Role-based Authorization**
-
-Add role-based authorization to your application:
-
-```elixir
-# lib/your_app_web/user_auth.ex
-defmodule YourAppWeb.UserAuth do
-  # ... existing functions ...
-
-  # Simple role-based authorization
-  def require_role(conn, required_role) do
-    user = conn.assigns.phoenix_kit_current_user
-    
-    if user && PhoenixKit.Users.Auth.User.has_role_level?(user, required_role) do
-      conn
-    else
-      conn
-      |> Phoenix.Controller.put_flash(:error, "Access denied")
-      |> Phoenix.Controller.redirect(to: "/")
-      |> Plug.Conn.halt()
-    end
-  end
-
-  # Admin only access
-  def require_admin(conn, _opts) do
-    require_role(conn, :admin)
-  end
-
-  # Moderator or admin access  
-  def require_moderator(conn, _opts) do
-    require_role(conn, :moderator)
-  end
-end
-```
-
-**Step 4: Use in Router**
-
-```elixir
-# lib/your_app_web/router.ex
-defmodule YourAppWeb.Router do
-  # ... existing pipelines ...
-  
-  # Admin-only routes
-  scope "/admin" do
-    pipe_through [:browser, :require_authenticated_user, :require_admin]
-    
-    get "/users", AdminController, :users
-    get "/settings", AdminController, :settings
-  end
-
-  # Moderator routes  
-  scope "/moderate" do
-    pipe_through [:browser, :require_authenticated_user, :require_moderator]
-    
-    get "/posts", ModerationController, :posts
-  end
-end
-```
-
-#### New Role Helper Functions:
-
-```elixir
-user = PhoenixKit.Users.Auth.get_user_by_email("user@example.com")
-
-# Check specific roles
-PhoenixKit.Users.Auth.User.admin?(user)        # true/false
-PhoenixKit.Users.Auth.User.moderator?(user)    # true/false  
-PhoenixKit.Users.Auth.User.can_moderate?(user) # true for moderator or admin
-
-# Check minimum role level
-PhoenixKit.Users.Auth.User.has_role_level?(user, :moderator)
-```
-
-#### Database Schema Changes:
-
-The migration adds a new `role` column to `phoenix_kit_users`:
-
-- **Column**: `role VARCHAR(20) DEFAULT 'user' NOT NULL`
-- **Index**: `phoenix_kit_users_role_index` for fast role-based queries
-- **Constraint**: Validates role values (`user`, `moderator`, `admin`)
-- **Backward Compatibility**: Existing users automatically get `user` role
-
-#### Rollback Support:
-
-If you need to rollback the role system:
-
-```bash
-# Rollback to v0.2.x (removes role column)
-mix phoenix_kit.migrate --version 2
-```
-
-**Note**: Rolling back will remove all role information from the database.
 
 ## License
 
@@ -1092,215 +963,3 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 
 Built with ❤️ for the Phoenix community
 
-
-
-
-from phoenix_kit file:
-
-  phoenix_kit.ex file:
-
-  PhoenixKit is a professional authentication library for Phoenix applications with zero-config setup.
-
-  PhoenixKit provides a complete, production-ready authentication system that integrates seamlessly
-  into any Phoenix application. It follows Oban-style architecture with versioned migrations and
-  automatic configuration detection.
-
-  ## Features
-
-  - **Zero-Config Setup** - Automatic repository detection and configuration
-  - **Complete Authentication** - Registration, login, logout, email confirmation, password reset
-  - **Professional Database Management** - Versioned migrations with rollback support
-  - **Library-First Design** - No OTP application, integrates into any Phoenix app
-  - **LiveView Ready** - All authentication pages use Phoenix LiveView
-  - **Production Ready** - Comprehensive error handling and logging
-  - **Magic Link Authentication** - Optional passwordless authentication
-  - **Layout Integration** - Seamless integration with your app's layouts
-
-  ## Quick Start
-
-  Add PhoenixKit to your Phoenix application:
-
-      # mix.exs
-      def deps do
-        [
-          {:phoenix_kit, "~> 0.1.14"},
-          {:igniter, "~> 0.6.0", only: [:dev]}
-        ]
-      end
-
-  Install and configure PhoenixKit:
-
-      mix deps.get
-      mix phoenix_kit.install
-
-  This automatically:
-  - Detects your Ecto repository
-  - Creates database migrations
-  - Configures your Phoenix router
-  - Sets up authentication routes
-  - Adds layout integration
-
-  ## Core Modules
-
-  ### Authentication Context
-
-  - `PhoenixKit.Users.Auth` - Main authentication context with user management functions
-  - `PhoenixKit.Users.Auth.User` - User schema with email-based authentication
-  - `PhoenixKit.Users.Auth.UserToken` - Token management for email confirmation and password reset
-  - `PhoenixKit.Users.Auth.MagicLink` - Optional passwordless authentication system
-
-  ### Web Integration
-
-  - `PhoenixKitWeb.Integration` - Router integration macros and helpers
-  - `PhoenixKitWeb.Users.Auth` - Plugs and authentication helpers
-  - `PhoenixKit.LayoutConfig` - Layout integration with parent applications
-
-  ### Database Management
-
-  - `PhoenixKit.Migration` - Database migration utilities and PostgreSQL support
-  - `PhoenixKit.Repo` - Repository configuration and helpers
-
-  ### Configuration
-
-  - `PhoenixKit.Config` - Configuration management with environment variable support
-  - `PhoenixKit.ConfigEnv` - Environment-based configuration loading
-
-  ## Installation Methods
-
-  ### Semi-Automatic (Recommended)
-
-  Uses Igniter for automated setup:
-
-      mix phoenix_kit.install
-
-  ### Manual Integration
-
-  Add routes to your router:
-
-      # router.ex
-      use PhoenixKitWeb.Integration
-
-      scope "/" do
-        pipe_through :browser
-        phoenix_kit_routes()
-      end
-
-  Configure your application:
-
-      # config/config.exs
-      config :phoenix_kit,
-        repo: MyApp.Repo
-
-      # config/dev.exs
-      config :phoenix_kit, PhoenixKit.Mailer,
-        adapter: Swoosh.Adapters.Local
-
-  ## Layout Integration
-
-  PhoenixKit automatically integrates with your app's layouts:
-
-      # config/config.exs
-      config :phoenix_kit,
-        layout: {MyAppWeb.Layouts, :app},
-        root_layout: {MyAppWeb.Layouts, :root}
-
-  Access current user in layouts:
-
-      <!-- app.html.heex -->
-      <%= if assigns[:phoenix_kit_current_user] do %>
-        <p>Welcome, <%= @phoenix_kit_current_user.email %>!</p>
-      <% else %>
-        <%= link "Sign in", to: ~p"/phoenix_kit/users/log_in" %>
-      <% end %>
-
-  ## Authentication Routes
-
-  PhoenixKit provides these routes by default:
-
-  - `GET /phoenix_kit/users/register` - User registration
-  - `GET /phoenix_kit/users/log_in` - User login
-  - `DELETE /phoenix_kit/users/log_out` - User logout
-  - `GET /phoenix_kit/users/confirm` - Email confirmation
-  - `GET /phoenix_kit/users/reset_password` - Password reset
-  - `GET /phoenix_kit/users/settings` - User settings
-
-  ## LiveView Integration
-
-  Protect your LiveView pages with on_mount callbacks:
-
-      # router.ex
-      live_session :authenticated, on_mount: [:phoenix_kit_mount_current_user, :phoenix_kit_ensure_authenticated] do
-        scope "/admin" do
-          pipe_through [:browser]
-          live "/dashboard", MyAppWeb.DashboardLive
-        end
-      end
-
-  ## Database Migrations
-
-  PhoenixKit uses a professional versioned migration system:
-
-      # Check current version
-      mix phoenix_kit.update --status
-
-      # Update to latest version
-      mix phoenix_kit.update
-
-      # Generate custom migration
-      mix phoenix_kit.gen.migration AddCustomField
-
-  ## Configuration
-
-  PhoenixKit supports various configuration options:
-
-      config :phoenix_kit,
-        repo: MyApp.Repo,
-        layout: {MyAppWeb.Layouts, :app},
-        page_title_prefix: "Auth"
-
-      config :phoenix_kit, PhoenixKit.Mailer,
-        adapter: Swoosh.Adapters.SMTP,
-        relay: "smtp.example.com"
-
-  ## Production Deployment
-
-  PhoenixKit is production-ready with:
-
-  - Secure password hashing with bcrypt
-  - Email confirmation workflow
-  - Session management
-  - Comprehensive error handling
-  - Database connection pooling
-  - Proper logging and telemetry
-
-  ## Examples
-
-  ### Creating a User
-
-      {:ok, user} = PhoenixKit.Users.Auth.register_user(%{
-        email: "user@example.com",
-        password: "secure_password123"
-      })
-
-  ### Authenticating
-
-      case PhoenixKit.Users.Auth.get_user_by_email_and_password(email, password) do
-        %User{} = user -> {:ok, user}
-        nil -> {:error, :invalid_credentials}
-      end
-
-  ### Magic Link Authentication
-
-      # Generate magic link
-      {:ok, link} = PhoenixKit.Users.Auth.MagicLink.generate_magic_link(user)
-
-      # Send via email
-      PhoenixKit.Mailer.deliver_magic_link_email(user, link)
-
-  ## More Information
-
-  For detailed documentation, visit:
-  - [HexDocs](https://hexdocs.pm/phoenix_kit)
-  - [GitHub](https://github.com/BeamLabEU/phoenixkit)
-
-  For common integration patterns, see `PhoenixKitWeb.Integration`.
