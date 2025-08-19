@@ -169,7 +169,7 @@ defmodule PhoenixKitWeb.Users.MagicLinkLive do
         </div>
 
         <div class="mt-6 text-center">
-          <.link navigate="/phoenix_kit/users/log_in" class="text-sm text-brand hover:underline">
+          <.link navigate="/phoenix_kit/users/log-in" class="text-sm text-brand hover:underline">
             Sign in with password
           </.link>
         </div>

@@ -353,7 +353,7 @@ defmodule PhoenixKit.Users.Auth do
 
   ## Examples
 
-      iex> deliver_user_reset_password_instructions(user, &"/phoenix_kit/users/reset_password/#{&1}")
+      iex> deliver_user_reset_password_instructions(user, &"/phoenix_kit/users/reset-password/#{&1}")
       {:ok, %{to: ..., body: ...}}
 
   """

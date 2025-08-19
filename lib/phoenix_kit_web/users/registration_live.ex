@@ -18,7 +18,7 @@ defmodule PhoenixKitWeb.Users.RegistrationLive do
           <div class="text-sm opacity-75">
             Already have an account?
             <.link
-              navigate="/phoenix_kit/users/log_in"
+              navigate="/phoenix_kit/users/log-in"
               class="font-semibold text-primary hover:underline"
             >
               Sign in here
@@ -37,7 +37,7 @@ defmodule PhoenixKitWeb.Users.RegistrationLive do
               phx-submit="save"
               phx-change="validate"
               phx-trigger-action={@trigger_submit}
-              action="/phoenix_kit/users/log_in?_action=registered"
+              action="/phoenix_kit/users/log-in?_action=registered"
               method="post"
             >
               <fieldset class="fieldset">

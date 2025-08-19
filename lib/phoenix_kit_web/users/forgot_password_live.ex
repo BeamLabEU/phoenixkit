@@ -21,7 +21,7 @@ defmodule PhoenixKitWeb.Users.ForgotPasswordLive do
       </.simple_form>
       <p class="text-center text-sm mt-4">
         <.link href="/phoenix_kit/users/register">Register</.link>
-        | <.link href="/phoenix_kit/users/log_in">Log in</.link>
+        | <.link href="/phoenix_kit/users/log-in">Log in</.link>
       </p>
     </div>
     """
@@ -35,7 +35,7 @@ defmodule PhoenixKitWeb.Users.ForgotPasswordLive do
     if user = Auth.get_user_by_email(email) do
       Auth.deliver_user_reset_password_instructions(
         user,
-        &"/phoenix_kit/users/reset_password/#{&1}"
+        &"/phoenix_kit/users/reset-password/#{&1}"
       )
     end
 

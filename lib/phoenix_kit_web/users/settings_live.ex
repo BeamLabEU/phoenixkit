@@ -51,7 +51,7 @@ defmodule PhoenixKitWeb.Users.SettingsLive do
               <.simple_form
                 for={@password_form}
                 id="password_form"
-                action="/phoenix_kit/users/log_in?_action=password_updated"
+                action="/phoenix_kit/users/log-in?_action=password_updated"
                 method="post"
                 phx-change="validate_password"
                 phx-submit="update_password"
@@ -170,7 +170,7 @@ defmodule PhoenixKitWeb.Users.SettingsLive do
         Auth.deliver_user_update_email_instructions(
           applied_user,
           user.email,
-          &url(~p"/phoenix_kit/users/settings/confirm_email/#{&1}")
+          &url(~p"/phoenix_kit/users/settings/confirm-email/#{&1}")
         )
 
         info = "A link to confirm your email change has been sent to the new address."

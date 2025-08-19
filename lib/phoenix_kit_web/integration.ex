@@ -62,11 +62,11 @@ defmodule PhoenixKitWeb.Integration do
         <div class="user-menu">
           Welcome, {@phoenix_kit_current_user.email}!
           <.link href="/phoenix_kit/users/settings">Settings</.link>
-          <.link href="/phoenix_kit/users/log_out" method="delete">Logout</.link>
+          <.link href="/phoenix_kit/users/log-out" method="delete">Logout</.link>
         </div>
       <% else %>
         <div class="auth-links">
-          <.link href="/phoenix_kit/users/log_in">Login</.link>
+          <.link href="/phoenix_kit/users/log-in">Login</.link>
           <.link href="/phoenix_kit/users/register">Sign Up</.link>
         </div>
       <% end %>
@@ -76,11 +76,11 @@ defmodule PhoenixKitWeb.Integration do
         <div class="user-menu">
           Welcome, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!
           <.link href="/phoenix_kit/users/settings">Settings</.link>
-          <.link href="/phoenix_kit/users/log_out" method="delete">Logout</.link>
+          <.link href="/phoenix_kit/users/log-out" method="delete">Logout</.link>
         </div>
       <% else %>
         <div class="auth-links">
-          <.link href="/phoenix_kit/users/log_in">Login</.link>
+          <.link href="/phoenix_kit/users/log-in">Login</.link>
           <.link href="/phoenix_kit/users/register">Sign Up</.link>
         </div>
       <% end %>
@@ -328,18 +328,18 @@ defmodule PhoenixKitWeb.Integration do
   The following routes will be available under /phoenix_kit prefix (or your custom prefix):
 
   - GET /phoenix_kit/users/register - User registration page
-  - GET /phoenix_kit/users/log_in - User login page
-  - GET /phoenix_kit/users/magic_link - Magic link login page
-  - POST /phoenix_kit/users/log_in - User login form submission
-  - DELETE /phoenix_kit/users/log_out - User logout
-  - GET /phoenix_kit/users/log_out - User logout (direct URL access)
-  - GET /phoenix_kit/users/reset_password - Password reset request page
-  - GET /phoenix_kit/users/reset_password/:token - Password reset form
+  - GET /phoenix_kit/users/log-in - User login page
+  - GET /phoenix_kit/users/magic-link - Magic link login page
+  - POST /phoenix_kit/users/log-in - User login form submission
+  - DELETE /phoenix_kit/users/log-out - User logout
+  - GET /phoenix_kit/users/log-out - User logout (direct URL access)
+  - GET /phoenix_kit/users/reset-password - Password reset request page
+  - GET /phoenix_kit/users/reset-password/:token - Password reset form
   - GET /phoenix_kit/users/settings - User settings page
   - GET /phoenix_kit/users/settings/confirm_email/:token - Email confirmation
   - GET /phoenix_kit/users/confirm/:token - Account confirmation
   - GET /phoenix_kit/users/confirm - Resend confirmation instructions
-  - GET /phoenix_kit/users/magic_link/:token - Magic link verification
+  - GET /phoenix_kit/users/magic-link/:token - Magic link verification
 
   ## Configuration
 
@@ -371,16 +371,14 @@ defmodule PhoenixKitWeb.Integration do
       scope unquote(prefix), PhoenixKitWeb do
         pipe_through [:browser, :phoenix_kit_auto_setup, :phoenix_kit_redirect_if_authenticated]
 
-        post "/users/log_in", Users.SessionController, :create
+        post "/users/log-in", Users.SessionController, :create
       end
 
       scope unquote(prefix), PhoenixKitWeb do
         pipe_through [:browser, :phoenix_kit_auto_setup]
 
-        delete "/users/log_out", Users.SessionController, :delete
-        get "/users/log_out", Users.SessionController, :get_logout
+        delete "/users/log-out", Users.SessionController, :delete
         get "/users/log-out", Users.SessionController, :get_logout
-        get "/users/magic_link/:token", Users.MagicLinkController, :verify
         get "/users/magic-link/:token", Users.MagicLinkController, :verify
       end
 
@@ -389,30 +387,25 @@ defmodule PhoenixKitWeb.Integration do
         pipe_through [:browser, :phoenix_kit_auto_setup]
 
         live_session :phoenix_kit_redirect_if_user_is_authenticated,
-          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_user_is_authenticated}] do
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_authenticated_scope}] do
           # live "/test", TestLive, :index  # Moved to require_authenticated section
           live "/users/register", Users.RegistrationLive, :new
-          live "/users/log_in", Users.LoginLive, :new
           live "/users/log-in", Users.LoginLive, :new
-          live "/users/magic_link", Users.MagicLinkLive, :new
           live "/users/magic-link", Users.MagicLinkLive, :new
-          live "/users/reset_password", Users.ForgotPasswordLive, :new
           live "/users/reset-password", Users.ForgotPasswordLive, :new
-          live "/users/reset_password/:token", Users.ResetPasswordLive, :edit
           live "/users/reset-password/:token", Users.ResetPasswordLive, :edit
         end
 
         live_session :phoenix_kit_current_user,
-          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}] do
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
           live "/users/confirm/:token", Users.ConfirmationLive, :edit
           live "/users/confirm", Users.ConfirmationInstructionsLive, :new
         end
 
         live_session :phoenix_kit_require_authenticated_user,
-          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated}] do
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}] do
           # live "/test", TestLive, :index
           live "/users/settings", Users.SettingsLive, :edit
-          live "/users/settings/confirm_email/:token", Users.SettingsLive, :confirm_email
           live "/users/settings/confirm-email/:token", Users.SettingsLive, :confirm_email
         end
       end

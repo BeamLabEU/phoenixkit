@@ -161,7 +161,7 @@ mix phx.server
 Visit these URLs to verify PhoenixKit is working:
 
 - `http://localhost:4000/phoenix_kit/users/register` - User registration
-- `http://localhost:4000/phoenix_kit/users/log_in` - User login
+- `http://localhost:4000/phoenix_kit/users/log-in` - User login
 
 ## Production Setup
 
@@ -320,14 +320,14 @@ If you're upgrading your Phoenix app from 1.7 to 1.8, PhoenixKit will automatica
 PhoenixKit provides these LiveView routes under your chosen prefix:
 
 - `GET /phoenix_kit/users/register` - User registration form (LiveView)
-- `GET /phoenix_kit/users/log_in` - Login form (LiveView)
-- `POST /phoenix_kit/users/log_in` - User login
-- `DELETE /phoenix_kit/users/log_out` - User logout
-- `GET /phoenix_kit/users/log_out` - User logout (direct URL access)
-- `GET /phoenix_kit/users/magic_link` - Magic link login page
-- `GET /phoenix_kit/users/magic_link/:token` - Magic link verification
-- `GET /phoenix_kit/users/reset_password` - Password reset request (LiveView)
-- `GET /phoenix_kit/users/reset_password/:token` - Password reset form (LiveView)
+- `GET /phoenix_kit/users/log-in` - Login form (LiveView)
+- `POST /phoenix_kit/users/log-in` - User login
+- `DELETE /phoenix_kit/users/log-out` - User logout
+- `GET /phoenix_kit/users/log-out` - User logout (direct URL access)
+- `GET /phoenix_kit/users/magic-link` - Magic link login page
+- `GET /phoenix_kit/users/magic-link/:token` - Magic link verification
+- `GET /phoenix_kit/users/reset-password` - Password reset request (LiveView)
+- `GET /phoenix_kit/users/reset-password/:token` - Password reset form (LiveView)
 - `GET /phoenix_kit/users/settings` - User settings (LiveView, requires login)
 - `GET /phoenix_kit/users/settings/confirm_email/:token` - Email confirmation
 - `GET /phoenix_kit/users/confirm/:token` - Account confirmation (LiveView)
@@ -524,11 +524,11 @@ Access authentication data in your layout templates:
       <div class="user-menu">
         Welcome, {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}!
         <.link href="/phoenix_kit/users/settings">Settings</.link>
-        <.link href="/phoenix_kit/users/log_out" method="delete">Logout</.link>
+        <.link href="/phoenix_kit/users/log-out" method="delete">Logout</.link>
       </div>
     <% else %>
       <div class="auth-links">
-        <.link href="/phoenix_kit/users/log_in">Login</.link>
+        <.link href="/phoenix_kit/users/log-in">Login</.link>
         <.link href="/phoenix_kit/users/register">Sign Up</.link>
       </div>
     <% end %>

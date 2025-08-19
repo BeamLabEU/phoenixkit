@@ -52,13 +52,13 @@ defmodule PhoenixKit.MixProject do
     [
       # Database
       {:ecto_sql, "~> 3.10"},
-      {:postgrex, ">= 0.0.0"},
+      {:postgrex, "~> 0.21.1"},
 
       # Phoenix web layer - required for authentication module
       {:phoenix, "~> 1.7.0"},
       {:phoenix_ecto, "~> 4.6"},
       {:phoenix_html, "~> 4.0"},
-      {:phoenix_live_view, "~> 1.0"},
+      {:phoenix_live_view, "~> 1.1.7"},
 
       # Web functionality
       {:gettext, "~> 0.24"},
@@ -71,13 +71,13 @@ defmodule PhoenixKit.MixProject do
 
       # Authentication
       {:bcrypt_elixir, "~> 3.0"},
-      {:swoosh, "~> 1.4"},
+      {:swoosh, "~> 1.19.5"},
 
       # Development and testing
-      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.38.3", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4.6", only: [:dev, :test], runtime: false},
       {:floki, ">= 0.30.0", only: :test},
       {:hackney, "~> 1.9"},
 
@@ -85,7 +85,7 @@ defmodule PhoenixKit.MixProject do
       {:jason, "~> 1.4"},
 
       # Code generation and project patching
-      {:igniter, "~> 0.6.0", optional: true}
+      {:igniter, "~> 0.6.27", optional: true}
     ]
   end
 

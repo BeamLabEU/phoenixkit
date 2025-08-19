@@ -29,7 +29,7 @@ defmodule PhoenixKitWeb.Users.LoginLive do
             <h2 class="card-title justify-center">Log in to account</h2>
             
     <!-- Traditional Password Login -->
-            <.form for={@form} id="login_form" action="/phoenix_kit/users/log_in" phx-update="ignore">
+            <.form for={@form} id="login_form" action="/phoenix_kit/users/log-in" phx-update="ignore">
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">Login with Password</legend>
 
@@ -74,7 +74,7 @@ defmodule PhoenixKitWeb.Users.LoginLive do
 
                 <div class="text-center mt-2">
                   <.link
-                    href="/phoenix_kit/users/reset_password"
+                    href="/phoenix_kit/users/reset-password"
                     class="text-sm font-semibold text-primary hover:underline"
                   >
                     Forgot your password?

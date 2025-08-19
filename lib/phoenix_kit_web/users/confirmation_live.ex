@@ -17,7 +17,7 @@ defmodule PhoenixKitWeb.Users.ConfirmationLive do
 
       <p class="text-center mt-4">
         <.link href="/phoenix_kit/users/register">Register</.link>
-        | <.link href="/phoenix_kit/users/log_in">Log in</.link>
+        | <.link href="/phoenix_kit/users/log-in">Log in</.link>
       </p>
     </div>
     """

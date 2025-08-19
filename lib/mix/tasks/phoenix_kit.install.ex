@@ -1069,18 +1069,18 @@ defmodule Mix.Tasks.PhoenixKit.Install do
       scope "/" do
         pipe_through :browser
 
-        live_session :phoenix_kit_demo_current_user,
-          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_user}] do
+        live_session :phoenix_kit_demo_current_scope,
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
           live "/test-current-user", #{app_web_module_name}.PhoenixKitLive.TestRequireAuthLive, :index
         end
 
-        live_session :phoenix_kit_demo_redirect_if_auth,
-          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_user_is_authenticated}] do
+        live_session :phoenix_kit_demo_redirect_if_auth_scope,
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_redirect_if_authenticated_scope}] do
           live "/test-redirect-if-auth", #{app_web_module_name}.PhoenixKitLive.TestRedirectIfAuthLive, :index
         end
 
-        live_session :phoenix_kit_demo_ensure_auth,
-          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated}] do
+        live_session :phoenix_kit_demo_ensure_auth_scope,
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}] do
           live "/test-ensure-auth", #{app_web_module_name}.PhoenixKitLive.TestEnsureAuthLive, :index
         end
       end
@@ -1390,35 +1390,38 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     """
     defmodule PhoenixKitWeb.TestEnsureAuthLive do
       @moduledoc \"\"\"
-      Test component for phoenix_kit_ensure_authenticated authentication level.
-      This page should only be accessible to authenticated users using PhoenixKit auth.
+      Test component for phoenix_kit_ensure_authenticated_scope authentication level.
+      This page should only be accessible to authenticated users using PhoenixKit scope system.
       \"\"\"
       use PhoenixKitWeb, :live_view
+
+      alias PhoenixKit.Users.Auth.Scope
 
       def render(assigns) do
         ~H\"\"\"
         <div class="hero py-8 min-h-[80vh] bg-success">
           <div class="hero-content text-center">
             <div class="max-w-md">
-              <h1 class="text-5xl font-bold text-success-content">phoenix_kit_ensure_authenticated</h1>
+              <h1 class="text-5xl font-bold text-success-content">phoenix_kit_ensure_authenticated_scope</h1>
               <div class="py-6 text-success-content">
                 <p class="mb-4">
-                  This page is protected by PhoenixKit <code>phoenix_kit_ensure_authenticated</code>.
-                  You can only see this if you are logged in through PhoenixKit auth system.
+                  This page is protected by PhoenixKit <code>phoenix_kit_ensure_authenticated_scope</code>.
+                  Uses modern scope system for structured authentication state management.
                 </p>
 
-                <%= if @phoenix_kit_current_user do %>
+                <%= if Scope.authenticated?(@phoenix_kit_current_scope) do %>
                   <div class="alert alert-info">
                     <div>
                       <h3 class="font-bold">Welcome, authenticated user!</h3>
                       <div class="text-sm">
-                        <p><strong>Email:</strong> {@phoenix_kit_current_user.email}</p>
-                        <p><strong>User ID:</strong> {@phoenix_kit_current_user.id}</p>
-                        <%= if @phoenix_kit_current_user.confirmed_at do %>
-                          <p><strong>Account:</strong> Confirmed at {@phoenix_kit_current_user.confirmed_at}</p>
+                        <p><strong>Email:</strong> {Scope.user_email(@phoenix_kit_current_scope)}</p>
+                        <p><strong>User ID:</strong> {Scope.user_id(@phoenix_kit_current_scope)}</p>
+                        <%= if Scope.user(@phoenix_kit_current_scope).confirmed_at do %>
+                          <p><strong>Account:</strong> Confirmed at {Scope.user(@phoenix_kit_current_scope).confirmed_at}</p>
                         <% else %>
                           <p><strong>Account:</strong> Not yet confirmed</p>
                         <% end %>
+                        <p><strong>Scope Status:</strong> authenticated? = {Scope.authenticated?(@phoenix_kit_current_scope)}</p>
                       </div>
                     </div>
                   </div>
@@ -1426,11 +1429,12 @@ defmodule Mix.Tasks.PhoenixKit.Install do
                   <div class="alert alert-error">
                     <div>
                       <p>This should never be visible - authentication is required!</p>
+                      <p class="text-xs">Scope authenticated? = {Scope.authenticated?(@phoenix_kit_current_scope)}</p>
                     </div>
                   </div>
                 <% end %>
               </div>
-              <div class="badge badge-success">PhoenixKit Authentication: REQUIRED</div>
+              <div class="badge badge-success">PhoenixKit Scope Authentication: REQUIRED</div>
             </div>
           </div>
         </div>
@@ -1448,22 +1452,41 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     """
     defmodule PhoenixKitWeb.TestRedirectIfAuthLive do
       @moduledoc \"\"\"
-      Test component for redirect_if_user_is_authenticated authentication level.
-      This page should redirect authenticated users away (like login/register pages).
+      Test component for phoenix_kit_redirect_if_authenticated_scope authentication level.
+      This page should redirect authenticated users away using PhoenixKit scope system.
       \"\"\"
       use PhoenixKitWeb, :live_view
+
+      alias PhoenixKit.Users.Auth.Scope
 
       def render(assigns) do
         ~H\"\"\"
         <div class="hero py-8 min-h-[80vh] bg-base-300">
           <div class="hero-content text-center">
             <div class="max-w-md">
-              <h1 class="text-5xl font-bold text-warning">redirect_if_user_is_authenticated</h1>
-              <p class="py-6">
-                This page is protected by <code>redirect_if_user_is_authenticated</code> authentication.
-                If you are logged in, you should be redirected away from this page.
-              </p>
-              <div class="badge badge-warning">Authentication: REDIRECT IF LOGGED IN</div>
+              <h1 class="text-5xl font-bold text-warning">phoenix_kit_redirect_if_authenticated_scope</h1>
+              <div class="py-6">
+                <p class="mb-4">
+                  This page is protected by <code>phoenix_kit_redirect_if_authenticated_scope</code>.
+                  Uses modern scope system to redirect authenticated users away (like login/register pages).
+                </p>
+                <div class="alert alert-warning">
+                  <div>
+                    <h3 class="font-bold">Anonymous Access Only</h3>
+                    <div class="text-sm">
+                      <p><strong>Scope Status:</strong> authenticated? = {Scope.authenticated?(@phoenix_kit_current_scope)}</p>
+                      <p><strong>User Status:</strong> anonymous? = {Scope.anonymous?(@phoenix_kit_current_scope)}</p>
+                      <%= if Scope.authenticated?(@phoenix_kit_current_scope) do %>
+                        <p><strong>Email:</strong> {Scope.user_email(@phoenix_kit_current_scope)}</p>
+                        <p class="text-xs text-error">⚠️ You should be redirected away from this page!</p>
+                      <% else %>
+                        <p class="text-xs text-success">✅ Correct - anonymous users can access this page</p>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="badge badge-warning">Scope Authentication: REDIRECT IF LOGGED IN</div>
             </div>
           </div>
         </div>
@@ -1481,48 +1504,50 @@ defmodule Mix.Tasks.PhoenixKit.Install do
     """
     defmodule PhoenixKitWeb.TestRequireAuthLive do
       @moduledoc \"\"\"
-      Test component for phoenix_kit_mount_current_user authentication level.
-      This page shows current user information without requiring authentication.
+      Test component for phoenix_kit_mount_current_scope authentication level.
+      This page shows current scope information without requiring authentication.
       \"\"\"
       use PhoenixKitWeb, :live_view
+
+      alias PhoenixKit.Users.Auth.Scope
 
       def render(assigns) do
         ~H\"\"\"
         <div class="hero py-8 min-h-[80vh] bg-info">
           <div class="hero-content text-center">
             <div class="max-w-md">
-              <h1 class="text-5xl font-bold text-info-content">phoenix_kit_mount_current_user</h1>
+              <h1 class="text-5xl font-bold text-info-content">phoenix_kit_mount_current_scope</h1>
               <div class="py-6 text-info-content">
                 <p class="mb-4">
-                  This page uses PhoenixKit <code>phoenix_kit_mount_current_user</code>.
-                  It mounts current user without requiring authentication.
+                  This page uses PhoenixKit <code>phoenix_kit_mount_current_scope</code>.
+                  Modern scope system that mounts current scope without requiring authentication.
                 </p>
 
-                <%= if @phoenix_kit_current_user do %>
-                  <div class="alert alert-success">
-                    <div>
-                      <h3 class="font-bold">User is logged in!</h3>
-                      <div class="text-sm">
-                        <p><strong>Email:</strong> {@phoenix_kit_current_user.email}</p>
-                        <p><strong>ID:</strong> {@phoenix_kit_current_user.id}</p>
-                        <%= if @phoenix_kit_current_user.confirmed_at do %>
-                          <p><strong>Status:</strong> Confirmed</p>
+                <div class="alert {if Scope.authenticated?(@phoenix_kit_current_scope), do: "alert-success", else: "alert-warning"}">
+                  <div>
+                    <h3 class="font-bold">
+                      {if Scope.authenticated?(@phoenix_kit_current_scope), do: "User is logged in!", else: "No user logged in"}
+                    </h3>
+                    <div class="text-sm">
+                      <p><strong>Scope Status:</strong> authenticated? = {Scope.authenticated?(@phoenix_kit_current_scope)}</p>
+                      <p><strong>User Status:</strong> anonymous? = {Scope.anonymous?(@phoenix_kit_current_scope)}</p>
+                      <%= if Scope.authenticated?(@phoenix_kit_current_scope) do %>
+                        <p><strong>Email:</strong> {Scope.user_email(@phoenix_kit_current_scope)}</p>
+                        <p><strong>ID:</strong> {Scope.user_id(@phoenix_kit_current_scope)}</p>
+                        <%= if Scope.user(@phoenix_kit_current_scope).confirmed_at do %>
+                          <p><strong>Status:</strong> Confirmed at {Scope.user(@phoenix_kit_current_scope).confirmed_at}</p>
                         <% else %>
                           <p><strong>Status:</strong> Not confirmed</p>
                         <% end %>
-                      </div>
+                      <% else %>
+                        <p class="text-sm">Page is accessible but scope is anonymous</p>
+                        <p class="text-xs">Both @phoenix_kit_current_scope and @phoenix_kit_current_user available</p>
+                      <% end %>
                     </div>
                   </div>
-                <% else %>
-                  <div class="alert alert-warning">
-                    <div>
-                      <h3 class="font-bold">No user logged in</h3>
-                      <p class="text-sm">Page is accessible but phoenix_kit_current_user is nil</p>
-                    </div>
-                  </div>
-                <% end %>
+                </div>
               </div>
-              <div class="badge badge-info">PhoenixKit Mount: ALWAYS ACCESSIBLE</div>
+              <div class="badge badge-info">PhoenixKit Scope Mount: ALWAYS ACCESSIBLE</div>
             </div>
           </div>
         </div>

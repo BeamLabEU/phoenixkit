@@ -32,7 +32,7 @@ defmodule PhoenixKitWeb.Users.ResetPasswordLive do
 
       <p class="text-center text-sm mt-4">
         <.link href="/phoenix_kit/users/register">Register</.link>
-        | <.link href="/phoenix_kit/users/log_in">Log in</.link>
+        | <.link href="/phoenix_kit/users/log-in">Log in</.link>
       </p>
     </div>
     """
@@ -61,7 +61,7 @@ defmodule PhoenixKitWeb.Users.ResetPasswordLive do
         {:noreply,
          socket
          |> put_flash(:info, "Password reset successfully.")
-         |> redirect(to: "/phoenix_kit/users/log_in")}
+         |> redirect(to: "/phoenix_kit/users/log-in")}
 
       {:error, changeset} ->
         {:noreply, assign_form(socket, Map.put(changeset, :action, :insert))}
