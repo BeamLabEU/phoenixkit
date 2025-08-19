@@ -160,13 +160,8 @@ defmodule PhoenixKit.Migrations.Postgres do
 
       :undefined ->
         # Fallback: try to guess from module name
-        case Module.split(repo) do
-          [app_name | _] ->
-            String.to_atom(Macro.underscore(app_name))
-
-          _ ->
-            nil
-        end
+        [app_name | _] = Module.split(repo)
+        String.to_atom(Macro.underscore(app_name))
     end
   end
 

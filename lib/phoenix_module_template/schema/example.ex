@@ -74,7 +74,6 @@ defmodule PhoenixModuleTemplate.Schema.Example do
   @doc """
   Creates a changeset for creating a new example with default values.
   """
-  @spec create_changeset(map()) :: Ecto.Changeset.t()
   def create_changeset(attrs) do
     %__MODULE__{}
     |> changeset(attrs)

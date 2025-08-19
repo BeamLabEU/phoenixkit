@@ -88,9 +88,6 @@ defmodule PhoenixKit.LayoutConfig do
           {layout_module, _} ->
             # Try to use the same module as app layout but with :root template
             validate_layout_module(layout_module, :root, @default_root_layout)
-
-          _ ->
-            @default_root_layout
         end
     end
   end

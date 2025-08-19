@@ -20,10 +20,11 @@
     <div class="flex items-center gap-2 text-sm text-zinc-600">
       <%!-- Theme Switcher --%>
       <.theme_switcher size="small" show_label={false} class="mr-2" />
-      <%!-- Option 1: Basic user check (standard approach) --%>
-      <%= if @phoenix_kit_current_user do %>
+
+      <%!-- Scope-based authentication (recommended approach) --%>
+      <%= if assigns[:phoenix_kit_current_scope] && PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
         <span class="bg-green-100 text-green-800 px-2 py-1 rounded">
-          Logged in as: {@phoenix_kit_current_user.email}
+          Logged in as: {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}
         </span>
       <% else %>
         <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded">
@@ -32,9 +33,21 @@
       <% end %>
 
       <%!-- 
-        Option 2: Scope-based approach (uncomment to use instead)
+        Legacy option: Basic user check (backwards compatibility)
         
-        This requires using :phoenix_kit_mount_current_scope in your router:
+        If you're still using :phoenix_kit_mount_current_user, this approach works:
+        
+        <%= if @phoenix_kit_current_user do %>
+          <span class="bg-green-100 text-green-800 px-2 py-1 rounded">
+            Logged in as: {@phoenix_kit_current_user.email}
+          </span>
+        <% else %>
+          <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded">
+            Not authenticated
+          </span>
+        <% end %>
+        
+        To use scope approach, update your router:
         
         live_session :default,
           layout: {MyAppWeb.Layouts, :app},
@@ -47,18 +60,6 @@
         - Explicit authentication checks
         - Ready for future extensions (roles, permissions, etc.)
         - Type safety with proper struct
-      --%>
-      <%!-- 
-      <%= if assigns[:phoenix_kit_current_scope] && PhoenixKit.Users.Auth.Scope.authenticated?(@phoenix_kit_current_scope) do %>
-        <span class="bg-green-100 text-green-800 px-2 py-1 rounded">
-          Logged in as: {PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope)}
-          (ID: {PhoenixKit.Users.Auth.Scope.user_id(@phoenix_kit_current_scope)})
-        </span>
-      <% else %>
-        <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded">
-          Not authenticated
-        </span>
-      <% end %>
       --%>
     </div>
   </div>

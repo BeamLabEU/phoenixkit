@@ -106,7 +106,6 @@ defmodule PhoenixModuleTemplate do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_example(map()) :: {:ok, struct()} | {:error, Ecto.Changeset.t()}
   defdelegate create_example(attrs), to: Context
 
   @doc """
