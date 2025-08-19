@@ -1,4 +1,6 @@
 defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
+  use Mix.Task
+
   @moduledoc """
   Generate PhoenixKit authentication migration in parent application.
 
@@ -24,8 +26,6 @@ defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
   """
   @shortdoc "Generate PhoenixKit authentication migration"
 
-  use Mix.Task
-
   @impl Mix.Task
   def run(args) do
     opts = parse_args(args)
@@ -40,8 +40,8 @@ defmodule Mix.Tasks.PhoenixKit.Gen.Migration do
     migration_content = generate_migration_content(table_prefix)
     File.write!(path, migration_content)
 
-    Mix.shell().info("✅ Generated migration: #{filename}")
-    Mix.shell().info("Run: mix ecto.migrate")
+    IO.puts("✅ Generated migration: #{filename}")
+    IO.puts("Run: mix ecto.migrate")
   end
 
   defp parse_args(args) do

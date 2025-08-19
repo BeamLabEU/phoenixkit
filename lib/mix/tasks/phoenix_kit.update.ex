@@ -1,4 +1,6 @@
 defmodule Mix.Tasks.PhoenixKit.Update do
+  use Mix.Task
+
   @moduledoc """
   Updates PhoenixKit to the latest version.
 
@@ -43,8 +45,6 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   - Idempotent (safe to run multiple times)
   - Rollback-capable (can be reverted if needed)
   """
-
-  use Mix.Task
 
   alias PhoenixKit.Migrations.Postgres
 

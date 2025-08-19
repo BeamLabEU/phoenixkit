@@ -6,7 +6,6 @@ defmodule PhoenixKit.Migrations.Postgres do
   use Ecto.Migration
 
   alias Ecto.Adapters.SQL
-  alias Mix.Tasks.App.Start, as: AppStart
 
   @initial_version 1
   @current_version 2
@@ -110,7 +109,7 @@ defmodule PhoenixKit.Migrations.Postgres do
         app = get_repo_app(repo)
 
         if app do
-          AppStart.run([to_string(app)])
+          Application.ensure_all_started(app)
         end
 
         # Use Ecto.Adapters.SQL.query which should work now

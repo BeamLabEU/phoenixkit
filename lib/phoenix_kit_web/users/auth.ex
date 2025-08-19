@@ -395,7 +395,7 @@ defmodule PhoenixKitWeb.Users.Auth do
 
   defp get_parent_endpoint do
     # Simple endpoint detection without external dependencies
-    app_name = Mix.Project.config()[:app]
+    app_name = Application.get_application(__MODULE__)
     base_module = app_name |> to_string() |> Macro.camelize()
 
     potential_endpoints = [
