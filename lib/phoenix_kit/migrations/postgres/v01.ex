@@ -96,6 +96,22 @@ defmodule PhoenixKit.Migrations.Postgres.V01 do
                            prefix: prefix
                          )
 
+    # Performance optimization indexes for active role queries
+    create_if_not_exists index(:phoenix_kit_user_role_assignments, [:user_id, :is_active],
+                           prefix: prefix,
+                           name: :idx_user_role_assignments_user_active
+                         )
+
+    create_if_not_exists index(:phoenix_kit_user_role_assignments, [:role_id, :is_active],
+                           prefix: prefix,
+                           name: :idx_user_role_assignments_role_active
+                         )
+
+    create_if_not_exists index(:phoenix_kit_users, [:is_active],
+                           prefix: prefix,
+                           name: :idx_users_active
+                         )
+
     # Insert system roles
     execute """
     INSERT INTO #{inspect(prefix)}.phoenix_kit_user_roles (name, description, is_system_role, inserted_at, updated_at)

@@ -113,7 +113,25 @@ defmodule PhoenixKitWeb.Users.Auth do
   def fetch_phoenix_kit_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Auth.get_user_by_session_token(user_token)
-    assign(conn, :phoenix_kit_current_user, user)
+
+    # Check if user is active, log out inactive users
+    active_user =
+      case user do
+        %{is_active: false} = inactive_user ->
+          require Logger
+
+          Logger.warning(
+            "PhoenixKit: Inactive user #{inactive_user.id} attempted access, logging out"
+          )
+
+          # Don't assign inactive user, effectively logging them out
+          nil
+
+        active_user ->
+          active_user
+      end
+
+    assign(conn, :phoenix_kit_current_user, active_user)
   end
 
   @doc """
@@ -128,10 +146,28 @@ defmodule PhoenixKitWeb.Users.Auth do
   def fetch_phoenix_kit_current_scope(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Auth.get_user_by_session_token(user_token)
-    scope = Scope.for_user(user)
+
+    # Check if user is active, log out inactive users
+    active_user =
+      case user do
+        %{is_active: false} = inactive_user ->
+          require Logger
+
+          Logger.warning(
+            "PhoenixKit: Inactive user #{inactive_user.id} attempted scope access, logging out"
+          )
+
+          # Don't assign inactive user, effectively logging them out
+          nil
+
+        active_user ->
+          active_user
+      end
+
+    scope = Scope.for_user(active_user)
 
     conn
-    |> assign(:phoenix_kit_current_user, user)
+    |> assign(:phoenix_kit_current_user, active_user)
     |> assign(:phoenix_kit_current_scope, scope)
   end
 
@@ -302,10 +338,29 @@ defmodule PhoenixKitWeb.Users.Auth do
 
   defp mount_phoenix_kit_current_user(socket, session) do
     Phoenix.Component.assign_new(socket, :phoenix_kit_current_user, fn ->
-      if user_token = session["user_token"] do
-        Auth.get_user_by_session_token(user_token)
+      case session["user_token"] do
+        nil -> nil
+        user_token -> get_active_user_from_token(user_token)
       end
     end)
+  end
+
+  defp get_active_user_from_token(user_token) do
+    user = Auth.get_user_by_session_token(user_token)
+
+    case user do
+      %{is_active: false} = inactive_user ->
+        require Logger
+
+        Logger.warning(
+          "PhoenixKit: Inactive user #{inactive_user.id} attempted LiveView mount, blocking access"
+        )
+
+        nil
+
+      active_user ->
+        active_user
+    end
   end
 
   defp mount_phoenix_kit_current_scope(socket, session) do

@@ -64,6 +64,7 @@ defmodule PhoenixKit.Users.Auth do
   # This module will be populated by mix phx.gen.auth
 
   alias PhoenixKit.Users.Auth.{User, UserNotifier, UserToken}
+  alias PhoenixKit.Users.Roles
 
   ## Database getters
 
@@ -120,7 +121,10 @@ defmodule PhoenixKit.Users.Auth do
   ## User registration
 
   @doc """
-  Registers a user.
+  Registers a user with safe Owner assignment.
+
+  This function prevents race conditions by safely assigning Owner role
+  to the first user using database transactions.
 
   ## Examples
 
@@ -132,9 +136,34 @@ defmodule PhoenixKit.Users.Auth do
 
   """
   def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
+    case %User{}
+         |> User.registration_changeset(attrs)
+         |> Repo.insert() do
+      {:ok, user} ->
+        # Safely assign Owner role to first user, User role to others
+        case Roles.ensure_first_user_is_owner(user) do
+          {:ok, role_type} ->
+            # Log successful role assignment for security audit
+            require Logger
+            Logger.info("PhoenixKit: User #{user.id} (#{user.email}) assigned #{role_type} role")
+            {:ok, user}
+
+          {:error, reason} ->
+            # Role assignment failed - this is critical
+            require Logger
+
+            Logger.error(
+              "PhoenixKit: Failed to assign role to user #{user.id}: #{inspect(reason)}"
+            )
+
+            # User was created but role assignment failed
+            # In production, you might want to delete the user or mark as needs_role_assignment
+            {:ok, user}
+        end
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   @doc """
@@ -546,20 +575,43 @@ defmodule PhoenixKit.Users.Auth do
   end
 
   @doc """
-  Updates a user's active status.
+  Updates user status with Owner protection.
+
+  Prevents deactivation of the last Owner to maintain system security.
+
+  ## Parameters
+
+  - `user`: User to update
+  - `attrs`: Status attributes (typically %{"is_active" => true/false})
 
   ## Examples
 
-      iex> update_user_status(user, %{is_active: false})
+      iex> update_user_status(user, %{"is_active" => false})
       {:ok, %User{}}
 
-      iex> update_user_status(owner_user, %{is_active: false})
-      {:error, %Ecto.Changeset{}}
+      iex> update_user_status(last_owner, %{"is_active" => false})
+      {:error, :cannot_deactivate_last_owner}
   """
   def update_user_status(%User{} = user, attrs) do
-    user
-    |> User.status_changeset(attrs)
-    |> Repo.update()
+    # Check if this would deactivate the last owner
+    if attrs["is_active"] == false or attrs[:is_active] == false do
+      case Roles.can_deactivate_user?(user) do
+        :ok ->
+          user
+          |> User.status_changeset(attrs)
+          |> Repo.update()
+
+        {:error, :cannot_deactivate_last_owner} ->
+          require Logger
+          Logger.warning("PhoenixKit: Attempted to deactivate last Owner user #{user.id}")
+          {:error, :cannot_deactivate_last_owner}
+      end
+    else
+      # Activation is always safe
+      user
+      |> User.status_changeset(attrs)
+      |> Repo.update()
+    end
   end
 
   @doc """

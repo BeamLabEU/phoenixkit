@@ -338,7 +338,9 @@ defmodule PhoenixKit.Users.Roles do
   end
 
   @doc """
-  Demotes an admin user to regular user role.
+  Safely demotes a user from Admin or Owner role with protection.
+
+  Prevents demotion of last Owner to maintain system security.
 
   ## Parameters
 
@@ -346,14 +348,181 @@ defmodule PhoenixKit.Users.Roles do
 
   ## Examples
 
-      iex> demote_to_user(user)
+      iex> demote_to_user(admin_user)
       {:ok, %RoleAssignment{}}
+      
+      iex> demote_to_user(last_owner)
+      {:error, :cannot_demote_last_owner}
   """
   def demote_to_user(%User{} = user) do
-    remove_role(user, "Admin")
+    cond do
+      user_has_role?(user, "Owner") ->
+        # Use safe removal for Owner role
+        safely_remove_role(user, "Owner")
+
+      user_has_role?(user, "Admin") ->
+        # Admin can be demoted safely
+        remove_role(user, "Admin")
+
+      true ->
+        # User has no roles to demote from
+        {:error, :no_role_to_demote}
+    end
+  end
+
+  @doc """
+  Counts active users with Owner role.
+
+  Critical security function - ensures we never have zero owners.
+
+  ## Examples
+
+      iex> count_active_owners()
+      1
+  """
+  def count_active_owners do
+    repo = RepoHelper.repo()
+
+    query =
+      from user in User,
+        join: assignment in assoc(user, :role_assignments),
+        join: role in assoc(assignment, :role),
+        where: role.name == "Owner",
+        where: assignment.is_active == true,
+        where: user.is_active == true,
+        select: count(user.id)
+
+    repo.one(query) || 0
+  end
+
+  @doc """
+  Safely assigns Owner role to first user using database transaction.
+
+  This function prevents race conditions by using FOR UPDATE lock.
+
+  ## Parameters
+
+  - `user`: The user to potentially make Owner
+
+  ## Returns
+
+  - `{:ok, :owner}` if user became Owner
+  - `{:ok, :user}` if user became regular User  
+  - `{:error, reason}` on failure
+
+  ## Examples
+
+      iex> ensure_first_user_is_owner(user)
+      {:ok, :owner}
+  """
+  def ensure_first_user_is_owner(%User{} = user) do
+    repo = RepoHelper.repo()
+
+    repo.transaction(fn ->
+      # Lock users table to prevent race condition
+      user_count =
+        repo.one(
+          from u in User,
+            select: count(u.id),
+            lock: "FOR UPDATE"
+        )
+
+      role_name = if user_count == 1, do: "Owner", else: "User"
+      role_type = if user_count == 1, do: :owner, else: :user
+
+      case assign_role(user, role_name) do
+        {:ok, _assignment} -> role_type
+        {:error, reason} -> repo.rollback(reason)
+      end
+    end)
+  end
+
+  @doc """
+  Safely removes role with Owner protection.
+
+  Prevents removal of Owner role if it would leave system without owners.
+
+  ## Parameters
+
+  - `user`: User to remove role from
+  - `role_name`: Name of role to remove
+
+  ## Examples
+
+      iex> safely_remove_role(owner_user, "Owner")
+      {:error, :cannot_remove_last_owner}
+      
+      iex> safely_remove_role(admin_user, "Admin") 
+      {:ok, %RoleAssignment{}}
+  """
+  def safely_remove_role(%User{} = user, role_name) when role_name == "Owner" do
+    repo = RepoHelper.repo()
+
+    repo.transaction(fn ->
+      remaining_owners = count_remaining_owners(repo, user.id)
+
+      if remaining_owners < 1 do
+        repo.rollback(:cannot_remove_last_owner)
+      else
+        execute_role_removal(user, role_name, repo)
+      end
+    end)
+  end
+
+  def safely_remove_role(%User{} = user, role_name) do
+    # Non-Owner roles can be removed safely
+    remove_role(user, role_name)
+  end
+
+  @doc """
+  Checks if user can be deactivated safely.
+
+  Prevents deactivation of last active Owner.
+
+  ## Parameters
+
+  - `user`: User to check for deactivation
+
+  ## Examples
+
+      iex> can_deactivate_user?(last_owner)
+      {:error, :cannot_deactivate_last_owner}
+      
+      iex> can_deactivate_user?(regular_user)
+      :ok
+  """
+  def can_deactivate_user?(%User{} = user) do
+    if user_has_role?(user, "Owner") do
+      case count_active_owners() do
+        count when count <= 1 -> {:error, :cannot_deactivate_last_owner}
+        _ -> :ok
+      end
+    else
+      :ok
+    end
   end
 
   # Private helper functions
+
+  defp execute_role_removal(user, role_name, repo) do
+    case remove_role(user, role_name) do
+      {:ok, assignment} -> assignment
+      {:error, reason} -> repo.rollback(reason)
+    end
+  end
+
+  defp count_remaining_owners(repo, excluding_user_id) do
+    repo.one(
+      from u in User,
+        join: assignment in assoc(u, :role_assignments),
+        join: role in assoc(assignment, :role),
+        where: role.name == "Owner",
+        where: assignment.is_active == true,
+        where: u.is_active == true,
+        where: u.id != ^excluding_user_id,
+        select: count(u.id)
+    ) || 0
+  end
 
   defp get_active_assignment(user_id, role_name) do
     repo = RepoHelper.repo()

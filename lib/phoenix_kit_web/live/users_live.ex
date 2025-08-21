@@ -52,9 +52,11 @@ defmodule PhoenixKitWeb.Live.UsersLive do
   end
 
   def handle_event("promote_to_admin", %{"user_id" => user_id}, socket) do
+    current_user = socket.assigns.phoenix_kit_current_user
     user = Auth.get_user!(user_id)
 
-    case Roles.promote_to_admin(user, socket.assigns.phoenix_kit_current_user) do
+    # Self-promotion is allowed for admin role
+    case Roles.promote_to_admin(user, current_user) do
       {:ok, _assignment} ->
         socket =
           socket
@@ -71,26 +73,56 @@ defmodule PhoenixKitWeb.Live.UsersLive do
   end
 
   def handle_event("demote_to_user", %{"user_id" => user_id}, socket) do
+    current_user = socket.assigns.phoenix_kit_current_user
     user = Auth.get_user!(user_id)
 
-    case Roles.demote_to_user(user) do
-      {:ok, _assignment} ->
-        socket =
-          socket
-          |> put_flash(:info, "User demoted to regular user successfully")
-          |> load_users()
-          |> load_stats()
+    # Prevent self-modification
+    if current_user.id == user.id do
+      socket = put_flash(socket, :error, "Cannot demote yourself")
+      {:noreply, socket}
+    else
+      case Roles.demote_to_user(user) do
+        {:ok, _assignment} ->
+          socket =
+            socket
+            |> put_flash(:info, "User demoted successfully")
+            |> load_users()
+            |> load_stats()
 
-        {:noreply, socket}
+          {:noreply, socket}
 
-      {:error, _changeset} ->
-        socket = put_flash(socket, :error, "Failed to demote user")
-        {:noreply, socket}
+        {:error, :cannot_demote_last_owner} ->
+          socket = put_flash(socket, :error, "Cannot demote the last system owner")
+          {:noreply, socket}
+
+        {:error, :cannot_remove_last_owner} ->
+          socket = put_flash(socket, :error, "Cannot remove the last system owner")
+          {:noreply, socket}
+
+        {:error, :no_role_to_demote} ->
+          socket = put_flash(socket, :error, "User has no elevated role to demote")
+          {:noreply, socket}
+
+        {:error, _changeset} ->
+          socket = put_flash(socket, :error, "Failed to demote user")
+          {:noreply, socket}
+      end
     end
   end
 
   def handle_event("toggle_user_status", %{"user_id" => user_id}, socket) do
+    current_user = socket.assigns.phoenix_kit_current_user
     user = Auth.get_user!(user_id)
+
+    if current_user.id == user.id do
+      socket = put_flash(socket, :error, "Cannot modify your own status")
+      {:noreply, socket}
+    else
+      toggle_user_status_safely(socket, user)
+    end
+  end
+
+  defp toggle_user_status_safely(socket, user) do
     new_status = !user.is_active
 
     case Auth.update_user_status(user, %{"is_active" => new_status}) do
@@ -103,6 +135,10 @@ defmodule PhoenixKitWeb.Live.UsersLive do
           |> load_users()
           |> load_stats()
 
+        {:noreply, socket}
+
+      {:error, :cannot_deactivate_last_owner} ->
+        socket = put_flash(socket, :error, "Cannot deactivate the last system owner")
         {:noreply, socket}
 
       {:error, _changeset} ->
