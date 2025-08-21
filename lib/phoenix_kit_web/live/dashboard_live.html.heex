@@ -1,0 +1,246 @@
+<div class="container flex-col mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-base-content mb-2">
+      PhoenixKit Dashboard
+    </h1>
+    <p class="text-base-content/70">
+      Welcome to the PhoenixKit administration panel
+    </p>
+  </div>
+  
+<!-- Admin Menu Actions -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <.link
+      navigate="/phoenix_kit/admin/users"
+      class="card bg-secondary text-secondary-content hover:shadow-lg transition-all"
+    >
+      <div class="card-body">
+        <div class="flex items-center">
+          <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+            >
+            </path>
+          </svg>
+          <div>
+            <h3 class="card-title text-lg">Users</h3>
+            <p class="text-sm opacity-75">User management</p>
+          </div>
+        </div>
+      </div>
+    </.link>
+
+    <.link
+      navigate="/phoenix_kit/users/registration"
+      class="card bg-primary text-primary-content hover:shadow-lg transition-all"
+    >
+      <div class="card-body">
+        <div class="flex items-center">
+          <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+            >
+            </path>
+          </svg>
+          <div>
+            <h3 class="card-title text-lg">Add User</h3>
+            <p class="text-sm opacity-75">Create new account</p>
+          </div>
+        </div>
+      </div>
+    </.link>
+
+    <button
+      phx-click="refresh_stats"
+      class="card bg-accent text-accent-content hover:shadow-lg transition-all cursor-pointer"
+    >
+      <div class="card-body">
+        <div class="flex items-center">
+          <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            >
+            </path>
+          </svg>
+          <div>
+            <h3 class="card-title text-lg">Refresh</h3>
+            <p class="text-sm opacity-75">Update statistics</p>
+          </div>
+        </div>
+      </div>
+    </button>
+  </div>
+  
+<!-- Platform Statistics -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold text-base-content mb-6">
+      Platform Statistics
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Total Users Stats -->
+      <div class="stats shadow">
+        <div class="stat">
+          <div class="stat-figure text-primary">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+              >
+              </path>
+            </svg>
+          </div>
+          <div class="stat-title">Total Users</div>
+          <div class="stat-value text-primary">{@stats.total_users}</div>
+        </div>
+      </div>
+      
+<!-- Owners Stats -->
+      <div class="stats shadow">
+        <div class="stat">
+          <div class="stat-figure text-error">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+              >
+              </path>
+            </svg>
+          </div>
+          <div class="stat-title">Owners</div>
+          <div class="stat-value text-error">{@stats.owner_count}</div>
+        </div>
+      </div>
+      
+<!-- Admins Stats -->
+      <div class="stats shadow">
+        <div class="stat">
+          <div class="stat-figure text-warning">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              >
+              </path>
+            </svg>
+          </div>
+          <div class="stat-title">Admins</div>
+          <div class="stat-value text-warning">{@stats.admin_count}</div>
+        </div>
+      </div>
+      
+<!-- Regular Users Stats -->
+      <div class="stats shadow">
+        <div class="stat">
+          <div class="stat-figure text-info">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              >
+              </path>
+            </svg>
+          </div>
+          <div class="stat-title">Regular Users</div>
+          <div class="stat-value text-info">{@stats.user_count}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<!-- Role Distribution -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold text-base-content mb-6">
+      Role Distribution
+    </h2>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <!-- Owner Distribution -->
+        <div class="mb-4">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="font-medium">Owners</span>
+            <span>{@stats.owner_count} / {@stats.total_users}</span>
+          </div>
+          <progress
+            class="progress progress-error w-full"
+            value={@stats.owner_count}
+            max={max(@stats.total_users, 1)}
+          >
+          </progress>
+        </div>
+        
+<!-- Admin Distribution -->
+        <div class="mb-4">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="font-medium">Admins</span>
+            <span>{@stats.admin_count} / {@stats.total_users}</span>
+          </div>
+          <progress
+            class="progress progress-warning w-full"
+            value={@stats.admin_count}
+            max={max(@stats.total_users, 1)}
+          >
+          </progress>
+        </div>
+        
+<!-- User Distribution -->
+        <div class="mb-4">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="font-medium">Regular Users</span>
+            <span>{@stats.user_count} / {@stats.total_users}</span>
+          </div>
+          <progress
+            class="progress progress-info w-full"
+            value={@stats.user_count}
+            max={max(@stats.total_users, 1)}
+          >
+          </progress>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<!-- System Information -->
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold text-base-content mb-6">
+      System Information
+    </h2>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary mb-2">1.0.0</div>
+            <div class="text-sm text-base-content/70">PhoenixKit Version</div>
+          </div>
+          <div class="text-center">
+            <div class="badge badge-success badge-lg mb-2">Active</div>
+            <div class="text-sm text-base-content/70">Role System</div>
+          </div>
+          <div class="text-center">
+            <div class="badge badge-success badge-lg mb-2">Enabled</div>
+            <div class="text-sm text-base-content/70">Authentication</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

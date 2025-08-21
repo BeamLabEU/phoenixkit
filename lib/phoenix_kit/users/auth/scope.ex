@@ -158,6 +158,132 @@ defmodule PhoenixKit.Users.Auth.Scope do
   def anonymous?(%__MODULE__{authenticated?: authenticated?}), do: not authenticated?
 
   @doc """
+  Checks if the user has a specific role.
+
+  ## Examples
+
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.has_role?(scope, "Admin")
+      true
+
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.has_role?(scope, "Admin")
+      false
+  """
+  @spec has_role?(t(), String.t()) :: boolean()
+  def has_role?(%__MODULE__{user: %User{} = user}, role_name) when is_binary(role_name) do
+    User.has_role?(user, role_name)
+  end
+
+  def has_role?(%__MODULE__{user: nil}, _role_name), do: false
+
+  @doc """
+  Checks if the user is an owner.
+
+  ## Examples
+
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.owner?(scope)
+      true
+
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.owner?(scope)
+      false
+  """
+  @spec owner?(t()) :: boolean()
+  def owner?(%__MODULE__{user: %User{} = user}) do
+    User.owner?(user)
+  end
+
+  def owner?(%__MODULE__{user: nil}), do: false
+
+  @doc """
+  Checks if the user is an admin or owner.
+
+  ## Examples
+
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.admin?(scope)
+      true
+
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.admin?(scope)
+      false
+  """
+  @spec admin?(t()) :: boolean()
+  def admin?(%__MODULE__{user: %User{} = user}) do
+    User.admin?(user)
+  end
+
+  def admin?(%__MODULE__{user: nil}), do: false
+
+  @doc """
+  Gets all roles for the user.
+
+  ## Examples
+
+      iex> user = %PhoenixKit.Users.Auth.User{id: 1}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.user_roles(scope)
+      ["Admin", "User"]
+
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.user_roles(scope)
+      []
+  """
+  @spec user_roles(t()) :: [String.t()]
+  def user_roles(%__MODULE__{user: %User{} = user}) do
+    User.get_roles(user)
+  end
+
+  def user_roles(%__MODULE__{user: nil}), do: []
+
+  @doc """
+  Gets the user's full name.
+
+  ## Examples
+
+      iex> user = %PhoenixKit.Users.Auth.User{first_name: "John", last_name: "Doe"}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.user_full_name(scope)
+      "John Doe"
+
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.user_full_name(scope)
+      nil
+  """
+  @spec user_full_name(t()) :: String.t() | nil
+  def user_full_name(%__MODULE__{user: %User{} = user}) do
+    User.full_name(user)
+  end
+
+  def user_full_name(%__MODULE__{user: nil}), do: nil
+
+  @doc """
+  Checks if the user is active.
+
+  ## Examples
+
+      iex> user = %PhoenixKit.Users.Auth.User{is_active: true}
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(user)
+      iex> PhoenixKit.Users.Auth.Scope.user_active?(scope)
+      true
+
+      iex> scope = PhoenixKit.Users.Auth.Scope.for_user(nil)
+      iex> PhoenixKit.Users.Auth.Scope.user_active?(scope)
+      false
+  """
+  @spec user_active?(t()) :: boolean()
+  def user_active?(%__MODULE__{user: %User{is_active: is_active}}) do
+    is_active
+  end
+
+  def user_active?(%__MODULE__{user: nil}), do: false
+
+  @doc """
   Converts scope to a map for debugging or logging purposes.
 
   ## Examples
@@ -168,7 +294,10 @@ defmodule PhoenixKit.Users.Auth.Scope do
       %{
         authenticated?: true,
         user_id: 1,
-        user_email: "user@example.com"
+        user_email: "user@example.com",
+        user_roles: ["Admin", "User"],
+        owner?: false,
+        admin?: true
       }
   """
   @spec to_map(t()) :: map()
@@ -176,7 +305,12 @@ defmodule PhoenixKit.Users.Auth.Scope do
     %{
       authenticated?: authenticated?(scope),
       user_id: user_id(scope),
-      user_email: user_email(scope)
+      user_email: user_email(scope),
+      user_full_name: user_full_name(scope),
+      user_roles: user_roles(scope),
+      owner?: owner?(scope),
+      admin?: admin?(scope),
+      user_active?: user_active?(scope)
     }
   end
 end

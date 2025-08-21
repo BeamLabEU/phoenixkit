@@ -108,6 +108,13 @@ defmodule PhoenixKit.RepoHelper do
   end
 
   @doc """
+  Delegates to the configured repo's aggregate function.
+  """
+  def aggregate(queryable, aggregate, field, opts \\ []) do
+    repo().aggregate(queryable, aggregate, field, opts)
+  end
+
+  @doc """
   Delegates to the configured repo's query function.
   """
   def query(sql, params \\ [], opts \\ []) do

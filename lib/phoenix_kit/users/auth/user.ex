@@ -23,12 +23,17 @@ defmodule PhoenixKit.Users.Auth.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias PhoenixKit.Users.Roles
+
   @type t :: %__MODULE__{
           id: integer() | nil,
           email: String.t(),
           password: String.t() | nil,
           hashed_password: String.t(),
           current_password: String.t() | nil,
+          first_name: String.t() | nil,
+          last_name: String.t() | nil,
+          is_active: boolean(),
           confirmed_at: NaiveDateTime.t() | nil,
           inserted_at: NaiveDateTime.t(),
           updated_at: NaiveDateTime.t()
@@ -39,7 +44,13 @@ defmodule PhoenixKit.Users.Auth.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
+    field :first_name, :string
+    field :last_name, :string
+    field :is_active, :boolean, default: true
     field :confirmed_at, :naive_datetime
+
+    has_many :role_assignments, PhoenixKit.Users.RoleAssignment
+    many_to_many :roles, PhoenixKit.Users.Role, join_through: PhoenixKit.Users.RoleAssignment
 
     timestamps()
   end
@@ -69,9 +80,10 @@ defmodule PhoenixKit.Users.Auth.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :first_name, :last_name])
     |> validate_email(opts)
     |> validate_password(opts)
+    |> validate_names()
   end
 
   defp validate_email(changeset, opts) do
@@ -188,6 +200,126 @@ defmodule PhoenixKit.Users.Auth.User do
       changeset
     else
       add_error(changeset, :current_password, "is not valid")
+    end
+  end
+
+  @doc """
+  A user changeset for updating profile information.
+
+  ## Options
+
+    * `:validate_email` - Validates the uniqueness of the email, in case
+      you don't want to validate the uniqueness of the email (like when
+      using this changeset for validations on a LiveView form before
+      submitting the form), this option can be set to `false`.
+      Defaults to `true`.
+  """
+  def profile_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:first_name, :last_name, :email])
+    |> validate_names()
+    |> validate_email(opts)
+  end
+
+  @doc """
+  A user changeset for updating active status.
+  """
+  def status_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:is_active])
+    |> validate_inclusion(:is_active, [true, false])
+    |> validate_owner_cannot_be_deactivated()
+  end
+
+  @doc """
+  Checks if a user has a specific role.
+
+  ## Examples
+
+      iex> has_role?(user, "Admin")
+      true
+
+      iex> has_role?(user, "Owner")
+      false
+  """
+  def has_role?(%__MODULE__{} = user, role_name) when is_binary(role_name) do
+    Roles.user_has_role?(user, role_name)
+  end
+
+  @doc """
+  Checks if a user is an owner.
+
+  ## Examples
+
+      iex> owner?(user)
+      true
+  """
+  def owner?(%__MODULE__{} = user) do
+    has_role?(user, "Owner")
+  end
+
+  @doc """
+  Checks if a user is an admin or owner.
+
+  ## Examples
+
+      iex> admin?(user)
+      true
+  """
+  def admin?(%__MODULE__{} = user) do
+    has_role?(user, "Admin") || owner?(user)
+  end
+
+  @doc """
+  Gets all roles for a user.
+
+  ## Examples
+
+      iex> get_roles(user)
+      ["Admin", "User"]
+  """
+  def get_roles(%__MODULE__{} = user) do
+    Roles.get_user_roles(user)
+  end
+
+  @doc """
+  Gets the user's full name by combining first and last name.
+
+  ## Examples
+
+      iex> full_name(%User{first_name: "John", last_name: "Doe"})
+      "John Doe"
+
+      iex> full_name(%User{first_name: "John", last_name: nil})
+      "John"
+
+      iex> full_name(%User{first_name: nil, last_name: nil})
+      nil
+  """
+  def full_name(%__MODULE__{first_name: first_name, last_name: last_name}) do
+    case {first_name, last_name} do
+      {nil, nil} -> nil
+      {first, nil} -> String.trim(first)
+      {nil, last} -> String.trim(last)
+      {first, last} -> String.trim("#{first} #{last}")
+    end
+  end
+
+  defp validate_names(changeset) do
+    changeset
+    |> validate_length(:first_name, max: 100)
+    |> validate_length(:last_name, max: 100)
+  end
+
+  # Prevent deactivating Owner users
+  defp validate_owner_cannot_be_deactivated(changeset) do
+    user = changeset.data
+    is_active = get_field(changeset, :is_active)
+
+    if is_active == false && owner?(user) do
+      add_error(changeset, :is_active, "owner cannot be deactivated")
+    else
+      changeset
     end
   end
 end

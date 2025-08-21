@@ -35,7 +35,7 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   PhoenixKit uses a versioned migration system similar to Oban. Each version
   contains specific database schema changes that can be applied incrementally.
 
-  Current version: V02 (includes AI settings table)
+  Current version: V01 (includes basic authentication with role system)
 
   ## Safe Updates
 
@@ -292,11 +292,8 @@ defmodule Mix.Tasks.PhoenixKit.Update do
   # Describe what changed between versions
   defp describe_version_changes(from_version, to_version) do
     case {from_version, to_version} do
-      {1, 2} ->
-        "- Added phoenix_kit_ai table for AI configuration management"
-
-      {0, _} ->
-        "- Complete PhoenixKit installation with all features"
+      {0, 1} ->
+        "- Complete PhoenixKit installation with authentication and role system"
 
       {_, _} ->
         "- Various improvements and new features"

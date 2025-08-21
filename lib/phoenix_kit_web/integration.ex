@@ -327,6 +327,7 @@ defmodule PhoenixKitWeb.Integration do
 
   The following routes will be available under /phoenix_kit prefix (or your custom prefix):
 
+  ### Authentication Routes
   - GET /phoenix_kit/users/register - User registration page
   - GET /phoenix_kit/users/log-in - User login page
   - GET /phoenix_kit/users/magic-link - Magic link login page
@@ -340,6 +341,10 @@ defmodule PhoenixKitWeb.Integration do
   - GET /phoenix_kit/users/confirm/:token - Account confirmation
   - GET /phoenix_kit/users/confirm - Resend confirmation instructions
   - GET /phoenix_kit/users/magic-link/:token - Magic link verification
+
+  ### Admin Routes (Owner/Admin access required)
+  - GET /phoenix_kit/admin/dashboard - Admin dashboard with system statistics
+  - GET /phoenix_kit/admin/users - User management interface with role controls
 
   ## Configuration
 
@@ -407,6 +412,12 @@ defmodule PhoenixKitWeb.Integration do
           # live "/test", TestLive, :index
           live "/users/settings", Users.SettingsLive, :edit
           live "/users/settings/confirm-email/:token", Users.SettingsLive, :confirm_email
+        end
+
+        live_session :phoenix_kit_admin,
+          on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_admin}] do
+          live "/admin/dashboard", Live.DashboardLive, :index
+          live "/admin/users", Live.UsersLive, :index
         end
       end
     end

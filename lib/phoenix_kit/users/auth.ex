@@ -209,9 +209,9 @@ defmodule PhoenixKit.Users.Auth do
       |> User.email_changeset(%{email: email})
       |> User.confirm_changeset()
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, [context]))
+    multi = Ecto.Multi.new()
+    multi = Ecto.Multi.update(multi, :user, changeset)
+    Ecto.Multi.delete_all(multi, :tokens, UserToken.by_user_and_contexts_query(user, [context]))
   end
 
   @doc ~S"""
@@ -262,9 +262,10 @@ defmodule PhoenixKit.Users.Auth do
       |> User.password_changeset(attrs)
       |> User.validate_current_password(password)
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
+    multi = Ecto.Multi.new()
+    multi = Ecto.Multi.update(multi, :user, changeset)
+
+    Ecto.Multi.delete_all(multi, :tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -341,9 +342,9 @@ defmodule PhoenixKit.Users.Auth do
   end
 
   defp confirm_user_multi(user) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.confirm_changeset(user))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, ["confirm"]))
+    multi = Ecto.Multi.new()
+    multi = Ecto.Multi.update(multi, :user, User.confirm_changeset(user))
+    Ecto.Multi.delete_all(multi, :tokens, UserToken.by_user_and_contexts_query(user, ["confirm"]))
   end
 
   ## Reset password
@@ -398,13 +399,248 @@ defmodule PhoenixKit.Users.Auth do
 
   """
   def reset_user_password(user, attrs) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
+    multi = Ecto.Multi.new()
+    multi = Ecto.Multi.update(multi, :user, User.password_changeset(user, attrs))
+
+    Ecto.Multi.delete_all(multi, :tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  ## Role Management Functions
+
+  @doc """
+  Assigns a role to a user.
+
+  ## Examples
+
+      iex> assign_role(user, "Admin")
+      {:ok, %RoleAssignment{}}
+
+      iex> assign_role(user, "Admin", assigned_by_user)
+      {:ok, %RoleAssignment{}}
+
+      iex> assign_role(user, "NonexistentRole")
+      {:error, :role_not_found}
+  """
+  defdelegate assign_role(user, role_name, assigned_by \\ nil), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Removes a role from a user.
+
+  ## Examples
+
+      iex> remove_role(user, "Admin")
+      {:ok, %RoleAssignment{}}
+
+      iex> remove_role(user, "NonexistentRole")
+      {:error, :assignment_not_found}
+  """
+  defdelegate remove_role(user, role_name), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Checks if a user has a specific role.
+
+  ## Examples
+
+      iex> user_has_role?(user, "Admin")
+      true
+
+      iex> user_has_role?(user, "Owner")
+      false
+  """
+  defdelegate user_has_role?(user, role_name), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Gets all active roles for a user.
+
+  ## Examples
+
+      iex> get_user_roles(user)
+      ["Admin", "User"]
+
+      iex> get_user_roles(user_with_no_roles)
+      []
+  """
+  defdelegate get_user_roles(user), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Gets all users who have a specific role.
+
+  ## Examples
+
+      iex> users_with_role("Admin")
+      [%User{}, %User{}]
+
+      iex> users_with_role("NonexistentRole")
+      []
+  """
+  defdelegate users_with_role(role_name), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Promotes a user to admin role.
+
+  ## Examples
+
+      iex> promote_to_admin(user)
+      {:ok, %RoleAssignment{}}
+
+      iex> promote_to_admin(user, assigned_by_user)
+      {:ok, %RoleAssignment{}}
+  """
+  defdelegate promote_to_admin(user, assigned_by \\ nil), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Demotes an admin user to regular user role.
+
+  ## Examples
+
+      iex> demote_to_user(user)
+      {:ok, %RoleAssignment{}}
+  """
+  defdelegate demote_to_user(user), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Gets role statistics for dashboard display.
+
+  ## Examples
+
+      iex> get_role_stats()
+      %{
+        total_users: 10,
+        owner_count: 1,
+        admin_count: 2,
+        user_count: 7
+      }
+  """
+  defdelegate get_role_stats(), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Lists all roles.
+
+  ## Examples
+
+      iex> list_roles()
+      [%Role{}, %Role{}, %Role{}]
+  """
+  defdelegate list_roles(), to: PhoenixKit.Users.Roles
+
+  @doc """
+  Updates a user's profile information.
+
+  ## Examples
+
+      iex> update_user_profile(user, %{first_name: "John", last_name: "Doe"})
+      {:ok, %User{}}
+
+      iex> update_user_profile(user, %{first_name: ""})
+      {:error, %Ecto.Changeset{}}
+  """
+  def update_user_profile(%User{} = user, attrs) do
+    user
+    |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Updates a user's active status.
+
+  ## Examples
+
+      iex> update_user_status(user, %{is_active: false})
+      {:ok, %User{}}
+
+      iex> update_user_status(owner_user, %{is_active: false})
+      {:error, %Ecto.Changeset{}}
+  """
+  def update_user_status(%User{} = user, attrs) do
+    user
+    |> User.status_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Gets a user by ID with preloaded roles.
+
+  ## Examples
+
+      iex> get_user_with_roles(123)
+      %User{roles: [%Role{}, %Role{}]}
+
+      iex> get_user_with_roles(999)
+      nil
+  """
+  def get_user_with_roles(id) when is_integer(id) do
+    from(u in User, where: u.id == ^id, preload: [:roles])
+    |> Repo.one()
+  end
+
+  @doc """
+  Lists users with pagination and optional role filtering.
+
+  ## Examples
+
+      iex> list_users_paginated(page: 1, page_size: 10)
+      %{users: [%User{}], total_count: 50, total_pages: 5}
+
+      iex> list_users_paginated(page: 1, page_size: 10, role: "Admin")
+      %{users: [%User{}], total_count: 3, total_pages: 1}
+  """
+  def list_users_paginated(opts \\ []) do
+    page = Keyword.get(opts, :page, 1)
+    page_size = Keyword.get(opts, :page_size, 10)
+    role_filter = Keyword.get(opts, :role)
+    search_query = Keyword.get(opts, :search, "")
+
+    base_query = from(u in User, order_by: [desc: u.inserted_at])
+
+    query =
+      base_query
+      |> maybe_filter_by_role(role_filter)
+      |> maybe_filter_by_search(search_query)
+
+    total_count = PhoenixKit.RepoHelper.aggregate(query, :count, :id)
+    total_pages = div(total_count + page_size - 1, page_size)
+
+    users =
+      query
+      |> limit(^page_size)
+      |> offset(^((page - 1) * page_size))
+      |> preload([:roles])
+      |> Repo.all()
+
+    %{
+      users: users,
+      total_count: total_count,
+      total_pages: total_pages,
+      current_page: page
+    }
+  end
+
+  defp maybe_filter_by_role(query, nil), do: query
+  defp maybe_filter_by_role(query, "all"), do: query
+
+  defp maybe_filter_by_role(query, role_name) when is_binary(role_name) do
+    from [u] in query,
+      join: assignment in assoc(u, :role_assignments),
+      join: role in assoc(assignment, :role),
+      where: role.name == ^role_name,
+      where: assignment.is_active == true,
+      distinct: u.id
+  end
+
+  defp maybe_filter_by_search(query, ""), do: query
+
+  defp maybe_filter_by_search(query, search_term) when is_binary(search_term) do
+    search_pattern = "%#{search_term}%"
+
+    from [u] in query,
+      where:
+        ilike(u.email, ^search_pattern) or
+          ilike(u.first_name, ^search_pattern) or
+          ilike(u.last_name, ^search_pattern)
   end
 end

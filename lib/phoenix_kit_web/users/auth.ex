@@ -169,6 +169,12 @@ defmodule PhoenixKitWeb.Users.Auth do
 
     * `:phoenix_kit_ensure_authenticated_scope` - Authenticates the user via scope system,
       assigns both phoenix_kit_current_user and phoenix_kit_current_scope.
+
+    * `:phoenix_kit_ensure_owner` - Ensures the user has owner role,
+      and redirects to the home page if not.
+
+    * `:phoenix_kit_ensure_admin` - Ensures the user has admin or owner role,
+      and redirects to the home page if not.
       Redirects to login page if there's no logged user.
 
     * `:phoenix_kit_redirect_if_user_is_authenticated` - Authenticates the user from the session.
@@ -259,6 +265,38 @@ defmodule PhoenixKitWeb.Users.Auth do
       {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
     else
       {:cont, socket}
+    end
+  end
+
+  def on_mount(:phoenix_kit_ensure_owner, _params, session, socket) do
+    socket = mount_phoenix_kit_current_scope(socket, session)
+    scope = socket.assigns.phoenix_kit_current_scope
+
+    if Scope.owner?(scope) do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> Phoenix.LiveView.put_flash(:error, "You must be an owner to access this page.")
+        |> Phoenix.LiveView.redirect(to: "/")
+
+      {:halt, socket}
+    end
+  end
+
+  def on_mount(:phoenix_kit_ensure_admin, _params, session, socket) do
+    socket = mount_phoenix_kit_current_scope(socket, session)
+    scope = socket.assigns.phoenix_kit_current_scope
+
+    if Scope.admin?(scope) do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> Phoenix.LiveView.put_flash(:error, "You must be an admin to access this page.")
+        |> Phoenix.LiveView.redirect(to: "/")
+
+      {:halt, socket}
     end
   end
 
@@ -359,6 +397,83 @@ defmodule PhoenixKitWeb.Users.Auth do
         conn
         |> fetch_phoenix_kit_current_scope([])
         |> require_authenticated_scope([])
+    end
+  end
+
+  @doc """
+  Used for routes that require the user to be an owner.
+
+  If you want to enforce the owner requirement without
+  redirecting to the login page, consider using
+  `:phoenix_kit_require_authenticated_scope` instead.
+  """
+  def require_owner(conn, _opts) do
+    case conn.assigns[:phoenix_kit_current_scope] do
+      %Scope{} = scope ->
+        if Scope.owner?(scope) do
+          conn
+        else
+          conn
+          |> put_flash(:error, "You must be an owner to access this page.")
+          |> redirect(to: "/")
+          |> halt()
+        end
+
+      _ ->
+        # Scope not found, try to create it from current_user
+        conn
+        |> fetch_phoenix_kit_current_scope([])
+        |> require_owner([])
+    end
+  end
+
+  @doc """
+  Used for routes that require the user to be an admin or owner.
+
+  If you want to enforce the admin requirement without
+  redirecting to the login page, consider using
+  `:phoenix_kit_require_authenticated_scope` instead.
+  """
+  def require_admin(conn, _opts) do
+    case conn.assigns[:phoenix_kit_current_scope] do
+      %Scope{} = scope ->
+        if Scope.admin?(scope) do
+          conn
+        else
+          conn
+          |> put_flash(:error, "You must be an admin to access this page.")
+          |> redirect(to: "/")
+          |> halt()
+        end
+
+      _ ->
+        # Scope not found, try to create it from current_user
+        conn
+        |> fetch_phoenix_kit_current_scope([])
+        |> require_admin([])
+    end
+  end
+
+  @doc """
+  Used for routes that require the user to have a specific role.
+  """
+  def require_role(conn, role_name) when is_binary(role_name) do
+    case conn.assigns[:phoenix_kit_current_scope] do
+      %Scope{} = scope ->
+        if Scope.has_role?(scope, role_name) do
+          conn
+        else
+          conn
+          |> put_flash(:error, "You must have the #{role_name} role to access this page.")
+          |> redirect(to: "/")
+          |> halt()
+        end
+
+      _ ->
+        # Scope not found, try to create it from current_user
+        conn
+        |> fetch_phoenix_kit_current_scope([])
+        |> require_role(role_name)
     end
   end
 

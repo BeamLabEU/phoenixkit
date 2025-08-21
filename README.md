@@ -17,6 +17,7 @@ PhoenixKit is a production-ready authentication library for Phoenix applications
 - 🚀 **Zero-Config Setup** - Automatic repository detection and configuration
 - 🗄️ **Professional Database Management** - Versioned migrations with Oban-style architecture
 - 🔐 **Complete Authentication** - Registration, login, logout, email confirmation, password reset
+- 👥 **Role-Based Access Control** - Built-in Owner/Admin/User roles with management interface
 - 🎯 **Library-First Design** - No OTP application, integrates into any Phoenix app
 - 📦 **Production Ready** - Comprehensive error handling and logging
 - 🛠️ **Developer Friendly** - Single command installation with automatic setup
@@ -319,6 +320,7 @@ If you're upgrading your Phoenix app from 1.7 to 1.8, PhoenixKit will automatica
 
 PhoenixKit provides these LiveView routes under your chosen prefix:
 
+### Public Authentication Routes
 - `GET /phoenix_kit/users/register` - User registration form (LiveView)
 - `GET /phoenix_kit/users/log-in` - Login form (LiveView)
 - `POST /phoenix_kit/users/log-in` - User login
@@ -328,10 +330,16 @@ PhoenixKit provides these LiveView routes under your chosen prefix:
 - `GET /phoenix_kit/users/magic-link/:token` - Magic link verification
 - `GET /phoenix_kit/users/reset-password` - Password reset request (LiveView)
 - `GET /phoenix_kit/users/reset-password/:token` - Password reset form (LiveView)
-- `GET /phoenix_kit/users/settings` - User settings (LiveView, requires login)
-- `GET /phoenix_kit/users/settings/confirm_email/:token` - Email confirmation
 - `GET /phoenix_kit/users/confirm/:token` - Account confirmation (LiveView)
 - `GET /phoenix_kit/users/confirm` - Resend confirmation (LiveView)
+
+### Authenticated User Routes
+- `GET /phoenix_kit/users/settings` - User settings (LiveView, requires login)
+- `GET /phoenix_kit/users/settings/confirm_email/:token` - Email confirmation
+
+### Admin Routes (Owner/Admin access required)
+- `GET /phoenix_kit/admin/dashboard` - Admin dashboard with system statistics
+- `GET /phoenix_kit/admin/users` - User management interface with role controls
 
 ## Database Schema
 
@@ -342,6 +350,9 @@ PhoenixKit creates these tables:
 - `id` - Primary key (bigserial)
 - `email` - Email address (citext, unique)
 - `hashed_password` - Bcrypt hashed password
+- `first_name` - User's first name (optional)
+- `last_name` - User's last name (optional)
+- `is_active` - User status (boolean, default: true)
 - `confirmed_at` - Email confirmation timestamp
 - `inserted_at`, `updated_at` - Timestamps
 
@@ -354,11 +365,29 @@ PhoenixKit creates these tables:
 - `sent_to` - Email address for email tokens
 - `inserted_at` - Creation timestamp
 
+### `phoenix_kit_user_roles` (Roles)
+
+- `id` - Primary key (bigserial)
+- `name` - Role name (text, unique)
+- `description` - Role description (text)
+- `is_system_role` - System role flag (boolean)
+- `inserted_at` - Creation timestamp
+
+### `phoenix_kit_user_role_assignments` (Role Assignments)
+
+- `id` - Primary key (bigserial)
+- `user_id` - Foreign key to phoenix_kit_users
+- `role_id` - Foreign key to phoenix_kit_user_roles
+- `assigned_by` - User who assigned the role (optional)
+- `assigned_at` - Assignment timestamp
+- `is_active` - Assignment status (boolean)
+- `inserted_at` - Creation timestamp
+
 ### `phoenix_kit_schema_versions` (Migration Tracking)
 
 - Professional versioning system tracks schema changes
 - Enables safe upgrades and rollbacks
-- Current version: V02
+- Current version: V01
 
 ## Requirements & Configuration
 
@@ -717,6 +746,274 @@ end
 ```
 
 This gives you a complete authentication system with structured access to user data in your layouts and LiveViews.
+
+## Role-Based Access Control (RBAC)
+
+PhoenixKit includes a comprehensive role-based access control system with three built-in system roles and a flexible API for role management.
+
+### System Roles
+
+PhoenixKit provides three predefined system roles:
+
+- **Owner** - System owner with full access (automatically assigned to first user)
+- **Admin** - Administrator with elevated privileges 
+- **User** - Standard user with basic access (default for new users)
+
+### Automatic Role Assignment
+
+The first user registered in the system is automatically assigned the **Owner** role via a PostgreSQL database trigger. All subsequent users receive the **User** role by default.
+
+### Role Management API
+
+#### Check User Roles
+
+```elixir
+# Check if user has a specific role
+user = PhoenixKit.Users.Auth.get_user_by_email("user@example.com")
+PhoenixKit.Users.Roles.user_has_role?(user, "Admin")
+# => true | false
+
+# Get all user roles
+PhoenixKit.Users.Roles.get_user_roles(user)
+# => ["Admin", "User"]
+
+# Check specific role types
+PhoenixKit.Users.Auth.User.is_owner?(user)    # => true | false
+PhoenixKit.Users.Auth.User.is_admin?(user)    # => true | false (includes Owner)
+```
+
+#### Assign and Remove Roles
+
+```elixir
+# Promote user to admin
+{:ok, assignment} = PhoenixKit.Users.Roles.promote_to_admin(user)
+
+# Remove admin role (demote to regular user)
+{:ok, assignment} = PhoenixKit.Users.Roles.demote_to_user(user)
+
+# Assign specific role
+{:ok, assignment} = PhoenixKit.Users.Roles.assign_role(user, "Admin", assigned_by_user)
+
+# Remove specific role
+{:ok, assignment} = PhoenixKit.Users.Roles.remove_role(user, "Admin")
+```
+
+#### User Management
+
+```elixir
+# Get users with specific role
+admin_users = PhoenixKit.Users.Roles.users_with_role("Admin")
+
+# Count users with role
+admin_count = PhoenixKit.Users.Roles.count_users_with_role("Admin")
+
+# Get role statistics for dashboard
+stats = PhoenixKit.Users.Roles.get_role_stats()
+# => %{total_users: 10, owner_count: 1, admin_count: 2, user_count: 7}
+
+# Update user profile information
+{:ok, user} = PhoenixKit.Users.Auth.update_user_profile(user, %{
+  first_name: "John",
+  last_name: "Doe"
+})
+
+# Update user active status
+{:ok, user} = PhoenixKit.Users.Auth.update_user_status(user, %{is_active: false})
+```
+
+### Role-Based Authentication Hooks
+
+PhoenixKit provides on_mount callbacks for role-based access control:
+
+```elixir
+# lib/your_app_web/router.ex
+defmodule YourAppWeb.Router do
+  use YourAppWeb, :router
+  import PhoenixKitWeb.Integration
+
+  # Add PhoenixKit authentication routes (includes admin routes)
+  phoenix_kit_routes()
+
+  scope "/", YourAppWeb do
+    pipe_through :browser
+
+    # Admin-only routes
+    live_session :admin_only,
+      layout: {YourAppWeb.Layouts, :admin},
+      on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_admin}] do
+      live "/admin", AdminDashboardLive
+      live "/admin/reports", AdminReportsLive
+    end
+
+    # Owner-only routes
+    live_session :owner_only,
+      layout: {YourAppWeb.Layouts, :admin},
+      on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_owner}] do
+      live "/system", SystemManagementLive
+      live "/system/config", SystemConfigLive
+    end
+  end
+end
+```
+
+### Available Role-Based Callbacks
+
+#### Admin Access Control
+```elixir
+# Require admin or owner access
+on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_admin}]
+
+# Require owner access only
+on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_owner}]
+```
+
+#### Controller Plugs
+```elixir
+# In your controllers
+defmodule YourAppWeb.AdminController do
+  use YourAppWeb, :controller
+  import PhoenixKitWeb.Users.Auth
+
+  # Require admin access for all actions
+  plug :fetch_phoenix_kit_current_scope
+  plug :require_admin
+
+  # Or require owner access
+  plug :require_owner
+
+  # Or require specific role
+  plug :require_role, "Manager"
+end
+```
+
+### Role-Based Templates
+
+Use roles in your templates with the Scope system:
+
+```heex
+<!-- Check for admin access -->
+<%= if PhoenixKit.Users.Auth.Scope.is_admin?(@phoenix_kit_current_scope) do %>
+  <.link navigate="/phoenix_kit/admin/dashboard" class="btn btn-primary">
+    Admin Dashboard
+  </.link>
+<% end %>
+
+<!-- Check for owner access -->
+<%= if PhoenixKit.Users.Auth.Scope.is_owner?(@phoenix_kit_current_scope) do %>
+  <.link navigate="/system/config" class="btn btn-warning">
+    System Configuration
+  </.link>
+<% end %>
+
+<!-- Check for specific role -->
+<%= if PhoenixKit.Users.Auth.Scope.has_role?(@phoenix_kit_current_scope, "Manager") do %>
+  <.link navigate="/reports" class="btn btn-info">
+    View Reports
+  </.link>
+<% end %>
+
+<!-- Display user's full name -->
+<%= if full_name = PhoenixKit.Users.Auth.Scope.user_full_name(@phoenix_kit_current_scope) do %>
+  <span class="font-medium"><%= full_name %></span>
+<% else %>
+  <span class="font-medium">
+    <%= PhoenixKit.Users.Auth.Scope.user_email(@phoenix_kit_current_scope) %>
+  </span>
+<% end %>
+
+<!-- Show all user roles -->
+<div class="flex gap-2">
+  <%= for role <- PhoenixKit.Users.Auth.Scope.user_roles(@phoenix_kit_current_scope) do %>
+    <span class="badge badge-primary"><%= role %></span>
+  <% end %>
+</div>
+```
+
+### User Management Interface
+
+PhoenixKit provides built-in admin interfaces accessible to Owner and Admin users:
+
+#### Dashboard (`/phoenix_kit/admin/dashboard`)
+- System statistics (total users, role distribution)
+- Visual charts showing role breakdown
+- Quick navigation to user management
+- System information display
+
+#### User Management (`/phoenix_kit/admin/users`)
+- Search and filter users by email/name and role
+- Paginated user listings
+- Role promotion/demotion controls
+- User activation/deactivation
+- Protected operations (Owners cannot be demoted/deactivated)
+- Bulk user statistics
+
+### Security Features
+
+#### Owner Protection
+- Owner users cannot be deactivated or demoted
+- Only one Owner exists per system (assigned to first user)
+- Owner automatically has all admin privileges
+
+#### Self-Protection
+- Users cannot modify their own roles or status
+- Prevents accidental account lockouts
+- Admin interface clearly marks self-actions
+
+#### Audit Trail
+- All role assignments track who assigned them (`assigned_by`)
+- Assignment timestamps for compliance
+- Role assignment history maintained
+
+### Creating Custom Roles
+
+While PhoenixKit comes with three system roles, you can create custom roles:
+
+```elixir
+# Create a custom role
+{:ok, role} = PhoenixKit.Users.Roles.create_role(%{
+  name: "Manager",
+  description: "Department manager with team oversight"
+})
+
+# Assign custom role to user
+{:ok, assignment} = PhoenixKit.Users.Roles.assign_role(user, "Manager")
+
+# Use in templates
+<%= if PhoenixKit.Users.Auth.Scope.has_role?(@phoenix_kit_current_scope, "Manager") do %>
+  <p>Manager-specific content</p>
+<% end %>
+```
+
+### Role System Integration
+
+The role system integrates seamlessly with PhoenixKit's Scope system:
+
+```elixir
+# In your LiveView
+defmodule YourAppWeb.DashboardLive do
+  use YourAppWeb, :live_view
+
+  # Admin access required
+  on_mount {PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_admin}
+
+  def mount(_params, _session, socket) do
+    scope = socket.assigns.phoenix_kit_current_scope
+
+    # Access role information
+    is_owner = PhoenixKit.Users.Auth.Scope.is_owner?(scope)
+    user_roles = PhoenixKit.Users.Auth.Scope.user_roles(scope)
+    full_name = PhoenixKit.Users.Auth.Scope.user_full_name(scope)
+
+    socket = 
+      socket
+      |> assign(:is_owner, is_owner)
+      |> assign(:user_roles, user_roles)
+      |> assign(:user_full_name, full_name)
+
+    {:ok, socket}
+  end
+end
+```
 
 ## Architecture
 

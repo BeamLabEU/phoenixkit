@@ -27,6 +27,8 @@ This is **PhoenixKit** - a professional authentication library for Phoenix appli
 - Library-first architecture (no OTP application)
 - Zero-configuration setup with auto-detection
 - Complete authentication system with Magic Links
+- Role-based access control (Owner/Admin/User)
+- Built-in admin dashboard and user management
 - Theme system with light/dark mode support
 - Professional versioned migration system
 - Layout integration with parent applications
@@ -85,6 +87,16 @@ This is **PhoenixKit** - a professional authentication library for Phoenix appli
 - Use `phoenix_kit.update` for upgrading existing installations
 - Install will redirect to update if PhoenixKit is already installed
 
+### Role-Based Access Control System
+
+- **Three System Roles** - Owner, Admin, User with automatic assignment
+- **PostgreSQL Trigger** - First user automatically becomes Owner
+- **Admin Dashboard** - Built-in dashboard at `/phoenix_kit/admin/dashboard` for system statistics
+- **User Management** - Complete user management interface at `/phoenix_kit/admin/users`
+- **Role API** - Comprehensive role management with `PhoenixKit.Users.Roles`
+- **Security Features** - Owner protection, audit trail, self-modification prevention
+- **Scope Integration** - Role checks via `PhoenixKit.Users.Auth.Scope`
+
 ### Testing
 
 - `mix test` - Run all tests (12 tests, no database required)
@@ -127,7 +139,7 @@ This ensures consistent code formatting across the project.
 
 **Examples:**
 
-- ✅ `Add phoenix_kit_ai table for configuration management`
+- ✅ `Add role system for user authorization management`
 - ✅ `Update rollback logic to handle single version migrations`
 - ✅ `Fix merge conflict markers in installation file`
 - ❌ `Enhanced migration system` (no action verb)
@@ -264,7 +276,7 @@ Release includes: [brief description of main changes]"
 
 - **Current Version**: 1.0.0 (in mix.exs)
 - **Version Strategy**: Semantic versioning (MAJOR.MINOR.PATCH)
-- **Migration Version**: V02 (includes basic authentication and AI settings)
+- **Migration Version**: V01 (includes basic authentication with role system)
 - **Database Versioning**: Professional system with version tracking in table comments
 
 ### 🚀 Pre-Release Checklist
@@ -301,16 +313,24 @@ Release includes: [brief description of main changes]"
 ### Authentication Structure
 
 - **PhoenixKit.Users.Auth** - Main authentication context with public interface
-- **PhoenixKit.Users.Auth.User** - User schema with validations and authentication
+- **PhoenixKit.Users.Auth.User** - User schema with validations, authentication, and role helpers
 - **PhoenixKit.Users.Auth.UserToken** - Token management for email confirmation and password reset
 - **PhoenixKit.Users.MagicLink** - Magic link authentication system
-- **PhoenixKit.Users.Auth.Scope** - Authentication scope management
+- **PhoenixKit.Users.Auth.Scope** - Authentication scope management with role integration
+
+### Role System Architecture
+
+- **PhoenixKit.Users.Role** - Role schema with system role protection
+- **PhoenixKit.Users.RoleAssignment** - Many-to-many role assignments with audit trail
+- **PhoenixKit.Users.Roles** - Role management API and business logic
+- **PhoenixKitWeb.Live.DashboardLive** - Admin dashboard with system statistics
+- **PhoenixKitWeb.Live.UsersLive** - User management interface with role controls
+- **PostgreSQL Trigger** - Automatic Owner role assignment to first user
 
 ### Migration Architecture
 
 - **PhoenixKit.Migrations.Postgres** - PostgreSQL-specific migrator with Oban-style versioning
-- **PhoenixKit.Migrations.Postgres.V01** - Version 1: Basic authentication tables
-- **PhoenixKit.Migrations.Postgres.V02** - Version 2: AI settings and extensions
+- **PhoenixKit.Migrations.Postgres.V01** - Version 1: Basic authentication tables with role system
 - **Mix.Tasks.PhoenixKit.Install** - Igniter-based installation for new projects
 - **Mix.Tasks.PhoenixKit.Update** - Versioned updates for existing installations
 - **Mix.Tasks.PhoenixKit.Gen.Migration** - Custom migration generator
@@ -326,7 +346,9 @@ Release includes: [brief description of main changes]"
 
 - **PostgreSQL** - Primary database with Ecto integration
 - **Repository Pattern** - Auto-detection or explicit configuration
-- **Migration Support** - Included migration for examples table
+- **Migration Support** - V01 migration with authentication and role tables
+- **Role System Tables** - phoenix_kit_user_roles, phoenix_kit_user_role_assignments
+- **Database Triggers** - Automatic Owner role assignment to first user
 - **Test Database** - Separate test database with sandbox
 
 ### Professional Features
@@ -386,18 +408,31 @@ end
 
 - `lib/phoenix_kit.ex` - Main API module and public interface
 - `lib/phoenix_kit/users/auth.ex` - Authentication context (main business logic)
-- `lib/phoenix_kit/users/auth/user.ex` - User schema with authentication
+- `lib/phoenix_kit/users/auth/user.ex` - User schema with authentication and role helpers
 - `lib/phoenix_kit/users/auth/user_token.ex` - Token management system
 - `lib/phoenix_kit/users/magic_link.ex` - Magic link authentication
 - `lib/phoenix_kit/theme_config.ex` - Theme system configuration
 
+### Role System Files
+
+- `lib/phoenix_kit/users/role.ex` - Role schema with validation and system role protection
+- `lib/phoenix_kit/users/role_assignment.ex` - Role assignment schema with audit trail
+- `lib/phoenix_kit/users/roles.ex` - Role management API and business logic
+
 ### Web Integration Files
 
-- `lib/phoenix_kit_web/integration.ex` - Router integration macro
-- `lib/phoenix_kit_web/users/auth.ex` - Web authentication plugs and helpers
+- `lib/phoenix_kit_web/integration.ex` - Router integration macro with admin routes
+- `lib/phoenix_kit_web/users/auth.ex` - Web authentication plugs and role-based helpers
 - `lib/phoenix_kit_web/users/login_live.ex` - Login LiveView component
 - `lib/phoenix_kit_web/users/registration_live.ex` - Registration LiveView component
 - `lib/phoenix_kit_web/users/settings_live.ex` - User settings LiveView component
+
+### Admin Interface Files
+
+- `lib/phoenix_kit_web/live/dashboard_live.ex` - Admin dashboard LiveView
+- `lib/phoenix_kit_web/live/dashboard_live.html.heex` - Dashboard template
+- `lib/phoenix_kit_web/live/users_live.ex` - User management LiveView
+- `lib/phoenix_kit_web/live/users_live.html.heex` - User management template
 - `lib/phoenix_kit_web/users/magic_link_live.ex` - Magic link request page
 - `lib/phoenix_kit_web/users/magic_link_controller.ex` - Magic link verification
 - `lib/phoenix_kit_web/components/core_components.ex` - UI components with theme support
@@ -410,8 +445,7 @@ end
 ### Database Files
 
 - `lib/phoenix_kit/migrations/postgres.ex` - Main migration controller
-- `lib/phoenix_kit/migrations/postgres/v01.ex` - V01: Basic auth tables
-- `lib/phoenix_kit/migrations/postgres/v02.ex` - V02: AI settings table
+- `lib/phoenix_kit/migrations/postgres/v01.ex` - V01: Basic auth tables with role system
 - `config/config.exs` - Library configuration
 
 ### Testing Files

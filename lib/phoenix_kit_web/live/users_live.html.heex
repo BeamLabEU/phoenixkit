@@ -1,0 +1,321 @@
+<div class="container flex-col mx-auto px-4 py-6">
+  <!-- Header Section -->
+  <header class="w-full relative mb-6">
+    <!-- Back Button (Left aligned) -->
+    <.link
+      navigate="/phoenix_kit/admin/dashboard"
+      class="btn btn-outline btn-primary btn-sm absolute left-0 top-0 -mb-12"
+    >
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        >
+        </path>
+      </svg>
+      Back to Dashboard
+    </.link>
+    
+<!-- Title Section -->
+    <div class="text-center">
+      <h1 class="text-4xl font-bold text-base-content mb-3">User Management</h1>
+      <p class="text-lg text-base-content">Manage user accounts and roles</p>
+    </div>
+  </header>
+  
+<!-- Controls -->
+  <div class="bg-base-200 rounded-lg p-6 mb-6">
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Search -->
+      <div class="flex-1">
+        <label class="label">
+          <span class="label-text">Search by email or name</span>
+        </label>
+        <form phx-submit="search" phx-change="search">
+          <input
+            type="text"
+            name="search"
+            value={@search_query}
+            placeholder="Enter email or name to search..."
+            class="input input-bordered w-full"
+          />
+        </form>
+      </div>
+      
+<!-- Role Filter -->
+      <div class="w-full md:w-48">
+        <label class="label">
+          <span class="label-text">Filter by role</span>
+        </label>
+        <form phx-change="filter_by_role">
+          <select class="select select-bordered w-full" name="role" value={@filter_role}>
+            <option value="all">All Users</option>
+            <option value="Owner">Owners Only</option>
+            <option value="Admin">Admins Only</option>
+            <option value="User">Regular Users</option>
+          </select>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+<!-- Users Table -->
+  <div class="bg-base-100 rounded-lg shadow-md overflow-hidden">
+    <%= if length(@users) > 0 do %>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Registered</th>
+              <th>Last Confirmed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for user <- @users do %>
+              <tr>
+                <td>
+                  <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium">{user.email}</span>
+                      <%= if user.id == @phoenix_kit_current_user.id do %>
+                        <span class="badge badge-info badge-xs">you</span>
+                      <% end %>
+                    </div>
+                    <%= if user.first_name || user.last_name do %>
+                      <div class="text-sm text-base-content/70">
+                        {PhoenixKit.Users.Auth.User.full_name(user)}
+                      </div>
+                    <% end %>
+                  </div>
+                </td>
+                <td>
+                  <span class={"badge #{role_badge_class(user_primary_role(user))}"}>
+                    {user_primary_role(user)}
+                  </span>
+                </td>
+                <td>
+                  <div class="flex flex-col gap-1">
+                    <%= if user.confirmed_at do %>
+                      <span class="badge badge-success badge-sm">Confirmed</span>
+                    <% else %>
+                      <span class="badge badge-warning badge-sm">Pending</span>
+                    <% end %>
+                    <%= if user.is_active do %>
+                      <span class="badge badge-outline badge-xs">Active</span>
+                    <% else %>
+                      <span class="badge badge-error badge-xs">Inactive</span>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="text-sm">
+                  {format_datetime(user.inserted_at)}
+                </td>
+                <td class="text-sm">
+                  {format_datetime(user.confirmed_at)}
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    <!-- Role Management -->
+                    <%= if user_primary_role(user) == "User" do %>
+                      <button
+                        class="btn btn-xs btn-outline btn-primary"
+                        phx-click="promote_to_admin"
+                        phx-value-user_id={user.id}
+                        data-confirm="Are you sure you want to promote this user to admin?"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-3 w-3 mr-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 15l7-7 7 7"
+                          />
+                        </svg>
+                        Promote
+                      </button>
+                    <% else %>
+                      <%= if user.id != @phoenix_kit_current_user.id && user_primary_role(user) != "Owner" do %>
+                        <button
+                          class="btn btn-xs btn-outline btn-error"
+                          phx-click="demote_to_user"
+                          phx-value-user_id={user.id}
+                          data-confirm="Are you sure you want to demote this admin to regular user?"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-3 w-3 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                          Demote
+                        </button>
+                      <% end %>
+                    <% end %>
+                    
+<!-- Status Toggle -->
+                    <%= if user.id != @phoenix_kit_current_user.id && user_primary_role(user) != "Owner" do %>
+                      <button
+                        class={"btn btn-xs btn-outline #{if user.is_active, do: "btn-warning", else: "btn-success"}"}
+                        phx-click="toggle_user_status"
+                        phx-value-user_id={user.id}
+                        data-confirm={"Are you sure you want to #{if user.is_active, do: "deactivate", else: "activate"} this user?"}
+                      >
+                        <%= if user.is_active do %>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-3 w-3 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"
+                            />
+                          </svg>
+                          Deactivate
+                        <% else %>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-3 w-3 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          Activate
+                        <% end %>
+                      </button>
+                    <% else %>
+                      <span class="text-xs text-base-content/50">
+                        {if user.id == @phoenix_kit_current_user.id, do: "Self", else: "Protected"}
+                      </span>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      
+<!-- Pagination -->
+      <%= if @total_pages > 1 do %>
+        <div class="flex justify-center p-4 border-t border-base-300">
+          <div class="join">
+            <%= for page <- 1..@total_pages do %>
+              <button
+                class={"join-item btn btn-sm #{if page == @page, do: "btn-active", else: ""}"}
+                phx-click="change_page"
+                phx-value-page={page}
+              >
+                {page}
+              </button>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <!-- Empty state -->
+      <div class="text-center py-12">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-16 w-16 mx-auto text-base-content/40 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+          />
+        </svg>
+        <h3 class="text-lg font-medium text-base-content mb-2">
+          No users found
+        </h3>
+        <p class="text-base-content/70 mb-4">
+          <%= if @search_query != "" or @filter_role != "all" do %>
+            Try adjusting your search or filter criteria.
+          <% else %>
+            No users are registered yet.
+          <% end %>
+        </p>
+        <%= if @search_query != "" or @filter_role != "all" do %>
+          <button
+            class="btn btn-outline btn-sm"
+            phx-click="search"
+            phx-value-search=""
+            onclick="document.querySelector('input[name=&quot;search&quot;]').value = ''"
+          >
+            Clear Filters
+          </button>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+<!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+    <div class="bg-base-200 rounded-lg p-4">
+      <h4 class="text-sm font-medium text-base-content mb-1">Total Users</h4>
+      <p class="text-2xl font-bold text-base-content">{@total_users}</p>
+    </div>
+    <div class="bg-base-200 rounded-lg p-4">
+      <h4 class="text-sm font-medium text-base-content mb-1">Administrators</h4>
+      <p class="text-2xl font-bold text-error">{@total_admins}</p>
+    </div>
+    <div class="bg-base-200 rounded-lg p-4">
+      <h4 class="text-sm font-medium text-base-content mb-1">Regular Users</h4>
+      <p class="text-2xl font-bold text-success">{@total_regular_users}</p>
+    </div>
+  </div>
+  
+<!-- Quick Actions -->
+  <div class="text-center mt-6">
+    <.link
+      navigate="/phoenix_kit/users/registration"
+      class="btn btn-primary"
+    >
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        >
+        </path>
+      </svg>
+      Add New User
+    </.link>
+  </div>
+</div>
