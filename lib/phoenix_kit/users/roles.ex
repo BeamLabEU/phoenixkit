@@ -79,9 +79,18 @@ defmodule PhoenixKit.Users.Roles do
           is_active: true
         }
 
+        # Use upsert with ON CONFLICT DO NOTHING for idempotency
+        # This prevents duplicate role assignment errors during concurrent operations
         %RoleAssignment{}
         |> RoleAssignment.changeset(attrs)
-        |> repo.insert()
+        |> repo.insert(
+          on_conflict: :nothing,
+          conflict_target: [:user_id, :role_id]
+        )
+        |> case do
+          {:ok, assignment} -> {:ok, assignment}
+          {:error, changeset} -> {:error, changeset}
+        end
     end
   end
 

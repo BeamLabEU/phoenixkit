@@ -77,7 +77,7 @@ defmodule PhoenixKit.Migration do
   end
   ```
 
-  The migration will create the "auth" schema and all tables, functions and triggers within
+  The migration will create the "auth" schema and all tables within
   that schema. With the database migrated you'll then specify the prefix in your configuration:
 
   ```elixir

@@ -121,10 +121,12 @@ defmodule PhoenixKit.Users.Auth do
   ## User registration
 
   @doc """
-  Registers a user with safe Owner assignment.
+  Registers a user with automatic role assignment.
 
-  This function prevents race conditions by safely assigning Owner role
-  to the first user using database transactions.
+  Role assignment is handled by Elixir application logic:
+  - First user receives Owner role
+  - Subsequent users receive User role
+  - Uses database transactions to prevent race conditions
 
   ## Examples
 

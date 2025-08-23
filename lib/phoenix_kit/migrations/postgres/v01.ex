@@ -122,108 +122,12 @@ defmodule PhoenixKit.Migrations.Postgres.V01 do
     ON CONFLICT (name) DO NOTHING
     """
 
-    # Create function and trigger for auto-assigning Owner role to first user
-    execute """
-    CREATE OR REPLACE FUNCTION assign_owner_to_first_user()
-    RETURNS TRIGGER AS $$
-    DECLARE
-      user_count INTEGER;
-      owner_role_id BIGINT;
-      user_role_id BIGINT;
-      target_role_id BIGINT;
-      target_role_name TEXT;
-    BEGIN
-      -- Get current user count (excluding the just-inserted user)
-      SELECT COUNT(*) INTO user_count 
-      FROM #{inspect(prefix)}.phoenix_kit_users 
-      WHERE id != NEW.id;
-      
-      -- Get role IDs with error handling
-      SELECT id INTO owner_role_id 
-      FROM #{inspect(prefix)}.phoenix_kit_user_roles 
-      WHERE name = 'Owner' AND is_system_role = true;
-      
-      SELECT id INTO user_role_id 
-      FROM #{inspect(prefix)}.phoenix_kit_user_roles 
-      WHERE name = 'User' AND is_system_role = true;
-      
-      -- Ensure roles exist
-      IF owner_role_id IS NULL THEN
-        RAISE EXCEPTION 'PhoenixKit: Owner role not found in phoenix_kit_user_roles table';
-      END IF;
-      
-      IF user_role_id IS NULL THEN
-        RAISE EXCEPTION 'PhoenixKit: User role not found in phoenix_kit_user_roles table';
-      END IF;
-      
-      -- Determine role assignment based on user count
-      IF user_count = 0 THEN
-        -- This is the first user - assign Owner role
-        target_role_id := owner_role_id;
-        target_role_name := 'Owner';
-        
-        -- Log the Owner assignment
-        RAISE NOTICE 'PhoenixKit: Assigning Owner role to first user (ID: %, Email: %)', 
-          NEW.id, NEW.email;
-      ELSE
-        -- This is not the first user - assign User role
-        target_role_id := user_role_id;
-        target_role_name := 'User';
-        
-        -- Log the User assignment
-        RAISE NOTICE 'PhoenixKit: Assigning User role to user (ID: %, Email: %)', 
-          NEW.id, NEW.email;
-      END IF;
-      
-      -- Perform the role assignment with error handling
-      BEGIN
-        INSERT INTO #{inspect(prefix)}.phoenix_kit_user_role_assignments 
-          (user_id, role_id, assigned_at, is_active, inserted_at)
-        VALUES 
-          (NEW.id, target_role_id, NOW(), true, NOW())
-        ON CONFLICT (user_id, role_id) DO NOTHING;
-        
-        -- Log successful assignment
-        RAISE NOTICE 'PhoenixKit: Successfully assigned % role to user ID %', 
-          target_role_name, NEW.id;
-          
-      EXCEPTION
-        WHEN OTHERS THEN
-          -- Log the error but don't fail the user creation
-          RAISE WARNING 'PhoenixKit: Failed to assign % role to user ID %: % (SQLSTATE: %)', 
-            target_role_name, NEW.id, SQLERRM, SQLSTATE;
-            
-          -- Continue with user creation despite role assignment failure
-          RETURN NEW;
-      END;
-      
-      RETURN NEW;
-      
-    EXCEPTION
-      WHEN OTHERS THEN
-        -- Critical error in the trigger itself
-        RAISE WARNING 'PhoenixKit: Critical error in assign_owner_to_first_user trigger: % (SQLSTATE: %)', 
-          SQLERRM, SQLSTATE;
-        
-        -- Return NEW to allow user creation to proceed
-        RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql
-    """
-
-    execute """
-    CREATE TRIGGER first_user_owner_trigger
-      AFTER INSERT ON #{inspect(prefix)}.phoenix_kit_users
-      FOR EACH ROW
-      EXECUTE FUNCTION assign_owner_to_first_user()
-    """
+    # Role assignment is handled by Elixir application logic
+    # The ensure_first_user_is_owner/1 function in PhoenixKit.Users.Roles
+    # manages Owner/User role assignment with proper race condition protection
   end
 
   def down(%{prefix: prefix}) do
-    # Drop trigger and function
-    execute "DROP TRIGGER IF EXISTS first_user_owner_trigger ON #{inspect(prefix)}.phoenix_kit_users"
-    execute "DROP FUNCTION IF EXISTS assign_owner_to_first_user()"
-
     # Drop tables in correct order (foreign key dependencies)
     drop_if_exists table(:phoenix_kit_user_role_assignments, prefix: prefix)
     drop_if_exists table(:phoenix_kit_user_roles, prefix: prefix)

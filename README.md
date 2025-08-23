@@ -761,7 +761,7 @@ PhoenixKit provides three predefined system roles:
 
 ### Automatic Role Assignment
 
-The first user registered in the system is automatically assigned the **Owner** role via a PostgreSQL database trigger. All subsequent users receive the **User** role by default.
+The first user registered in the system is automatically assigned the **Owner** role via Elixir application logic. All subsequent users receive the **User** role by default.
 
 ### Role Management API
 
