@@ -305,6 +305,47 @@ defmodule PhoenixKit.Users.Roles do
   end
 
   @doc """
+  Gets comprehensive user statistics including activity and confirmation status.
+
+  ## Examples
+
+      iex> get_extended_stats()
+      %{
+        total_users: 10,
+        owner_count: 1,
+        admin_count: 2,
+        user_count: 7,
+        active_users: 8,
+        inactive_users: 2,
+        confirmed_users: 9,
+        pending_users: 1
+      }
+  """
+  def get_extended_stats do
+    repo = RepoHelper.repo()
+
+    # Basic role stats
+    base_stats = get_role_stats()
+
+    # Activity stats
+    active_users = repo.one(from u in User, where: u.is_active == true, select: count(u.id))
+    inactive_users = repo.one(from u in User, where: u.is_active == false, select: count(u.id))
+
+    # Confirmation stats
+    confirmed_users =
+      repo.one(from u in User, where: not is_nil(u.confirmed_at), select: count(u.id))
+
+    pending_users = repo.one(from u in User, where: is_nil(u.confirmed_at), select: count(u.id))
+
+    Map.merge(base_stats, %{
+      active_users: active_users,
+      inactive_users: inactive_users,
+      confirmed_users: confirmed_users,
+      pending_users: pending_users
+    })
+  end
+
+  @doc """
   Counts users with a specific role.
 
   ## Parameters

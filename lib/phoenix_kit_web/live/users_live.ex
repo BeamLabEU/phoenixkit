@@ -165,12 +165,17 @@ defmodule PhoenixKitWeb.Live.UsersLive do
   end
 
   defp load_stats(socket) do
-    stats = Roles.get_role_stats()
+    stats = Roles.get_extended_stats()
 
     socket
     |> assign(:total_users, stats.total_users)
-    |> assign(:total_admins, stats.admin_count + stats.owner_count)
+    |> assign(:total_owners, stats.owner_count)
+    |> assign(:total_admins, stats.admin_count)
     |> assign(:total_regular_users, stats.user_count)
+    |> assign(:active_users, stats.active_users)
+    |> assign(:inactive_users, stats.inactive_users)
+    |> assign(:confirmed_users, stats.confirmed_users)
+    |> assign(:pending_users, stats.pending_users)
   end
 
   defp role_badge_class("Owner"), do: "badge-error"
