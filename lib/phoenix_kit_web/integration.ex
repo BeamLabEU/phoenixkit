@@ -356,6 +356,50 @@ defmodule PhoenixKitWeb.Integration do
 
       # Add to your deps in mix.exs
       {:phoenix_kit, "~> 0.1.0"}
+
+  ## DaisyUI Integration
+
+  PhoenixKit uses DaisyUI for styling. To ensure all components work correctly:
+
+  ### 1. Install DaisyUI in your parent application:
+      
+      npm install daisyui@latest
+
+  ### 2. Update your tailwind.config.js:
+
+      module.exports = {
+        content: [
+          "./lib/**/*.{ex,heex,js}",
+          "./assets/**/*.js",
+          "./deps/phoenix_kit/**/*.{ex,heex,js}"  // ← CRITICAL: Include PhoenixKit files
+        ],
+        theme: {
+          extend: {}
+        },
+        plugins: [
+          require('@tailwindcss/forms'),
+          require('daisyui')                      // ← CRITICAL: Add DaisyUI plugin
+        ],
+        daisyui: {
+          themes: ["light", "dark"],              // ← Configure themes
+          darkTheme: "dark",
+          base: true,
+          styled: true,
+          utils: true
+        }
+      }
+
+  ### 3. Set theme in your root layout (optional):
+
+      <!-- In your root.html.heex -->
+      <html data-theme="light">
+
+  **Without these steps, only basic buttons will be styled and other DaisyUI components will appear unstyled.**
+
+  ### 4. Verify setup:
+
+  Visit `/phoenix_kit/daisy-test` (no login required) to test all DaisyUI components.
+
   """
   defmacro phoenix_kit_routes(prefix \\ "/phoenix_kit") do
     quote do
@@ -405,11 +449,12 @@ defmodule PhoenixKitWeb.Integration do
           on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_mount_current_scope}] do
           live "/users/confirm/:token", Users.ConfirmationLive, :edit
           live "/users/confirm", Users.ConfirmationInstructionsLive, :new
+          live "/daisy-test", Live.DaisyTestLive, :index
         end
 
         live_session :phoenix_kit_require_authenticated_user,
           on_mount: [{PhoenixKitWeb.Users.Auth, :phoenix_kit_ensure_authenticated_scope}] do
-          # live "/test", TestLive, :index
+          live "/test", TestLive, :index
           live "/users/settings", Users.SettingsLive, :edit
           live "/users/settings/confirm-email/:token", Users.SettingsLive, :confirm_email
         end
