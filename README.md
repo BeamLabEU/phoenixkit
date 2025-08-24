@@ -2,7 +2,7 @@
 
 README.md file:
 
-Professional authentication library for Phoenix applications with zero-config setup
+Professional authentication library for Phoenix applications with streamlined setup
 
 <!-- [![Hex.pm](https://img.shields.io/hexpm/v/phoenix_kit.svg)](https://hex.pm/packages/phoenix_kit)
 [![Documentation](https://img.shields.io/badge/docs-hexpm-blue.svg)](https://hexdocs.pm/phoenix_kit)
@@ -14,7 +14,7 @@ PhoenixKit is a production-ready authentication library for Phoenix applications
 
 ### Key Features
 
-- 🚀 **Zero-Config Setup** - Automatic repository detection and configuration
+- 🚀 **Streamlined Setup** - Automatic repository detection with minimal configuration
 - 🗄️ **Professional Database Management** - Versioned migrations with Oban-style architecture
 - 🔐 **Complete Authentication** - Registration, login, logout, email confirmation, password reset
 - 👥 **Role-Based Access Control** - Built-in Owner/Admin/User roles with management interface

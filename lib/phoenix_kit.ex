@@ -2,7 +2,7 @@ defmodule PhoenixKit do
   @moduledoc """
   PhoenixKit - Professional authentication library for Phoenix applications.
 
-  Provides zero-config setup authentication with support for:
+  Provides streamlined authentication setup with support for:
   - User registration and login
   - Email confirmation 
   - Password reset
