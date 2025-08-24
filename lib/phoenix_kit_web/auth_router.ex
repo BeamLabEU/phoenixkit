@@ -46,8 +46,7 @@ defmodule PhoenixKitWeb.AuthRouter do
   scope "/" do
     pipe_through [:browser, :phoenix_kit_redirect_if_authenticated]
 
-    # Test LiveView
-    live "/test", PhoenixKitWeb.TestLive, :index
+    # Test LiveView routes moved to integration.ex for proper parent app support
 
     # LiveView routes for authentication
     live "/register", PhoenixKitWeb.Users.RegistrationLive, :new
