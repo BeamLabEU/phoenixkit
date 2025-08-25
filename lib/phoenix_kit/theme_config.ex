@@ -97,17 +97,18 @@ defmodule PhoenixKit.ThemeConfig do
   ]
 
   @default_theme_config %{
-    mode: :auto,
-    # Legacy format for backwards compatibility
-    primary_color: "#3b82f6",
-    # Default selection
+    theme: "auto",
+    # OKLCH color format (modern standard)
+    primary_color: "oklch(55% 0.3 240)",
+    # Default theme selection
     themes: [:light, :dark, :synthwave, :dracula, :nord],
     storage: :local_storage,
-    # Default to daisyUI 5
+    # daisyUI 5 + Tailwind CSS 4 only
     daisyui_version: 5,
-    # Enable theme-controller by default
+    tailwind_version: 4,
+    # Always enabled for modern architecture
     theme_controller: true,
-    # Modern OKLCH color definitions
+    # OKLCH color definitions for all semantic tokens
     oklch_colors: %{
       primary: "oklch(55% 0.3 240)",
       secondary: "oklch(70% 0.25 200)",
@@ -165,31 +166,35 @@ defmodule PhoenixKit.ThemeConfig do
   end
 
   @doc """
-  Gets the configured theme mode.
+  Gets the configured default theme.
 
   ## Examples
 
-      iex> Application.put_env(:phoenix_kit, :theme, %{mode: :dark})
-      iex> PhoenixKit.ThemeConfig.get_theme_mode()
-      :dark
+      iex> Application.put_env(:phoenix_kit, :theme, %{theme: "dark"})
+      iex> PhoenixKit.ThemeConfig.get_theme()
+      "dark"
       
       iex> Application.delete_env(:phoenix_kit, :theme)
-      iex> PhoenixKit.ThemeConfig.get_theme_mode()
-      :auto
+      iex> PhoenixKit.ThemeConfig.get_theme()
+      "auto"
   """
-  @spec get_theme_mode() :: :light | :dark | :auto
-  def get_theme_mode do
-    get_theme_config().mode
+  @spec get_theme() :: String.t()
+  def get_theme do
+    case get_theme_config()[:theme] do
+      theme when is_binary(theme) -> theme
+      theme when is_atom(theme) -> to_string(theme)
+      _ -> "auto"
+    end
   end
 
   @doc """
-  Gets the configured primary color.
+  Gets the configured primary color in OKLCH format.
 
   ## Examples
 
-      iex> Application.put_env(:phoenix_kit, :theme, %{primary_color: "#10b981"})
+      iex> Application.put_env(:phoenix_kit, :theme, %{primary_color: "oklch(60% 0.2 180)"})
       iex> PhoenixKit.ThemeConfig.get_primary_color()
-      "#10b981"
+      "oklch(60% 0.2 180)"
   """
   @spec get_primary_color() :: String.t()
   def get_primary_color do
@@ -306,35 +311,13 @@ defmodule PhoenixKit.ThemeConfig do
       "--color-base-200: #{oklch_colors[:"base-200"]}",
       "--color-base-300: #{oklch_colors[:"base-300"]}",
       "--color-base-content: #{oklch_colors[:"base-content"]}",
-      "--theme-mode: #{config.mode}",
+      "--theme-mode: #{get_theme()}",
       "--daisyui-version: #{get_daisyui_version()}"
     ]
 
     Enum.join(variables, "; ") <> ";"
   end
 
-  @doc """
-  Generates legacy CSS custom properties for backwards compatibility.
-
-  ## Examples
-
-      iex> PhoenixKit.ThemeConfig.theme_css_variables()
-      "--primary-color: #3b82f6; --theme-mode: auto;"
-      
-      iex> PhoenixKit.ThemeConfig.theme_css_variables(%{primary_color: "#10b981", mode: :dark})
-      "--primary-color: #10b981; --theme-mode: dark;"
-  """
-  @spec theme_css_variables(map() | nil) :: String.t()
-  def theme_css_variables(theme \\ nil) do
-    config = theme || get_theme_config()
-
-    variables = [
-      "--primary-color: #{config.primary_color}",
-      "--theme-mode: #{config.mode}"
-    ]
-
-    Enum.join(variables, "; ") <> ";"
-  end
 
   @doc """
   Generates data attributes for daisyUI 5 theme system integration.
@@ -351,7 +334,7 @@ defmodule PhoenixKit.ThemeConfig do
     config = get_theme_config()
 
     [
-      {"data-theme-mode", to_string(config.mode)},
+      {"data-theme", get_theme()},
       {"data-theme-storage", to_string(config.storage)},
       {"data-themes", Enum.map_join(config.themes, ",", &to_string/1)},
       {"data-daisyui-version", to_string(get_daisyui_version())},
@@ -524,21 +507,20 @@ defmodule PhoenixKit.ThemeConfig do
   def theme_category(_), do: :unknown
 
   @doc """
-  Gets all theme configuration as a map for debugging purposes with daisyUI 5 info.
+  Gets all theme configuration for debugging daisyUI 5 + Tailwind CSS 4 setup.
 
   ## Examples
 
       iex> PhoenixKit.ThemeConfig.debug_config()
       %{
         enabled: true,
-        mode: :auto,
+        default_theme: "auto",
         daisyui_version: 5,
-        theme_controller: true,
-        configured_themes: [:light, :dark, :synthwave],
+        tailwind_version: 4,
+        configured_themes: ["light", "dark", "synthwave"],
         available_themes: 35,
-        modern_css_variables: "--color-primary: oklch(55% 0.3 240); ...",
-        legacy_css_variables: "--primary-color: #3b82f6; ...",
-        data_attributes: [{"data-theme-mode", "auto"}, ...]
+        oklch_colors: %{primary: "oklch(55% 0.3 240)", ...},
+        css_variables: "--color-primary: oklch(55% 0.3 240); ..."
       }
   """
   @spec debug_config() :: map()
@@ -547,60 +529,73 @@ defmodule PhoenixKit.ThemeConfig do
 
     %{
       enabled: theme_enabled?(),
-      mode: config.mode,
+      default_theme: get_theme(),
       daisyui_version: get_daisyui_version(),
+      tailwind_version: config[:tailwind_version] || 4,
       theme_controller: theme_controller_enabled?(),
       primary_color: config.primary_color,
-      configured_themes: config.themes,
+      configured_themes: get_supported_themes(),
       available_themes: length(@daisyui_5_themes),
-      all_daisyui_themes: @daisyui_5_themes,
+      all_themes: get_all_daisyui_themes(),
       storage: config.storage,
       oklch_colors: config[:oklch_colors],
-      modern_css_variables: modern_css_variables(config),
-      legacy_css_variables: theme_css_variables(config),
+      css_variables: modern_css_variables(config),
       data_attributes: theme_data_attributes()
     }
   end
 
   @doc """
-  Gets theme configuration optimized for parent application integration.
+  Gets configuration for parent application integration with Tailwind CSS 4.
 
-  Returns configuration that's safe for embedding in parent Phoenix applications.
+  Returns complete setup instructions for modern @plugin integration.
 
   ## Examples
 
       iex> PhoenixKit.ThemeConfig.parent_app_config()
       %{
-        themes: [:light, :dark, :synthwave, :dracula, :nord],
-        default_theme: "light",
-        css_plugin: "@plugin \"daisyui\" { themes: light --default, dark --prefersdark, synthwave, dracula, nord; }",
-        theme_controller: true
+        default_theme: "auto",
+        css_plugin: "@plugin \"daisyui\" { themes: light --default, dark --prefersdark, synthwave; }",
+        content_paths: ["./lib/**/*.{ex,heex}", "./deps/phoenix_kit/**/*.{ex,heex}"],
+        integration_example: "/* In your app.css */\\n@import \"tailwindcss\";\\n@plugin \"daisyui\" { themes: light, dark; };"
       }
   """
   @spec parent_app_config() :: map()
   def parent_app_config do
     config = get_theme_config()
-    themes = config.themes
-    default_theme = daisy_theme_name(config.mode)
+    themes = get_supported_themes()
+    default_theme = get_theme()
 
     theme_list =
       themes
-      |> Enum.map(&daisy_theme_name/1)
+      |> Enum.map(&to_string/1)
       |> Enum.map_join(", ", fn
         "light" -> "light --default"
         "dark" -> "dark --prefersdark"
         theme -> theme
       end)
 
+    integration_css = """
+    /* In your app.css */
+    @import "tailwindcss";
+    @plugin "daisyui" {
+      themes: #{theme_list};
+    };
+    """
+
     %{
       enabled: theme_enabled?(),
-      daisyui_version: get_daisyui_version(),
-      themes: themes,
+      architecture: "daisyUI 5 + Tailwind CSS 4",
       default_theme: default_theme,
+      themes: Enum.map(themes, &to_string/1),
       css_plugin: "@plugin \"daisyui\" { themes: #{theme_list}; }",
-      theme_controller: theme_controller_enabled?(),
-      storage: config.storage,
-      data_attributes: theme_data_attributes()
+      content_paths: [
+        "./lib/**/*.{ex,heex,js}",
+        "./assets/**/*.js", 
+        "./deps/phoenix_kit/**/*.{ex,heex}"
+      ],
+      integration_example: String.trim(integration_css),
+      oklch_colors: config[:oklch_colors],
+      storage: config.storage
     }
   end
 end

@@ -1,21 +1,20 @@
-# DaisyUI 5 Migration Guide for PhoenixKit
+# PhoenixKit Modern Theme System Guide
 
 ## Overview
 
-This guide helps you migrate from PhoenixKit's legacy theme system to the modern daisyUI 5 integration with 35+ themes, theme-controller support, and Tailwind CSS 4 compatibility.
+PhoenixKit now uses **ONLY** daisyUI 5 + Tailwind CSS 4 architecture. 
+Legacy theme systems have been completely removed for a streamlined, modern approach.
 
-## Quick Migration
+## ⚠️ Breaking Changes
 
-Run the automated migration tool:
+- **NO backwards compatibility** with old theme systems
+- **Tailwind CSS 4 required** - no support for version 3
+- **@plugin directives only** - no JavaScript configuration
+- **OKLCH colors only** - modern color format
 
-```bash
-mix phoenix_kit.migrate_to_daisyui5
-```
+## Quick Setup
 
-For dry-run preview:
-```bash
-mix phoenix_kit.migrate_to_daisyui5 --dry-run
-```
+This is now the **ONLY** way to integrate PhoenixKit themes:
 
 ## What's New in DaisyUI 5 Integration
 
@@ -50,83 +49,63 @@ config :phoenix_kit,
   }
 ```
 
-**After (DaisyUI 5)**:
+**New (Modern Architecture)**:
 ```elixir
 config :phoenix_kit,
   theme: %{
-    theme: "auto",                   # Default theme or specific theme name
-    primary_color: "#3b82f6",       # OKLCH format supported
+    theme: "auto",                           # Default theme
+    primary_color: "oklch(55% 0.3 240)",    # OKLCH format REQUIRED  
     storage: :local_storage,
-    theme_controller: true,         # Enable theme-controller
-    categories: [:light, :dark, :colorful]  # Theme categories
+    themes: [:light, :dark, :synthwave, :dracula]  # Selected themes
   }
 ```
 
 ### 2. Update Assets
 
-**CSS Integration**:
-```html
-<!-- Replace old CSS -->
-<!-- <link rel="stylesheet" href="/assets/phoenix_kit.css"> -->
-
-<!-- Add new daisyUI 5 CSS -->
-<link rel="stylesheet" href="/assets/phoenix_kit_daisyui5.css">
-```
-
-**JavaScript Integration**:
-```html
-<!-- Replace old JS -->
-<!-- <script src="/assets/phoenix_kit.js"></script> -->
-
-<!-- Add new theme controller JS -->
-<script src="/assets/phoenix_kit_daisyui5.js"></script>
-```
-
-### 3. Update Tailwind Configuration
-
-**For Tailwind CSS 3** (tailwind.config.js):
-```javascript
-module.exports = {
-  content: [
-    "./lib/**/*.{ex,exs,heex}",
-    "./deps/phoenix_kit/**/*.{ex,exs,heex}"
-  ],
-  theme: {
-    extend: {}
-  },
-  plugins: [
-    require("@tailwindcss/forms"),
-    require("daisyui")
-  ],
-  daisyui: {
-    themes: [
-      "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
-      "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden",
-      "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black",
-      "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade",
-      "night", "coffee", "winter", "dim", "nord", "sunset"
-    ],
-    darkTheme: "dark",
-    base: true,
-    styled: true,
-    utils: true,
-    prefix: "",
-    logs: true,
-    themeRoot: ":root"
-  }
-}
-```
-
-**For Tailwind CSS 4** (@config):
+**CSS Integration (Tailwind CSS 4 ONLY)**:
 ```css
-@config "tailwind.config.js";
-@plugin "@tailwindcss/forms";
-@plugin "daisyui" theme({
-  themes: [
-    "light", "dark", "cupcake", "corporate", "synthwave", "retro"
-  ]
-});
+/* In your parent app's app.css */
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark, synthwave, dracula;
+};
+
+/* Import PhoenixKit theme utilities */  
+@import "./deps/phoenix_kit/priv/static/assets/phoenix_kit_daisyui5.css";
 ```
+
+**Content Configuration**:
+```css
+/* Add PhoenixKit content paths */
+@source "./lib/**/*.{ex,heex,js}";
+@source "./deps/phoenix_kit/**/*.{ex,heex}";
+```
+
+### 3. Tailwind CSS 4 Required
+
+**⚠️ BREAKING CHANGE**: Tailwind CSS 3 is no longer supported.
+
+**Required Setup**:
+```css
+/* app.css - This is the ONLY supported way */
+@import "tailwindcss";
+
+@source "./lib/**/*.{ex,heex,js}";
+@source "./assets/**/*.js";  
+@source "./deps/phoenix_kit/**/*.{ex,heex}";
+
+@plugin "daisyui" {
+  themes: 
+    light --default,
+    dark --prefersdark,
+    synthwave,
+    dracula,
+    corporate,
+    luxury;
+};
+```
+
+**JavaScript files are not needed** - everything is in CSS now!
 
 ### 4. Update Components
 

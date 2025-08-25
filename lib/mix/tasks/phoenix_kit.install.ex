@@ -26,7 +26,7 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
     * `--router-path` - Specify custom path to router.ex file
     * `--prefix` - Specify PostgreSQL schema prefix (defaults to "public")
     * `--create-schema` - Create schema if using custom prefix (default: true for non-public prefixes)
-    * `--theme-enabled` - Enable PhoenixKit theme system with light/dark mode support
+    * `--theme-enabled` - Enable modern daisyUI 5 + Tailwind CSS 4 theme system with 35+ themes
 
     ## Auto-detection
 
@@ -85,7 +85,7 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
       |> RepoDetection.add_phoenix_kit_configuration(opts[:repo])
       |> MailerConfig.add_mailer_configuration()
       |> LayoutConfig.add_layout_integration_configuration()
-      |> add_theme_configuration(opts[:theme_enabled])
+      |> add_theme_configuration(Keyword.get(opts, :theme_enabled, true))
       |> DemoFiles.copy_test_demo_files()
       |> RouterIntegration.add_router_integration(opts[:router_path])
       |> MigrationStrategy.create_phoenix_kit_migration_only(opts)
@@ -122,8 +122,91 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
       result
     end
 
-    # Theme configuration is disabled for now
+    # Add modern daisyUI 5 + Tailwind CSS 4 theme configuration
+    defp add_theme_configuration(igniter, theme_enabled) when theme_enabled do
+      Igniter.Project.Config.configure(
+        igniter,
+        "config.exs",
+        :phoenix_kit,
+        [theme_enabled: true, theme: %{
+          theme: "auto",
+          primary_color: "oklch(55% 0.3 240)", 
+          storage: :local_storage,
+          themes: [:light, :dark, :synthwave, :dracula, :nord]
+        }],
+        updater: fn zipper ->
+          {:ok, zipper}
+        end
+      )
+      |> create_tailwind_css4_example()
+      |> Igniter.add_notice("""
+      
+      🎨 Modern Theme System Enabled!
+      
+      IMPORTANT: PhoenixKit now requires Tailwind CSS 4 + daisyUI 5
+      
+      📁 Example configuration created: assets/phoenix_kit_app_css_example.css
+      
+      Copy content to your app.css:
+      ```bash
+      cp assets/phoenix_kit_app_css_example.css assets/css/app.css
+      ```
+      
+      Or manually add to your app.css:
+      ```css
+      @import "tailwindcss";
+      @source "./lib/**/*.{ex,heex,js}";
+      @source "./deps/phoenix_kit/**/*.{ex,heex}";
+      @plugin "daisyui" { themes: light --default, dark --prefersdark, synthwave; };
+      ```
+      """)
+    end
+    
     defp add_theme_configuration(igniter, _), do: igniter
+
+    # Create Tailwind CSS 4 example file for easy integration
+    defp create_tailwind_css4_example(igniter) do
+      example_content = """
+      /**
+       * PhoenixKit + Tailwind CSS 4 + daisyUI 5 Integration Example
+       * 
+       * Copy this content to your assets/css/app.css file to enable
+       * the modern PhoenixKit theme system with 35+ daisyUI themes.
+       * 
+       * Requirements: Tailwind CSS 4 + daisyUI 5
+       */
+
+      /* Import Tailwind CSS 4 */
+      @import "tailwindcss";
+
+      /* Content sources for Tailwind to scan */
+      @source "./lib/**/*.{ex,heex,js}";
+      @source "./assets/**/*.js";
+      @source "./deps/phoenix_kit/**/*.{ex,heex}";
+
+      /* daisyUI 5 plugin with theme selection */
+      @plugin "daisyui" {
+        themes: 
+          light --default,
+          dark --prefersdark,
+          synthwave,
+          dracula,
+          nord,
+          corporate,
+          luxury,
+          forest;
+      };
+
+      /* Additional custom styles (optional) */
+      @layer components {
+        .phoenix-kit-theme-example {
+          @apply bg-primary text-primary-content p-4 rounded-lg;
+        }
+      }
+      """
+      
+      Igniter.create_new_file(igniter, "assets/phoenix_kit_app_css_example.css", example_content)
+    end
 
     # Add completion notice with essential next steps
     defp add_completion_notice(igniter) do
@@ -133,9 +216,15 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
 
       Next steps:
         1. Run: mix ecto.migrate
-        2. Start server: mix phx.server
-        3. Visit /phoenix_kit/register
-        4. Test demo pages: /test-current-user, /test-redirect-if-auth, /test-ensure-auth
+        2. Update app.css for Tailwind CSS 4 + daisyUI 5 (see theme notice above)
+        3. Start server: mix phx.server
+        4. Visit /phoenix_kit/register
+        5. Test theme system: /phoenix_kit/daisy-test
+        6. Test demo pages: /test-current-user, /test-redirect-if-auth, /test-ensure-auth
+
+      📚 Documentation:
+        - Theme setup: /deps/phoenix_kit/priv/static/examples/
+        - Migration guide: /deps/phoenix_kit/priv/static/examples/DAISYUI_5_MIGRATION_GUIDE.md
 
       💡 Layout changes require: mix deps.compile phoenix_kit --force
       """

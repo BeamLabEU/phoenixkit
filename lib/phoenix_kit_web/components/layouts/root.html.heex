@@ -5,12 +5,12 @@
   {if PhoenixKit.ThemeConfig.theme_enabled?(), do: PhoenixKit.ThemeConfig.theme_data_attributes(), else: []}
   data-theme={
     if PhoenixKit.ThemeConfig.theme_enabled?(),
-      do: PhoenixKit.ThemeConfig.daisy_theme_name(PhoenixKit.ThemeConfig.get_theme_mode()),
+      do: PhoenixKit.ThemeConfig.get_theme(),
       else: "light"
   }
   style={
     if PhoenixKit.ThemeConfig.theme_enabled?(),
-      do: PhoenixKit.ThemeConfig.theme_css_variables(),
+      do: PhoenixKit.ThemeConfig.modern_css_variables(),
       else: ""
   }
 >

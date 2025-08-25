@@ -1150,11 +1150,12 @@ console.log('Effective theme:', info.effective);
 <!DOCTYPE html>
 <html lang="en" 
       {PhoenixKit.ThemeConfig.theme_data_attributes()}
-      data-theme={PhoenixKit.ThemeConfig.daisy_theme_name(PhoenixKit.ThemeConfig.get_theme_mode())}
-      style={PhoenixKit.ThemeConfig.theme_css_variables()}>
+      data-theme={PhoenixKit.ThemeConfig.get_theme()}
+      style={PhoenixKit.ThemeConfig.modern_css_variables()}>
   <head>
     <!-- Your head content -->
-    <link rel="stylesheet" href={~p"/assets/phoenix_kit_theme.css"} />
+    <!-- daisyUI 5 + Tailwind CSS 4 integration -->
+    <link rel="stylesheet" href={~p"/assets/phoenix_kit_daisyui5.css"} />
   </head>
   <body>
     <nav class="navbar">

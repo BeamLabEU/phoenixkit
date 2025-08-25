@@ -1,18 +1,18 @@
 /**
- * Example Tailwind CSS 4 Configuration with daisyUI 5 for PhoenixKit
+ * PhoenixKit + Tailwind CSS 4 + daisyUI 5 Configuration
  * 
- * This CSS file shows the modern Tailwind CSS 4 approach using @plugin directives
- * instead of JavaScript configuration files. This is the recommended approach
- * for new projects using daisyUI 5 and PhoenixKit.
+ * This is the ONLY supported way to integrate PhoenixKit themes.
+ * Modern @plugin directives with OKLCH colors and 35+ themes support.
  * 
- * Usage in your parent application:
- * 1. Import this file in your main CSS file
- * 2. Customize the themes and configuration as needed
- * 3. Configure PhoenixKit theme system in config/config.exs
+ * Copy this setup to your parent Phoenix application's app.css:
+ * 1. Copy this entire file content to your app.css
+ * 2. Customize themes as needed
+ * 3. No additional Tailwind config required
  * 
- * @version 1.1.0
+ * @version 2.0.0
  * @requires daisyUI ^5.0.0
  * @requires Tailwind CSS ^4.0.0
+ * @architecture Modern @plugin only
  */
 
 /* Import Tailwind CSS 4 */
