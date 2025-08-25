@@ -446,6 +446,76 @@ defmodule PhoenixKit.Users.Roles do
   end
 
   @doc """
+  Assigns roles to existing users who don't have any PhoenixKit roles.
+
+  This is useful for migration scenarios where PhoenixKit is installed 
+  into an existing application with users.
+
+  ## Parameters
+
+  - `opts`: Options for role assignment
+    - `:make_first_owner` (default: true) - Make first user without roles an Owner
+
+  ## Returns
+
+  - `{:ok, stats}` with assignment statistics
+  - `{:error, reason}` on failure
+
+  ## Examples
+
+      iex> assign_roles_to_existing_users()
+      {:ok, %{assigned_owner: 1, assigned_users: 5, total_processed: 6}}
+  """
+  def assign_roles_to_existing_users(opts \\ []) do
+    repo = RepoHelper.repo()
+    make_first_owner = Keyword.get(opts, :make_first_owner, true)
+
+    repo.transaction(fn ->
+      # Find users without any role assignments
+      users_without_roles =
+        repo.all(
+          from u in User,
+            left_join: assignment in assoc(u, :role_assignments),
+            where: is_nil(assignment.id),
+            where: u.is_active == true,
+            order_by: u.inserted_at
+        )
+
+      case users_without_roles do
+        [] ->
+          %{assigned_owner: 0, assigned_users: 0, total_processed: 0}
+
+        users ->
+          # Check if we need to assign Owner role
+          existing_owner_count = count_active_owners()
+
+          {owner_assignments, user_assignments} =
+            if make_first_owner && existing_owner_count == 0 do
+              # Assign Owner to first user, User to rest
+              [first_user | rest_users] = users
+              owner_result = assign_role(first_user, "Owner")
+              user_results = Enum.map(rest_users, &assign_role(&1, "User"))
+
+              {
+                if(match?({:ok, _}, owner_result), do: 1, else: 0),
+                Enum.count(user_results, &match?({:ok, _}, &1))
+              }
+            else
+              # Assign User role to all
+              user_results = Enum.map(users, &assign_role(&1, "User"))
+              {0, Enum.count(user_results, &match?({:ok, _}, &1))}
+            end
+
+          %{
+            assigned_owner: owner_assignments,
+            assigned_users: user_assignments,
+            total_processed: length(users)
+          }
+      end
+    end)
+  end
+
+  @doc """
   Safely assigns Owner role to first user using database transaction.
 
   This function prevents race conditions by using FOR UPDATE lock.
@@ -469,16 +539,29 @@ defmodule PhoenixKit.Users.Roles do
     repo = RepoHelper.repo()
 
     repo.transaction(fn ->
-      # Lock users table to prevent race condition
-      user_count =
+      # Lock the phoenix_kit_user_roles table to prevent race conditions
+      # Use a simpler approach - lock the Owner role and check for existing assignments
+      owner_role =
         repo.one(
-          from u in User,
-            select: count(u.id),
+          from r in Role,
+            where: r.name == "Owner",
             lock: "FOR UPDATE"
         )
 
-      role_name = if user_count == 1, do: "Owner", else: "User"
-      role_type = if user_count == 1, do: :owner, else: :user
+      # Check if there are any existing active Owner assignments
+      existing_owner =
+        repo.one(
+          from assignment in RoleAssignment,
+            join: u in User,
+            on: assignment.user_id == u.id,
+            where: assignment.role_id == ^owner_role.id,
+            where: assignment.is_active == true,
+            where: u.is_active == true,
+            limit: 1
+        )
+
+      role_name = if is_nil(existing_owner), do: "Owner", else: "User"
+      role_type = if is_nil(existing_owner), do: :owner, else: :user
 
       case assign_role(user, role_name) do
         {:ok, _assignment} -> role_type

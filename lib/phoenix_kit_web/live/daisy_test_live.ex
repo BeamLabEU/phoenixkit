@@ -4,42 +4,136 @@ defmodule PhoenixKitWeb.Live.DaisyTestLive do
   def render(assigns) do
     ~H"""
     <div class="container mx-auto p-8">
-      <h1 class="text-3xl font-bold mb-8">DaisyUI Test Page</h1>
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold">DaisyUI 5 Theme Test</h1>
+        <.theme_switcher />
+      </div>
       
-    <!-- Basic DaisyUI Components Test -->
+    <!-- Enhanced DaisyUI 5 Components Test -->
       <div class="grid gap-8">
         
-    <!-- Alert Test -->
-        <div class="alert alert-info">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="stroke-current shrink-0 w-6 h-6"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            >
-            </path>
-          </svg>
-          <span>If this looks styled, DaisyUI is working!</span>
+    <!-- Current Theme Info -->
+        <div class="mockup-code">
+          <pre data-prefix="$"><code>Current Theme: {@current_theme}</code></pre>
+          <pre data-prefix=">" class="text-info"><code>Available Themes: {@total_themes}</code></pre>
+          <pre data-prefix=">" class="text-success"><code>Theme Controller: {@theme_controller_status}</code></pre>
         </div>
         
-    <!-- Button Test -->
-        <div class="flex gap-4">
+    <!-- Alert Tests for Different Types -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="alert alert-info">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="stroke-current shrink-0 w-6 h-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              >
+              </path>
+            </svg>
+            <span>Info Alert - DaisyUI 5</span>
+          </div>
+
+          <div class="alert alert-success">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Success Alert - All good!</span>
+          </div>
+
+          <div class="alert alert-warning">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.966-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+            <span>Warning Alert</span>
+          </div>
+
+          <div class="alert alert-error">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Error Alert</span>
+          </div>
+        </div>
+        
+    <!-- Enhanced Button Tests -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <button class="btn btn-primary">Primary Button</button>
           <button class="btn btn-secondary">Secondary Button</button>
           <button class="btn btn-accent">Accent Button</button>
+          <button class="btn btn-info">Info Button</button>
+          <button class="btn btn-success">Success Button</button>
+          <button class="btn btn-warning">Warning Button</button>
+          <button class="btn btn-error">Error Button</button>
+          <button class="btn btn-outline">Outline Button</button>
+          <button class="btn btn-ghost">Ghost Button</button>
         </div>
         
-    <!-- Card Test -->
-        <div class="card w-96 bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title">Card Title</h2>
-            <p>If this card is styled, DaisyUI is working!</p>
+    <!-- Enhanced Card Tests -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Base Card</h2>
+              <p>Default card styling test</p>
+              <div class="card-actions justify-end">
+                <button class="btn btn-primary btn-sm">Action</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card bg-primary text-primary-content shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Primary Card</h2>
+              <p>Primary themed card test</p>
+              <div class="card-actions justify-end">
+                <button class="btn btn-secondary btn-sm">Action</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card bg-secondary text-secondary-content shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title">Secondary Card</h2>
+              <p>Secondary themed card test</p>
+              <div class="card-actions justify-end">
+                <button class="btn btn-accent btn-sm">Action</button>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -60,17 +154,37 @@ defmodule PhoenixKitWeb.Live.DaisyTestLive do
           </div>
         </div>
         
-    <!-- Enhanced Theme Detection -->
+    <!-- Theme Showcase Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <%= for theme <- @sample_themes do %>
+            <div
+              class="card bg-base-100 shadow-lg border hover:shadow-xl transition-shadow"
+              data-theme={theme}
+            >
+              <div class="card-body p-4">
+                <h3 class="card-title text-sm">{String.capitalize(theme)}</h3>
+                <div class="flex gap-1 mb-2">
+                  <div class="w-4 h-4 rounded bg-primary"></div>
+                  <div class="w-4 h-4 rounded bg-secondary"></div>
+                  <div class="w-4 h-4 rounded bg-accent"></div>
+                </div>
+                <button class="btn btn-primary btn-xs" phx-click="set_theme" phx-value-theme={theme}>
+                  Test {theme}
+                </button>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+    <!-- Enhanced Diagnostic Results -->
         <div class="mockup-code">
-          <pre data-prefix="$"><code>DaisyUI Diagnostic Results:</code></pre>
-          <pre data-prefix=">" class="text-warning"><code>HTML data-theme: {@theme_status}</code></pre>
+          <pre data-prefix="$"><code>DaisyUI 5 Diagnostic Results:</code></pre>
+          <pre data-prefix=">" class="text-info"><code>HTML data-theme: {@theme_status}</code></pre>
           <pre data-prefix=">" class="text-success"><code>CSS Variables: {@css_vars_status}</code></pre>
-          <pre data-prefix=">" class="text-info"><code>Alert class: {@alert_status}</code></pre>
-          <pre data-prefix=">" class="text-info"><code>Card class: {@card_status}</code></pre>
-          <pre data-prefix=">" class="text-info"><code>Stats class: {@stats_status}</code></pre>
-          <pre data-prefix=">" class="text-error"><code>ISSUE: TailwindCSS purging PhoenixKit DaisyUI classes</code></pre>
-          <pre data-prefix=">" class="text-warning"><code>SOLUTION: Add "./deps/phoenix_kit/**/*.&#123;ex,heex,js&#125;" to content</code></pre>
-          <pre data-prefix=">" class="text-info"><code>+ Install daisyui plugin in parent tailwind.config.js</code></pre>
+          <pre data-prefix=">" class="text-info"><code>Alert styling: {@alert_status}</code></pre>
+          <pre data-prefix=">" class="text-info"><code>Card styling: {@card_status}</code></pre>
+          <pre data-prefix=">" class="text-info"><code>Stats styling: {@stats_status}</code></pre>
+          <pre data-prefix=">" class="text-warning"><code>Theme Controller: {@theme_controller_status}</code></pre>
         </div>
         
     <!-- Refresh Button -->
@@ -92,11 +206,21 @@ defmodule PhoenixKitWeb.Live.DaisyTestLive do
     </div>
 
     <script>
-      // LiveView event listener for client-side diagnostic
+      // LiveView event listeners
       window.addEventListener('phx:run_diagnostic', function(event) {
         setTimeout(() => {
           runClientDiagnostic();
         }, 100);
+      });
+
+      window.addEventListener('phx:set_theme', function(event) {
+        const theme = event.detail.theme;
+        if (window.PhoenixKit && window.PhoenixKit.ThemeController) {
+          window.PhoenixKit.ThemeController.setTheme(theme);
+        } else {
+          // Fallback theme setting
+          document.documentElement.setAttribute('data-theme', theme);
+        }
       });
 
       function runClientDiagnostic() {
@@ -166,8 +290,21 @@ defmodule PhoenixKitWeb.Live.DaisyTestLive do
     # Run diagnostic on mount
     send(self(), :run_diagnostic)
 
+    # Get sample themes for showcase
+    all_themes = PhoenixKit.ThemeConfig.get_all_daisyui_themes()
+    sample_themes = Enum.take_random(all_themes, 8)
+    current_theme = get_current_theme()
+
     socket =
       assign(socket,
+        current_theme: current_theme,
+        total_themes: length(all_themes),
+        theme_controller_status:
+          if(PhoenixKit.ThemeConfig.theme_controller_enabled?(),
+            do: "Enabled ✓",
+            else: "Disabled ✗"
+          ),
+        sample_themes: sample_themes,
         theme_status: "Loading...",
         css_vars_status: "Loading...",
         alert_status: "Loading...",
@@ -176,6 +313,15 @@ defmodule PhoenixKitWeb.Live.DaisyTestLive do
       )
 
     {:ok, socket}
+  end
+
+  defp get_current_theme do
+    config = Application.get_env(:phoenix_kit, :theme, %{})
+
+    case config[:theme] do
+      theme when is_binary(theme) -> theme
+      _ -> "auto"
+    end
   end
 
   def handle_info(:run_diagnostic, socket) do
@@ -217,6 +363,16 @@ defmodule PhoenixKitWeb.Live.DaisyTestLive do
         card_status: params["card"] || "Missing",
         stats_status: params["stats"] || "Missing"
       )
+
+    {:noreply, socket}
+  end
+
+  def handle_event("set_theme", %{"theme" => theme}, socket) do
+    # This would typically trigger theme change via JavaScript
+    socket =
+      socket
+      |> assign(current_theme: theme)
+      |> push_event("set_theme", %{theme: theme})
 
     {:noreply, socket}
   end

@@ -421,108 +421,375 @@ defmodule PhoenixKitWeb.CoreComponents do
 
   defp assign_theme_data(assigns) do
     theme_config = ThemeConfig.get_theme_config()
+    all_themes = ThemeConfig.get_all_daisyui_themes()
+    configured_themes = theme_config.themes
+    theme_categories = group_themes_by_category(configured_themes)
 
     assigns
     |> assign(:theme_enabled, true)
     |> assign(:current_theme, theme_config.mode)
-    |> assign(:supported_themes, theme_config.themes)
+    |> assign(:configured_themes, configured_themes)
+    |> assign(:all_daisyui_themes, all_themes)
+    |> assign(:theme_categories, theme_categories)
+    |> assign(:daisyui_version, ThemeConfig.get_daisyui_version())
+    |> assign(:theme_controller_enabled, ThemeConfig.theme_controller_enabled?())
     |> assign(:storage_method, theme_config.storage)
-    |> assign(:css_variables, ThemeConfig.theme_css_variables())
+    |> assign(:modern_css_variables, ThemeConfig.modern_css_variables())
     |> assign(:data_attributes, ThemeConfig.theme_data_attributes())
+  end
+
+  # Group themes by their categories for better UI organization
+  defp group_themes_by_category(themes) do
+    themes
+    |> Enum.group_by(&ThemeConfig.theme_category/1)
+    |> Map.new(fn {category, theme_list} -> {category, Enum.sort(theme_list)} end)
   end
 
   defp render_theme_switcher(assigns) do
     ~H"""
-    <div class={["theme-switcher flex items-center gap-2", @class]} {@data_attributes} {@rest}>
+    <div
+      class={["phoenix-kit-theme-switcher flex items-center gap-2", @class]}
+      {@data_attributes}
+      {@rest}
+    >
       
-    <!-- Theme Toggle Button -->
+    <!-- Theme Toggle Button with enhanced daisyUI 5 support -->
       <div class="dropdown dropdown-end">
         <div
           tabindex="0"
           role="button"
           class={theme_button_classes(@size)}
-          id="theme-switcher-btn"
-          aria-label="Toggle theme"
+          id="phoenix-kit-theme-btn"
+          aria-label={"Switch theme (current: #{theme_display_name(@current_theme)})"}
+          title={"Current: #{theme_display_name(@current_theme)}"}
         >
-          <.theme_icon theme={@current_theme} />
+          <.theme_icon theme={@current_theme} size={@size} />
         </div>
         
-    <!-- Dropdown Menu -->
-        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-          <li :for={theme <- @supported_themes}>
-            <button
-              type="button"
-              class="flex items-center gap-3 px-4 py-2 hover:bg-base-200 rounded-lg"
-              phx-click={switch_theme_js(theme)}
-              data-theme={theme}
-            >
-              <.theme_icon theme={theme} />
-              <span class="capitalize">{theme_display_name(theme)}</span>
-              <.theme_check_icon :if={@current_theme == theme} />
-            </button>
-          </li>
+    <!-- Enhanced Dropdown Menu with categorized themes -->
+        <ul
+          tabindex="0"
+          class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-80 max-h-96 overflow-y-auto"
+        >
           
-    <!-- Auto mode (system preference) -->
+    <!-- Theme Categories Section -->
+          <div :if={map_size(@theme_categories) > 0} class="space-y-1">
+            
+    <!-- Light Themes -->
+            <div :if={Map.get(@theme_categories, :light_themes)} class="px-2 py-1">
+              <div class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+                ☀️ Light Themes
+              </div>
+              <div class="grid grid-cols-2 gap-1">
+                <button
+                  :for={theme <- Map.get(@theme_categories, :light_themes, [])}
+                  type="button"
+                  class={theme_controller_button_classes(theme == @current_theme)}
+                  phx-click={switch_theme_js(theme)}
+                  data-theme={theme}
+                  aria-pressed={to_string(theme == @current_theme)}
+                >
+                  <.theme_icon theme={theme} size="sm" />
+                  <span class="text-xs">{theme_display_name(theme)}</span>
+                  <.theme_check_icon :if={theme == @current_theme} />
+                </button>
+              </div>
+            </div>
+            
+    <!-- Dark Themes -->
+            <div :if={Map.get(@theme_categories, :dark_themes)} class="px-2 py-1">
+              <div class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+                🌙 Dark Themes
+              </div>
+              <div class="grid grid-cols-2 gap-1">
+                <button
+                  :for={theme <- Map.get(@theme_categories, :dark_themes, [])}
+                  type="button"
+                  class={theme_controller_button_classes(theme == @current_theme)}
+                  phx-click={switch_theme_js(theme)}
+                  data-theme={theme}
+                  aria-pressed={to_string(theme == @current_theme)}
+                >
+                  <.theme_icon theme={theme} size="sm" />
+                  <span class="text-xs">{theme_display_name(theme)}</span>
+                  <.theme_check_icon :if={theme == @current_theme} />
+                </button>
+              </div>
+            </div>
+            
+    <!-- Colorful Themes -->
+            <div :if={Map.get(@theme_categories, :colorful_themes)} class="px-2 py-1">
+              <div class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+                🎨 Colorful Themes
+              </div>
+              <div class="grid grid-cols-2 gap-1">
+                <button
+                  :for={theme <- Map.get(@theme_categories, :colorful_themes, [])}
+                  type="button"
+                  class={theme_controller_button_classes(theme == @current_theme)}
+                  phx-click={switch_theme_js(theme)}
+                  data-theme={theme}
+                  aria-pressed={to_string(theme == @current_theme)}
+                >
+                  <.theme_icon theme={theme} size="sm" />
+                  <span class="text-xs">{theme_display_name(theme)}</span>
+                  <.theme_check_icon :if={theme == @current_theme} />
+                </button>
+              </div>
+            </div>
+            
+    <!-- Professional Themes -->
+            <div :if={Map.get(@theme_categories, :professional_themes)} class="px-2 py-1">
+              <div class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+                💼 Professional
+              </div>
+              <div class="grid grid-cols-2 gap-1">
+                <button
+                  :for={theme <- Map.get(@theme_categories, :professional_themes, [])}
+                  type="button"
+                  class={theme_controller_button_classes(theme == @current_theme)}
+                  phx-click={switch_theme_js(theme)}
+                  data-theme={theme}
+                  aria-pressed={to_string(theme == @current_theme)}
+                >
+                  <.theme_icon theme={theme} size="sm" />
+                  <span class="text-xs">{theme_display_name(theme)}</span>
+                  <.theme_check_icon :if={theme == @current_theme} />
+                </button>
+              </div>
+            </div>
+            
+    <!-- New daisyUI 5 Themes -->
+            <div :if={Map.get(@theme_categories, :new_themes)} class="px-2 py-1">
+              <div class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+                ✨ New in v5
+              </div>
+              <div class="grid grid-cols-2 gap-1">
+                <button
+                  :for={theme <- Map.get(@theme_categories, :new_themes, [])}
+                  type="button"
+                  class={theme_controller_button_classes(theme == @current_theme)}
+                  phx-click={switch_theme_js(theme)}
+                  data-theme={theme}
+                  aria-pressed={to_string(theme == @current_theme)}
+                >
+                  <.theme_icon theme={theme} size="sm" />
+                  <span class="text-xs">{theme_display_name(theme)}</span>
+                  <.theme_check_icon :if={theme == @current_theme} />
+                </button>
+              </div>
+            </div>
+            
+    <!-- Custom PhoenixKit Themes -->
+            <div :if={Map.get(@theme_categories, :custom_themes)} class="px-2 py-1">
+              <div class="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-2">
+                🚀 PhoenixKit
+              </div>
+              <div class="grid grid-cols-1 gap-1">
+                <button
+                  :for={theme <- Map.get(@theme_categories, :custom_themes, [])}
+                  type="button"
+                  class={theme_controller_button_classes(theme == @current_theme)}
+                  phx-click={switch_theme_js(theme)}
+                  data-theme={theme}
+                  aria-pressed={to_string(theme == @current_theme)}
+                >
+                  <.theme_icon theme={theme} size="sm" />
+                  <span class="text-sm font-medium">{theme_display_name(theme)}</span>
+                  <.theme_check_icon :if={theme == @current_theme} />
+                </button>
+              </div>
+            </div>
+          </div>
+          
+    <!-- Separator -->
+          <li><hr class="my-2" /></li>
+          
+    <!-- Auto mode (system preference) with enhanced UI -->
           <li>
             <button
               type="button"
-              class="flex items-center gap-3 px-4 py-2 hover:bg-base-200 rounded-lg"
+              class={[
+                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
+                if(@current_theme == :auto,
+                  do: "bg-primary text-primary-content",
+                  else: "hover:bg-base-200"
+                )
+              ]}
               phx-click={switch_theme_js(:auto)}
               data-theme="auto"
+              aria-pressed={to_string(@current_theme == :auto)}
+              title="Automatically switch between light and dark based on system preference"
             >
-              <.theme_icon theme={:auto} />
-              <span>Auto (System)</span>
+              <.theme_icon theme={:auto} size="sm" />
+              <div class="flex flex-col items-start">
+                <span class="text-sm font-medium">Auto (System)</span>
+                <span class="text-xs opacity-60">Follows system preference</span>
+              </div>
               <.theme_check_icon :if={@current_theme == :auto} />
             </button>
           </li>
         </ul>
       </div>
       
-    <!-- Optional Label -->
-      <span :if={@show_label} class="text-sm text-base-content opacity-70">
-        Theme
+    <!-- Optional Label with theme count -->
+      <span :if={@show_label} class="text-sm text-base-content/70">
+        Theme <span class="text-xs opacity-50">({length(@configured_themes)})</span>
       </span>
     </div>
     """
   end
 
-  # Theme icon component
-  defp theme_icon(%{theme: :light} = assigns) do
+  # Enhanced theme icon component with size support and all daisyUI 5 themes
+  defp theme_icon(assigns) do
+    assigns =
+      assigns
+      |> assign_new(:size, fn -> "md" end)
+      |> assign(:icon_classes, theme_icon_classes(assigns[:size] || "md"))
+
     ~H"""
-    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-      <path
-        fill-rule="evenodd"
-        d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-        clip-rule="evenodd"
-      />
-    </svg>
+    <span class={@icon_classes}>
+      <%= case @theme do %>
+        <% :light -> %>
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        <% :dark -> %>
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+          </svg>
+        <% :auto -> %>
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        <% :synthwave -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        <% :dracula -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+          </svg>
+        <% :nord -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2zm0 16.5L11 21l-3-1 1-3 3 1zm5-13L18 4l3 1-1 3-3-1zm-10 0L6 4l-3 1 1 3 3-1z" />
+          </svg>
+        <% :retro -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="7" cy="12" r="2" /><circle
+              cx="17"
+              cy="12"
+              r="2"
+            />
+          </svg>
+        <% :cyberpunk -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 1.74-.96 3-2.74 3-4.8V14h5l1.94-3.5L23 9l-1.94-3.5L20 4l-8 0z" />
+          </svg>
+        <% :cupcake -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.8 3.6c-.4-.8-1.2-.6-1.6 0L8 12h8l-3.2-8.4zm-6.3 9.9c-.4.4-.4 1 0 1.4l6 6c.4.4 1 .4 1.4 0l6-6c.4-.4.4-1 0-1.4L17 12H7l-0.5 1.5z" />
+          </svg>
+        <% :bumblebee -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <ellipse cx="12" cy="12" rx="10" ry="6" /><ellipse cx="12" cy="8" rx="8" ry="2" /><ellipse
+              cx="12"
+              cy="16"
+              rx="8"
+              ry="2"
+            />
+          </svg>
+        <% :emerald -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l4 4 4-2-2 4 4 4-4 2-2 4-4-2-4 2-2-4-4-2 4-4-2-4 4 2z" />
+          </svg>
+        <% :corporate -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <rect x="4" y="4" width="16" height="16" rx="2" /><rect x="9" y="9" width="6" height="2" /><rect
+              x="9"
+              y="12"
+              width="6"
+              height="2"
+            />
+          </svg>
+        <% :caramellatte -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M7 3h10c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2zm3 16h4v-2h-4v2zm0-4h4v-2h-4v2zm0-4h4V9h-4v2z" />
+          </svg>
+        <% :abyss -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" /><circle
+              cx="12"
+              cy="12"
+              r="6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            /><circle cx="12" cy="12" r="2" />
+          </svg>
+        <% :silk -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+          </svg>
+        <% :phoenixkit_pro -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /><circle
+              cx="12"
+              cy="12"
+              r="3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1"
+            />
+          </svg>
+        <% :phoenixkit_dark -> %>
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M21.64 13a1 1 0 0 0-1.05-.14 8.05 8.05 0 0 1-3.37.73A8.15 8.15 0 0 1 9.08 5.49a8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36 10.14 10.14 0 1 0 22 14.05A1 1 0 0 0 21.64 13Z" /><circle
+              cx="12"
+              cy="12"
+              r="3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1"
+            />
+          </svg>
+        <% _ -> %>
+          <!-- Default icon for unknown themes -->
+          <svg fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M4 2a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm0 2h12v8H4V4z"
+              clip-rule="evenodd"
+            />
+          </svg>
+      <% end %>
+    </span>
     """
   end
 
-  defp theme_icon(%{theme: :dark} = assigns) do
-    ~H"""
-    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-      <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-    </svg>
-    """
-  end
+  # Icon size classes
+  defp theme_icon_classes("sm"), do: "w-4 h-4 flex-shrink-0"
+  defp theme_icon_classes("lg"), do: "w-6 h-6 flex-shrink-0"
+  defp theme_icon_classes(_), do: "w-5 h-5 flex-shrink-0"
 
-  defp theme_icon(%{theme: :auto} = assigns) do
-    ~H"""
-    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-      <path
-        fill-rule="evenodd"
-        d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z"
-        clip-rule="evenodd"
-      />
-    </svg>
-    """
-  end
-
-  # Check mark icon for selected theme
+  # Enhanced check mark icon for selected theme
   defp theme_check_icon(assigns) do
     ~H"""
-    <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+    <svg
+      class="w-4 h-4 text-primary flex-shrink-0 animate-pulse"
+      fill="currentColor"
+      viewBox="0 0 20 20"
+      role="img"
+      aria-label="Selected theme"
+    >
       <path
         fill-rule="evenodd"
         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -532,19 +799,70 @@ defmodule PhoenixKitWeb.CoreComponents do
     """
   end
 
-  # Helper functions
-  defp theme_button_classes("small"), do: "btn btn-sm btn-ghost btn-circle"
-  defp theme_button_classes("large"), do: "btn btn-lg btn-ghost btn-circle"
-  defp theme_button_classes(_), do: "btn btn-ghost btn-circle"
+  # Theme controller button classes with enhanced styling
+  defp theme_controller_button_classes(is_active) do
+    base_classes =
+      "flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-all duration-200 min-h-8"
 
+    if is_active do
+      "#{base_classes} bg-primary text-primary-content shadow-sm"
+    else
+      "#{base_classes} hover:bg-base-200 hover:scale-[1.02] active:scale-[0.98]"
+    end
+  end
+
+  # Enhanced helper functions for daisyUI 5
+  defp theme_button_classes("small"),
+    do: "btn btn-sm btn-ghost btn-circle transition-all duration-200 hover:scale-110"
+
+  defp theme_button_classes("large"),
+    do: "btn btn-lg btn-ghost btn-circle transition-all duration-200 hover:scale-110"
+
+  defp theme_button_classes(_),
+    do: "btn btn-ghost btn-circle transition-all duration-200 hover:scale-110"
+
+  # Enhanced theme display names with better formatting
   defp theme_display_name(:light), do: "Light"
   defp theme_display_name(:dark), do: "Dark"
   defp theme_display_name(:auto), do: "Auto"
-  defp theme_display_name(theme), do: String.capitalize(to_string(theme))
+  defp theme_display_name(:synthwave), do: "Synthwave"
+  defp theme_display_name(:dracula), do: "Dracula"
+  defp theme_display_name(:nord), do: "Nord"
+  defp theme_display_name(:retro), do: "Retro"
+  defp theme_display_name(:cyberpunk), do: "Cyberpunk"
+  defp theme_display_name(:cupcake), do: "Cupcake"
+  defp theme_display_name(:bumblebee), do: "Bumblebee"
+  defp theme_display_name(:emerald), do: "Emerald"
+  defp theme_display_name(:corporate), do: "Corporate"
+  defp theme_display_name(:caramellatte), do: "Caramellatte"
+  defp theme_display_name(:abyss), do: "Abyss"
+  defp theme_display_name(:silk), do: "Silk"
+  defp theme_display_name(:phoenixkit_pro), do: "PhoenixKit Pro"
+  defp theme_display_name(:phoenixkit_dark), do: "PhoenixKit Dark"
 
-  # JavaScript for theme switching
+  defp theme_display_name(theme) when is_atom(theme) do
+    theme
+    |> to_string()
+    |> String.replace("_", " ")
+    |> String.split(" ")
+    |> Enum.map(&String.capitalize/1)
+    |> Enum.join(" ")
+  end
+
+  defp theme_display_name(theme), do: to_string(theme)
+
+  # Enhanced JavaScript for theme switching with daisyUI 5 support
   defp switch_theme_js(theme) do
-    JS.dispatch("phoenix-kit:switch-theme", detail: %{theme: theme})
+    JS.dispatch("phoenixkit:theme-changed",
+      detail: %{
+        theme: theme,
+        source: "theme-switcher",
+        timestamp: System.system_time(:millisecond),
+        daisyui_version: 5
+      }
+    )
+    # Backward compatibility
+    |> JS.dispatch("phoenix-kit:switch-theme", detail: %{theme: theme})
   end
 
   defp hide_flash(js, selector) do

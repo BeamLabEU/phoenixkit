@@ -88,6 +88,7 @@ yarn-error.log*
 # Ignore personal notes
 NOTES.md
 TODO.md
+DAISYUI_SETUP.md
 
 # Claude Code memory
 memory.json

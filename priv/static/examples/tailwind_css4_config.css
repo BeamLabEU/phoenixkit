@@ -1,0 +1,366 @@
+/**
+ * Example Tailwind CSS 4 Configuration with daisyUI 5 for PhoenixKit
+ * 
+ * This CSS file shows the modern Tailwind CSS 4 approach using @plugin directives
+ * instead of JavaScript configuration files. This is the recommended approach
+ * for new projects using daisyUI 5 and PhoenixKit.
+ * 
+ * Usage in your parent application:
+ * 1. Import this file in your main CSS file
+ * 2. Customize the themes and configuration as needed
+ * 3. Configure PhoenixKit theme system in config/config.exs
+ * 
+ * @version 1.1.0
+ * @requires daisyUI ^5.0.0
+ * @requires Tailwind CSS ^4.0.0
+ */
+
+/* Import Tailwind CSS 4 */
+@import "tailwindcss";
+
+/* Configure source paths for content scanning */
+@source "./lib/**/*.{ex,heex,js}";
+@source "./assets/**/*.js";
+@source "./lib/*_web/phoenix_kit_live/**/*.{ex,heex}";  /* PhoenixKit generated files */
+
+/* =============================================================================
+   daisyUI 5 Plugin Configuration (Recommended for new projects)
+   ============================================================================= */
+
+@plugin "daisyui" {
+  /* Selected themes for your application */
+  themes: 
+    light --default,           /* Default light theme */
+    dark --prefersdark,        /* Default dark theme */
+    
+    /* Popular themes */
+    synthwave,
+    dracula, 
+    nord,
+    
+    /* New daisyUI 5 themes */
+    caramellatte,
+    abyss,
+    silk,
+    
+    /* Professional themes */
+    corporate,
+    business,
+    luxury;
+  
+  /* Root selector for CSS variables */
+  root: ":root";
+  
+  /* Development logging */
+  logs: true;
+  
+  /* Component inclusion/exclusion (optional) */
+  include: ;
+  exclude: ;
+  
+  /* Class name prefix (optional) */
+  prefix: ;
+}
+
+/* =============================================================================
+   Custom PhoenixKit Themes
+   ============================================================================= */
+
+/* PhoenixKit Professional Light Theme */
+@plugin "daisyui/theme" {
+  name: "phoenixkit-light";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* OKLCH color system for precise color matching */
+  --color-base-100: oklch(100% 0 0);        /* Pure white */
+  --color-base-200: oklch(96% 0 0);         /* Light gray */
+  --color-base-300: oklch(92% 0 0);         /* Medium gray */
+  --color-base-content: oklch(15% 0 0);     /* Dark text */
+  
+  --color-primary: oklch(55% 0.3 240);      /* Professional blue */
+  --color-primary-content: oklch(100% 0 0); /* White text on primary */
+  
+  --color-secondary: oklch(65% 0.25 160);   /* Professional green */
+  --color-secondary-content: oklch(100% 0 0);
+  
+  --color-accent: oklch(60% 0.25 280);      /* Professional purple */
+  --color-accent-content: oklch(100% 0 0);
+  
+  --color-neutral: oklch(50% 0.05 240);     /* Neutral gray */
+  --color-neutral-content: oklch(100% 0 0);
+  
+  /* Semantic colors */
+  --color-info: oklch(65% 0.2 220);        /* Info blue */
+  --color-info-content: oklch(100% 0 0);
+  
+  --color-success: oklch(65% 0.2 140);     /* Success green */
+  --color-success-content: oklch(100% 0 0);
+  
+  --color-warning: oklch(75% 0.2 60);      /* Warning orange */
+  --color-warning-content: oklch(15% 0 0);
+  
+  --color-error: oklch(65% 0.25 20);       /* Error red */
+  --color-error-content: oklch(100% 0 0);
+
+  /* Design tokens */
+  --radius-selector: 0.5rem;  /* 8px */
+  --radius-field: 0.5rem;     /* 8px */
+  --radius-box: 0.75rem;      /* 12px */
+  
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* PhoenixKit Professional Dark Theme */
+@plugin "daisyui/theme" {
+  name: "phoenixkit-dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+
+  /* Dark OKLCH colors */
+  --color-base-100: oklch(12% 0.02 240);    /* Dark blue-gray */
+  --color-base-200: oklch(8% 0.02 240);     /* Darker blue-gray */
+  --color-base-300: oklch(5% 0.02 240);     /* Darkest blue-gray */
+  --color-base-content: oklch(90% 0.02 240); /* Light text */
+  
+  --color-primary: oklch(70% 0.25 240);     /* Bright blue for contrast */
+  --color-primary-content: oklch(12% 0.02 240);
+  
+  --color-secondary: oklch(75% 0.2 160);    /* Bright green */
+  --color-secondary-content: oklch(12% 0.02 240);
+  
+  --color-accent: oklch(70% 0.2 280);       /* Bright purple */
+  --color-accent-content: oklch(12% 0.02 240);
+  
+  --color-neutral: oklch(25% 0.05 240);     /* Dark neutral */
+  --color-neutral-content: oklch(90% 0.02 240);
+  
+  /* Dark semantic colors */
+  --color-info: oklch(75% 0.15 220);       /* Bright info */
+  --color-info-content: oklch(12% 0.02 240);
+  
+  --color-success: oklch(75% 0.15 140);    /* Bright success */
+  --color-success-content: oklch(12% 0.02 240);
+  
+  --color-warning: oklch(85% 0.15 60);     /* Bright warning */
+  --color-warning-content: oklch(12% 0.02 240);
+  
+  --color-error: oklch(75% 0.2 20);        /* Bright error */
+  --color-error-content: oklch(12% 0.02 240);
+
+  /* Same design tokens */
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* =============================================================================
+   Theme System Integration
+   ============================================================================= */
+
+/* CSS Variables for PhoenixKit theme system */
+@theme {
+  /* Custom properties that work with both light and dark modes */
+  --phoenix-kit-primary: oklch(55% 0.3 240);
+  --phoenix-kit-secondary: oklch(65% 0.25 160);
+  --phoenix-kit-accent: oklch(60% 0.25 280);
+  
+  /* Theme transition properties */
+  --theme-transition-duration: 0.3s;
+  --theme-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* PhoenixKit specific variables */
+  --phoenixkit-version: "1.1.0";
+  --daisyui-version: 5;
+  --theme-controller-enabled: 1;
+}
+
+/* =============================================================================
+   Custom Utility Classes
+   ============================================================================= */
+
+/* PhoenixKit specific utilities */
+@layer utilities {
+  .theme-transition {
+    transition: 
+      background-color var(--theme-transition-duration) var(--theme-transition-timing),
+      border-color var(--theme-transition-duration) var(--theme-transition-timing),
+      color var(--theme-transition-duration) var(--theme-transition-timing);
+  }
+  
+  .theme-no-transition {
+    transition: none !important;
+  }
+  
+  /* Theme controller utilities */
+  .phoenix-kit-theme-controller {
+    @apply theme-transition cursor-pointer;
+  }
+  
+  .phoenix-kit-theme-controller:hover {
+    @apply scale-105;
+  }
+  
+  .phoenix-kit-theme-controller:active {
+    @apply scale-95;
+  }
+  
+  /* Stats component utilities */
+  .phoenix-kit-stat-card {
+    @apply bg-base-100 border border-base-300 rounded-box p-6 shadow-sm theme-transition;
+  }
+  
+  .phoenix-kit-stat-card:hover {
+    @apply shadow-md border-primary/30;
+  }
+}
+
+/* =============================================================================
+   Component Styles
+   ============================================================================= */
+
+@layer components {
+  /* Enhanced theme switcher */
+  .phoenix-kit-theme-switcher {
+    @apply relative inline-block;
+  }
+  
+  .phoenix-kit-theme-switcher .dropdown-content {
+    @apply bg-base-100 border border-base-300 shadow-lg rounded-box min-w-80 max-h-96 overflow-y-auto;
+    animation: dropdown-appear 0.2s ease-out;
+  }
+  
+  @keyframes dropdown-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Theme preview cards */
+  .phoenix-kit-theme-preview {
+    @apply bg-base-100 border-2 border-base-300 rounded-box p-4 cursor-pointer theme-transition;
+    min-height: 120px;
+  }
+  
+  .phoenix-kit-theme-preview:hover {
+    @apply border-primary shadow-lg transform -translate-y-1;
+  }
+  
+  .phoenix-kit-theme-preview.active {
+    @apply border-primary bg-primary/5 shadow-primary/20 shadow-lg;
+  }
+  
+  /* Statistics cards */
+  .phoenix-kit-stats-grid {
+    @apply grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  .phoenix-kit-stat-item {
+    @apply phoenix-kit-stat-card text-center;
+  }
+  
+  .phoenix-kit-stat-icon {
+    @apply w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-full;
+  }
+  
+  .phoenix-kit-stat-value {
+    @apply text-3xl font-bold text-base-content mb-1;
+  }
+  
+  .phoenix-kit-stat-label {
+    @apply text-sm text-base-content/60 font-medium;
+  }
+}
+
+/* =============================================================================
+   Responsive Design
+   ============================================================================= */
+
+/* Mobile-first responsive utilities */
+@responsive {
+  .phoenix-kit-grid-responsive {
+    @apply grid gap-4;
+    @apply grid-cols-1;
+    @apply sm:grid-cols-2;
+    @apply md:grid-cols-3;
+    @apply lg:grid-cols-4;
+    @apply xl:grid-cols-5;
+  }
+  
+  .phoenix-kit-text-responsive {
+    @apply text-sm;
+    @apply sm:text-base;
+    @apply lg:text-lg;
+  }
+}
+
+/* =============================================================================
+   Print Styles
+   ============================================================================= */
+
+@media print {
+  /* Ensure light theme for printing */
+  html {
+    color-scheme: light !important;
+  }
+  
+  [data-theme] {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .phoenix-kit-theme-switcher,
+  .theme-controller {
+    display: none !important;
+  }
+  
+  .phoenix-kit-stats-grid {
+    break-inside: avoid;
+  }
+}
+
+/* =============================================================================
+   Dark Mode Utilities (System Preference)
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  /* Automatic dark mode styles when data-theme="auto" */
+  [data-theme="auto"] {
+    color-scheme: dark;
+  }
+}
+
+/* =============================================================================
+   Development Utilities
+   ============================================================================= */
+
+/* Debug mode indicators (only in development) */
+@layer base {
+  html[data-debug="true"]::before {
+    content: "🎨 Theme: " attr(data-theme) " | daisyUI: 5 | PhoenixKit: 1.1.0";
+    @apply fixed top-0 left-0 bg-error text-error-content px-3 py-1 text-xs font-mono z-50;
+    border-radius: 0 0 0.5rem 0;
+  }
+  
+  html[data-debug="true"] .phoenix-kit-theme-preview::after {
+    content: attr(data-theme);
+    @apply absolute top-2 right-2 bg-primary text-primary-content px-2 py-1 text-xs rounded;
+  }
+}

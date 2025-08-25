@@ -550,6 +550,19 @@ defmodule PhoenixKit.Users.Auth do
   defdelegate get_role_stats(), to: PhoenixKit.Users.Roles
 
   @doc """
+  Assigns roles to existing users who don't have any PhoenixKit roles.
+
+  This is useful for migration scenarios where PhoenixKit is installed 
+  into an existing application with users.
+
+  ## Examples
+
+      iex> assign_roles_to_existing_users()
+      {:ok, %{assigned_owner: 1, assigned_users: 5, total_processed: 6}}
+  """
+  defdelegate assign_roles_to_existing_users(opts \\ []), to: PhoenixKit.Users.Roles
+
+  @doc """
   Lists all roles.
 
   ## Examples

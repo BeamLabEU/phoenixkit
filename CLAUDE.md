@@ -29,7 +29,7 @@ This is **PhoenixKit** - a professional authentication library for Phoenix appli
 - Complete authentication system with Magic Links
 - Role-based access control (Owner/Admin/User)
 - Built-in admin dashboard and user management
-- Theme system with light/dark mode support
+- Modern theme system with daisyUI 5 and 35+ themes support
 - Professional versioned migration system
 - Layout integration with parent applications
 - Ready for production use
@@ -219,6 +219,7 @@ git commit -m "Update version to 1.0.1 with comprehensive changelog"
 - **Mix.Tasks.PhoenixKit.Install** - Igniter-based installation for new projects
 - **Mix.Tasks.PhoenixKit.Update** - Versioned updates for existing installations
 - **Mix.Tasks.PhoenixKit.Gen.Migration** - Custom migration generator
+- **Mix.Tasks.PhoenixKit.MigrateToDaisyui5** - Migration tool for daisyUI 5 upgrade
 
 ### Key Design Principles
 
@@ -270,14 +271,19 @@ config :phoenix_kit,
   root_layout: {MyAppWeb.Layouts, :root},  # Optional: custom root layout
   page_title_prefix: "Auth"                # Optional: page title prefix
 
-# Configure Theme System (optional)
+# Configure DaisyUI 5 Theme System (optional)
 config :phoenix_kit,
   theme_enabled: true,
   theme: %{
-    mode: :auto,                    # :light, :dark, :auto
-    primary_color: "#3b82f6",      # Primary brand color
-    storage: :local_storage         # :local_storage, :session, :cookie
+    theme: "auto",                   # Any of 35+ daisyUI themes or "auto"
+    primary_color: "#3b82f6",       # Primary brand color (OKLCH format supported)
+    storage: :local_storage,        # :local_storage, :session, :cookie
+    theme_controller: true,         # Enable theme-controller integration
+    categories: [:light, :dark, :colorful]  # Theme categories to show in switcher
   }
+
+# Migrate existing installations to daisyUI 5
+# Run: mix phoenix_kit.migrate_to_daisyui5
 
 # In your Phoenix app's mix.exs
 def deps do
@@ -309,8 +315,16 @@ end
 ### Migration & Config
 
 - `lib/phoenix_kit/migrations/postgres/v01.ex` - V01 migration
+- `lib/mix/tasks/phoenix_kit.migrate_to_daisyui5.ex` - DaisyUI 5 migration tool
 - `config/config.exs` - Library configuration
 - `mix.exs` - Project and package configuration
+
+### DaisyUI 5 Assets
+
+- `priv/static/assets/phoenix_kit_daisyui5.css` - Modern CSS with @plugin directives
+- `priv/static/assets/phoenix_kit_daisyui5.js` - Enhanced theme system with controller integration
+- `priv/static/examples/tailwind_config_daisyui5.js` - Tailwind CSS 3 example config
+- `priv/static/examples/tailwind_css4_config.css` - Tailwind CSS 4 example config
 
 ## Development Workflow
 
