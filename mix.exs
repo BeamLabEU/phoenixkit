@@ -55,10 +55,10 @@ defmodule PhoenixKit.MixProject do
       {:postgrex, "~> 0.21.1"},
 
       # Phoenix web layer - required for authentication module
-      {:phoenix, "~> 1.7.0"},
+      {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.6"},
       {:phoenix_html, "~> 4.0"},
-      {:phoenix_live_view, "~> 1.1.7"},
+      {:phoenix_live_view, "~> 1.1.8"},
 
       # Web functionality
       {:gettext, "~> 0.24"},
