@@ -1,12 +1,6 @@
-# PhoenixKit
+# PhoenixKit - The Phoenix LiveView Starter Kit
 
-README.md file:
-
-Professional authentication library for Phoenix applications with streamlined setup
-
-<!-- [![Hex.pm](https://img.shields.io/hexpm/v/phoenix_kit.svg)](https://hex.pm/packages/phoenix_kit)
-[![Documentation](https://img.shields.io/badge/docs-hexpm-blue.svg)](https://hexdocs.pm/phoenix_kit)
-[![License](https://img.shields.io/hexpm/l/phoenix_kit.svg)](https://github.com/BeamLabEU/phoenixkit/blob/main/LICENSE) -->
+Don't reinvent the wheel, create Elixir/Phoenix-powered apps much faster.
 
 ## Overview
 
@@ -14,14 +8,13 @@ PhoenixKit is a production-ready authentication library for Phoenix applications
 
 ### Key Features
 
-- 🚀 **Streamlined Setup** - Automatic repository detection with minimal configuration
-- 🗄️ **Professional Database Management** - Versioned migrations with Oban-style architecture
-- 🔐 **Complete Authentication** - Registration, login, logout, email confirmation, password reset
-- 👥 **Role-Based Access Control** - Built-in Owner/Admin/User roles with management interface
-- 🎯 **Library-First Design** - No OTP application, integrates into any Phoenix app
-- 📦 **Production Ready** - Comprehensive error handling and logging
-- 🛠️ **Developer Friendly** - Single command installation with automatic setup
-- 🎨 **LiveView Ready** - All authentication pages use Phoenix LiveView
+- **Igniter installation** - Simplified installation 
+- **Authentication** - Registration, login, logout, email confirmation, password reset
+- **Role-Based Access Control** - Built-in Owner/Admin/User roles with management interface
+- **Layout integration** - Versioned migrations with Oban-style architecture
+- **Developer Friendly** - Single command installation with automatic setup
+
+Start building your apps today!
 
 ## Installation
 
@@ -51,10 +44,9 @@ mix phoenix_kit.install
 ```
 
 This will automatically:
-
 - ✅ Auto-detect your Ecto repository
 - ✅ **Validate PostgreSQL compatibility** with adapter detection
-- ✅ Generate migration files for authentication tables  
+- ✅ Generate migration files for authentication tables
 - ✅ **Optionally run migrations interactively** for instant setup
 - ✅ Add PhoenixKit configuration to `config/config.exs`
 - ✅ Configure mailer settings for development
@@ -1177,49 +1169,6 @@ console.log('Effective theme:', info.effective);
   </body>
 </html>
 ```
-
-#### Installation Integration
-
-The theme system is automatically configured during PhoenixKit installation:
-
-```bash
-mix phoenix_kit.install --theme-enabled
-```
-
-This will:
-- ✅ Enable theme configuration in config.exs
-- ✅ Copy theme assets to your project
-- ✅ Update layout files with theme integration
-- ✅ Add theme switcher to navigation
-
-## Troubleshooting
-
-### Common Issues
-
-**No repository configured**
-
-```
-ERROR: No repository configured for PhoenixKit
-```
-
-Solution: Run `mix phoenix_kit.install --repo MyApp.Repo` or manually add config.
-
-**--repo parameter required**
-
-```
-ERROR: --repo is required!
-```
-
-Solution: Always specify `--repo` parameter: `mix phoenix_kit.install --repo MyApp.Repo`
-
-**Migration errors**
-
-```
-ERROR: Schema migration failed
-ERROR: Migration system validation failed
-```
-
-Solution: Check database connection and permissions. Run `mix phoenix_kit.update --status` to verify migration state.
 
 **URL not found**
 
